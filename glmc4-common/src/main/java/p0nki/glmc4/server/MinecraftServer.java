@@ -3,7 +3,8 @@ package p0nki.glmc4.server;
 import p0nki.glmc4.network.ClientConnection;
 import p0nki.glmc4.network.packet.clientbound.PacketS2C;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CChatMessage;
-import p0nki.glmc4.network.packet.clientbound.PacketS2CPingRequest;
+import p0nki.glmc4.network.packet.clientbound.PacketS2CPlayerJoin;
+import p0nki.glmc4.network.packet.clientbound.PacketS2CPlayerLeave;
 import p0nki.glmc4.network.packet.serverbound.ServerPacketListener;
 import p0nki.glmc4.player.ServerPlayer;
 import p0nki.glmc4.utils.Words;
@@ -23,9 +24,16 @@ public class MinecraftServer {
         TimerTask pingPlayers = new TimerTask() {
             @Override
             public void run() {
-                writeAll(new PacketS2CPingRequest());
+                connections.values().forEach(connection -> {
+                    if (connection.getPacketListener().isDead()) playerIdsToRemove.add(connection.getPlayer().getId());
+                    else connection.getPacketListener().writePing();
+                });
                 playerIdsToRemove.forEach(id -> {
                     if (!connections.containsKey(id)) return;
+                    writeGlobalChatMessage("SERVER LEAVE", connections.get(id).getPlayer().toString());
+                    writeAll(new PacketS2CPlayerLeave(connections.get(id).getPlayer().getId()));
+                    connections.get(id).getPacketListener().onDisconnected("Disconnected");
+                    connections.get(id).close();
                     connections.remove(id);
                     for (int i = 0; i < players.size(); i++) {
                         if (players.get(i).getId().equals(id)) {
@@ -49,6 +57,8 @@ public class MinecraftServer {
     public void joinPlayer(ClientConnection<ServerPacketListener> connection) {
         ServerPlayer player = new ServerPlayer(UUID.randomUUID().toString(), Words.generateUnique());
         connection.setPlayer(player);
+        writeGlobalChatMessage("SERVER JOIN", connection.getPlayer().toString());
+        writeAll(new PacketS2CPlayerJoin(player));
         players.add(player);
         connections.put(connection.getPlayer().getId(), connection);
     }

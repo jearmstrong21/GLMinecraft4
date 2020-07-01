@@ -1,9 +1,6 @@
 package p0nki.glmc4.network.packet;
 
-import p0nki.glmc4.network.packet.clientbound.PacketS2CChatMessage;
-import p0nki.glmc4.network.packet.clientbound.PacketS2CHello;
-import p0nki.glmc4.network.packet.clientbound.PacketS2CPingRequest;
-import p0nki.glmc4.network.packet.clientbound.PacketS2CPlayerJoin;
+import p0nki.glmc4.network.packet.clientbound.*;
 import p0nki.glmc4.network.packet.serverbound.PacketC2SPingResponse;
 
 import javax.annotation.Nullable;
@@ -20,19 +17,22 @@ public class PacketHandler {
         classToId = new HashMap<>();
         idToSupplier = new HashMap<>();
 
+        // S2C
         register(PacketS2CChatMessage.class, PacketS2CChatMessage::new);
         register(PacketS2CHello.class, PacketS2CHello::new);
         register(PacketS2CPingRequest.class, PacketS2CPingRequest::new);
         register(PacketS2CPlayerJoin.class, PacketS2CPlayerJoin::new);
+        register(PacketS2CPlayerLeave.class, PacketS2CPlayerLeave::new);
 
+        //C2S
         register(PacketC2SPingResponse.class, PacketC2SPingResponse::new);
+
     }
 
-    public <P extends Packet<?>> PacketHandler register(Class<P> type, Supplier<P> factory) {
+    private <P extends Packet<?>> void register(Class<P> type, Supplier<P> factory) {
         int id = classToId.size();
         classToId.put(type, id);
         idToSupplier.put(id, factory);
-        return this;
     }
 
     @Nullable

@@ -18,16 +18,17 @@ public class ClientPacketListener implements PacketListener<ClientPacketListener
     }
 
     public void onPingRequest(PacketS2CPingRequest packet) {
-        System.out.println("Ping request");
         connection.write(new PacketC2SPingResponse());
+    }
+
+    public void onPlayerLeave(PacketS2CPlayerLeave packet) {
+        System.out.println("ON PLAYER LEAVE. "+packet.getId());
     }
 
     public void onHello(PacketS2CHello packet) {
         connection.setPlayer(packet.getYourPlayer());
         System.out.println("YOUR PLAYER IS " + packet.getYourPlayer().getId() + ":" + packet.getYourPlayer().getName());
-        packet.getAllPlayers().forEach(player -> {
-            System.out.println("Current players: " + player);
-        });
+        packet.getAllPlayers().forEach(player -> System.out.println("Current players: " + player));
     }
 
     public void onPlayerJoin(PacketS2CPlayerJoin packet) {

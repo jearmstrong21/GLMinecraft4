@@ -4,6 +4,7 @@ import p0nki.glmc4.network.packet.Packet;
 import p0nki.glmc4.network.packet.PacketHandler;
 import p0nki.glmc4.network.packet.PacketListener;
 import p0nki.glmc4.network.packet.PacketType;
+import p0nki.glmc4.network.packet.clientbound.ClientPacketListener;
 import p0nki.glmc4.player.ServerPlayer;
 import p0nki.glmc4.server.MinecraftServer;
 
@@ -53,22 +54,19 @@ public class ClientConnection<L extends PacketListener<L>> {
 
     private Thread threadLoop = null;
 
+    @SuppressWarnings("unchecked")
     public void startLoop() {
         if (isLoopRunning)
             throw new UnsupportedOperationException("Cannot start ClientConnection that is already started");
-        boolean[] connected = new boolean[]{false}; // TODO check to make sure there are no `connected` race conditions, i.e. onConnected() always fires before first packet read
         threadLoop = new Thread(() -> {
             while (true) {
-                if (!connected[0]) continue;
                 if (socket.isClosed()) {
-                    packetListener.onDisconnected("Socket closed");
                     break;
-                } // TODO put into private git
+                }
                 int id;
                 try {
                     id = input.readInt();
                 } catch (IOException e) {
-                    packetListener.onDisconnected("IOException: " + e.getClass() + ", " + e.getMessage());
                     break;
                 }
                 Packet<? extends PacketListener<?>> packet = packetHandler.createPacket(id);
@@ -77,53 +75,57 @@ public class ClientConnection<L extends PacketListener<L>> {
                     try {
                         packet.read(input);
                     } catch (IOException e) {
-                        packetListener.onDisconnected("IOException: " + e.getClass() + ", " + e.getMessage());
                         break;
                     }
                     ((Packet<L>) packet).apply(packetListener);
                 } else {
-                    packetListener.onDisconnected("Expected to read" + readType + " packet, instead got " + packet.getType() + " packet");
                     break;
                 }
             }
             if (MinecraftServer.INSTANCE != null)
                 MinecraftServer.INSTANCE.removeConnection(player.getId());
+            if (packetListener instanceof ClientPacketListener) packetListener.onDisconnected("Socket closed");
             isLoopRunning = false;
         });
         isLoopRunning = true;
-        threadLoop.start();
         packetListener.onConnected();
-        connected[0] = true;
+        threadLoop.start();
     }
 
-    private void disconnect(String reason) {
+    private void disconnect() {
         isLoopRunning = false;
+        if (packetListener instanceof ClientPacketListener) packetListener.onDisconnected("Socket closed");
         threadLoop.interrupt();
-        packetListener.onDisconnected(reason);
+    }
+
+    public void close() {
+        try {
+            socket.close();
+        } catch (IOException ioException) {
+            System.out.println("Error closing socket: " + ioException.getMessage());
+        }
     }
 
     public void write(Packet<?> packet) { // TODO make this a packet queue? speed gains?
         if (!isLoopRunning || socket.isClosed()) {
-            MinecraftServer.INSTANCE.removeConnection(player.getId());
+//            MinecraftServer.INSTANCE.removeConnection(player.getId());
             return;
         }
-//        if (!isLoopRunning)
-//            throw new UnsupportedOperationException("Cannot write ClientConnection that is already ended");
         if (packet.getType().matches(writeType)) {
             try {
                 output.writeInt(packetHandler.getId(packet));
             } catch (IOException e) {
-                disconnect("IOException: " + e.getClass() + ", " + e.getMessage());
+                disconnect();
                 return;
             }
             try {
                 packet.write(output);
             } catch (IOException e) {
                 if (packet.isWriteErrorSkippable()) return;
-                disconnect("IOException: " + e.getClass() + ", " + e.getMessage());
+                disconnect();
             }
         } else {
-            disconnect("Expected to write " + writeType + " packet, instead got " + packet.getType() + " packet");
+            disconnect();
         }
     }
 
