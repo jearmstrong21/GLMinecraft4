@@ -1,0 +1,13 @@
+plugins {
+	id 'application'
+}
+
+dependencies {
+	compile project(':glmc4-common')
+}
+
+mainClassName = 'p0nki.glmc4.client.GLMC4Client'
+
+run {
+	standardInput = System.in
+}

@@ -1,0 +1,19 @@
+allprojects {
+	apply plugin: 'java'
+	group = 'p0nki.glmc4'
+	version = '1.0'
+
+	repositories {
+		jcenter()
+		mavenCentral()
+		maven { url 'https://jitpack.io' }
+	}
+
+	dependencies {
+		compileJava {
+			compile 'com.google.code.findbugs:jsr305:3.0.2'
+			compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
+		}
+	}
+
+}
