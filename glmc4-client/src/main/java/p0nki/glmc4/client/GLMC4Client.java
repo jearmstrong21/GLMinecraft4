@@ -10,8 +10,8 @@ import java.net.Socket;
 
 public class GLMC4Client {
 
-    public static void main(String[] args) {
-        Socket socket = null;
+    private static void runSocket() {
+        Socket socket;
         try {
             socket = new Socket("localhost", 3333);
         } catch (IOException ioException) {
@@ -31,6 +31,11 @@ public class GLMC4Client {
         connection.setPacketListener(packetListener);
         connection.startLoop();
         System.out.println("Listening on localhost:3333");
+    }
+
+    public static void main(String[] args) {
+//        runSocket();
+
     }
 
 }
