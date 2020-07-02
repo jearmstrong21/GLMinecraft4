@@ -31,8 +31,11 @@ public class DataStreamUtils {
     @Nullable
     public static Tag<?> readTag(DataInput input) throws IOException {
         byte type = input.readByte();
-        if (type < 0 || type >= Tag.READERS.length) return null;
-        return Tag.READERS[type].read(input);
+        if (Tag.isValidTag(type)) {
+            return Tag.getReader(type).read(input);
+        } else {
+            return null;
+        }
     }
 
     public static void writeTag(DataOutput output, Tag<?> tag) throws IOException {
