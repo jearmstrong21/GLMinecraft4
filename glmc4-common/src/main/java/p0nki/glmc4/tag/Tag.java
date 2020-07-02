@@ -117,18 +117,6 @@ public interface Tag<T extends Tag<T>> extends ToTag<T> {
     int COMPOUND = 7;
     int LIST = 8;
 
-//    TagReader<?>[] READERS = new TagReader<?>[]{
-//            ByteTag.READER,
-//            ByteArrayTag.READER,
-//            StringTag.READER,
-//            LongTag.READER,
-//            LongArrayTag.READER,
-//            IntTag.READER,
-//            IntArrayTag.READER,
-//            CompoundTag.READER,
-//            ListTag.READER
-//    };
-
     static boolean isTagId(int id) {
         return id == BYTE || id == BYTE_ARRAY || id == STRING || id == LONG || id == LONG_ARRAY || id == INT || id == INT_ARRAY || id == COMPOUND || id == LIST;
     }

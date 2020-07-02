@@ -1,6 +1,8 @@
 package p0nki.glmc4.client.assets;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 public interface Location {
 
@@ -8,6 +10,14 @@ public interface Location {
 
     default void makeParentFolder() {
         asFile().getParentFile().mkdirs();
+    }
+
+    default String loadText() {
+        try {
+            return Files.readString(asFile().toPath());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

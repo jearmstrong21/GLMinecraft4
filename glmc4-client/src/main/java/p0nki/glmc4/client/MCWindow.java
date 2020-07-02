@@ -3,10 +3,10 @@ package p0nki.glmc4.client;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
+import java.util.function.IntConsumer;
+
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL30.GL_MAJOR_VERSION;
-import static org.lwjgl.opengl.GL30.GL_MINOR_VERSION;
 
 public class MCWindow {
 
@@ -15,6 +15,21 @@ public class MCWindow {
     }
 
     private static long ptr;
+    private static Runnable initializeCallback;
+    private static IntConsumer frameCallback;
+    private static Runnable endCallback;
+
+    public static void setInitializeCallback(Runnable initializeCallback) {
+        MCWindow.initializeCallback = initializeCallback;
+    }
+
+    public static void setFrameCallback(IntConsumer frameCallback) {
+        MCWindow.frameCallback = frameCallback;
+    }
+
+    public static void setEndCallback(Runnable endCallback) {
+        MCWindow.endCallback = endCallback;
+    }
 
     public static void start() {
         if (!glfwInit()) {
@@ -28,18 +43,39 @@ public class MCWindow {
         ptr = glfwCreateWindow(750, 750, "Minecraft", 0, 0);
         glfwMakeContextCurrent(ptr);
         GL.createCapabilities();
-        System.out.println(glfwGetVersionString());
-        System.out.println(glGetInteger(GL_MAJOR_VERSION));
-        System.out.println(glGetInteger(GL_MINOR_VERSION));
-        System.out.println(glGetString(GL_VENDOR));
-        System.out.println(glGetString(GL_RENDERER));
+//        System.out.println(glfwGetVersionString());
+//        System.out.println(glGetInteger(GL_MAJOR_VERSION));
+//        System.out.println(glGetInteger(GL_MINOR_VERSION));
+//        System.out.println(glGetString(GL_VENDOR));
+//        System.out.println(glGetString(GL_RENDERER));
+        int framecount = 0;
+        initializeCallback.run();
         while (!glfwWindowShouldClose(ptr)) {
-            glClearColor(0, 0, 0, 1);
+            glViewport(0, 0, getWidth(), getHeight());
+            glClearColor(0.2F, 0, 0, 1);
             glClear(GL_COLOR_BUFFER_BIT);
+            glfwPollEvents();
+
+            frameCallback.accept(framecount++);
 
             glfwSwapBuffers(ptr);
-            glfwPollEvents();
         }
+        endCallback.run();
+        glfwTerminate();
+    }
+
+    public static int getWidth() {
+        int[] w = new int[1];
+        int[] h = new int[1];
+        glfwGetFramebufferSize(ptr, w, h);
+        return w[0];
+    }
+
+    public static int getHeight() {
+        int[] w = new int[1];
+        int[] h = new int[1];
+        glfwGetFramebufferSize(ptr, w, h);
+        return h[0];
     }
 
 }
