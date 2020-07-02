@@ -1,0 +1,24 @@
+IMAGES WRITTEN: 19
+DIMENSIONS: 128x64
+PIXELS USED: 4864/8192
+TIME: 196ms
+-------------
+minecraft:grass_top                                              16x16     /Users/jackarmstrong/Documents/FabricProjects/GLMinecraft4/glmc4-client/build/resources/main/block/grass/top.png
+minecraft:stone                                                  16x16     /Users/jackarmstrong/Documents/FabricProjects/GLMinecraft4/glmc4-client/build/resources/main/block/stone.png
+minecraft:tnt_bottom                                             16x16     /Users/jackarmstrong/Documents/FabricProjects/GLMinecraft4/glmc4-client/build/resources/main/block/tnt/bottom.png
+minecraft:tnt_side                                               16x16     /Users/jackarmstrong/Documents/FabricProjects/GLMinecraft4/glmc4-client/build/resources/main/block/tnt/side.png
+minecraft:pumpkin_top                                            16x16     /Users/jackarmstrong/Documents/FabricProjects/GLMinecraft4/glmc4-client/build/resources/main/block/pumpkin/top.png
+minecraft:grass_side_overlay                                     16x16     /Users/jackarmstrong/Documents/FabricProjects/GLMinecraft4/glmc4-client/build/resources/main/block/grass/side_overlay.png
+minecraft:tnt_top                                                16x16     /Users/jackarmstrong/Documents/FabricProjects/GLMinecraft4/glmc4-client/build/resources/main/block/tnt/top.png
+minecraft:air                                                    16x16     /Users/jackarmstrong/Documents/FabricProjects/GLMinecraft4/glmc4-client/build/resources/main/block/air.png
+minecraft:grass_side                                             16x16     /Users/jackarmstrong/Documents/FabricProjects/GLMinecraft4/glmc4-client/build/resources/main/block/grass/side.png
+minecraft:sand                                                   16x16     /Users/jackarmstrong/Documents/FabricProjects/GLMinecraft4/glmc4-client/build/resources/main/block/sand.png
+minecraft:gravel                                                 16x16     /Users/jackarmstrong/Documents/FabricProjects/GLMinecraft4/glmc4-client/build/resources/main/block/gravel.png
+minecraft:planks_oak                                             16x16     /Users/jackarmstrong/Documents/FabricProjects/GLMinecraft4/glmc4-client/build/resources/main/block/planks_oak.png
+minecraft:pumpkin_side                                           16x16     /Users/jackarmstrong/Documents/FabricProjects/GLMinecraft4/glmc4-client/build/resources/main/block/pumpkin/side.png
+minecraft:pumpkin_face_off                                       16x16     /Users/jackarmstrong/Documents/FabricProjects/GLMinecraft4/glmc4-client/build/resources/main/block/pumpkin/face_off.png
+minecraft:dirt                                                   16x16     /Users/jackarmstrong/Documents/FabricProjects/GLMinecraft4/glmc4-client/build/resources/main/block/dirt.png
+minecraft:grass_side_snowed                                      16x16     /Users/jackarmstrong/Documents/FabricProjects/GLMinecraft4/glmc4-client/build/resources/main/block/grass/side_snowed.png
+minecraft:bedrock                                                16x16     /Users/jackarmstrong/Documents/FabricProjects/GLMinecraft4/glmc4-client/build/resources/main/block/bedrock.png
+minecraft:pumpkin_face_on                                        16x16     /Users/jackarmstrong/Documents/FabricProjects/GLMinecraft4/glmc4-client/build/resources/main/block/pumpkin/face_on.png
+minecraft:brick                                                  16x16     /Users/jackarmstrong/Documents/FabricProjects/GLMinecraft4/glmc4-client/build/resources/main/block/brick.png

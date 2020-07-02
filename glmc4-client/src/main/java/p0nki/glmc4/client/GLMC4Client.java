@@ -1,9 +1,11 @@
 package p0nki.glmc4.client;
 
+import p0nki.glmc4.client.assets.TextureAssembler;
 import p0nki.glmc4.network.ClientConnection;
-import p0nki.glmc4.network.packet.PacketHandler;
+import p0nki.glmc4.network.packet.NetworkProtocol;
 import p0nki.glmc4.network.packet.PacketType;
 import p0nki.glmc4.network.packet.clientbound.ClientPacketListener;
+import p0nki.glmc4.utils.Identifier;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -19,10 +21,10 @@ public class GLMC4Client {
             return;
         }
         System.out.println("Socket connected");
-        PacketHandler packetHandler = new PacketHandler();
+        NetworkProtocol networkProtocol = new NetworkProtocol();
         ClientConnection<ClientPacketListener> connection;
         try {
-            connection = new ClientConnection<>(socket, packetHandler, PacketType.CLIENTBOUND, PacketType.SERVERBOUND);
+            connection = new ClientConnection<>(socket, networkProtocol, PacketType.CLIENTBOUND, PacketType.SERVERBOUND);
         } catch (IOException ioException) {
             System.out.println("Error created connection object");
             return;
@@ -33,9 +35,10 @@ public class GLMC4Client {
         System.out.println("Listening on localhost:3333");
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 //        runSocket();
-
+        TextureAssembler.assemble(new Identifier("minecraft", "block"), "block");
+        MCWindow.start();
     }
 
 }

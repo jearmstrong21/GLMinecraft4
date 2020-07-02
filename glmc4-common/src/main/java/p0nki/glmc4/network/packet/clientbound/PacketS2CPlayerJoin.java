@@ -26,12 +26,12 @@ public class PacketS2CPlayerJoin extends PacketS2C {
 
     @Override
     public void read(DataInput input) throws IOException {
-        player = new ServerPlayer().fromCompoundTag(CompoundTag.READER.read(input));
+        player = new ServerPlayer().fromTag(CompoundTag.READER.read(input));
     }
 
     @Override
     public void write(DataOutput output) throws IOException {
-        player.toCompoundTag().write(output);
+        player.toTag().write(output);
     }
 
     @Override

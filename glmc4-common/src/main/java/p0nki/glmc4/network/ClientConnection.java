@@ -1,7 +1,7 @@
 package p0nki.glmc4.network;
 
+import p0nki.glmc4.network.packet.NetworkProtocol;
 import p0nki.glmc4.network.packet.Packet;
-import p0nki.glmc4.network.packet.PacketHandler;
 import p0nki.glmc4.network.packet.PacketListener;
 import p0nki.glmc4.network.packet.PacketType;
 import p0nki.glmc4.network.packet.clientbound.ClientPacketListener;
@@ -16,14 +16,14 @@ public class ClientConnection<L extends PacketListener<L>> {
     private final Socket socket;
     private final DataOutput output;
     private final DataInput input;
-    private final PacketHandler packetHandler;
+    private final NetworkProtocol networkProtocol;
     private L packetListener;
     private boolean isLoopRunning = false;
     private final PacketType readType;
     private final PacketType writeType;
     private ServerPlayer player = null;
 
-    public ClientConnection(Socket socket, PacketHandler packetHandler, PacketType readType, PacketType writeType) throws IOException {
+    public ClientConnection(Socket socket, NetworkProtocol networkProtocol, PacketType readType, PacketType writeType) throws IOException {
         this.socket = socket;
 //        outputStream = new DataOutputStream(new GZIPOutputStream(socket.getOutputStream()));
 //        inputStream = new DataInputStream(new GZIPInputStream(socket.getInputStream()));
@@ -31,7 +31,7 @@ public class ClientConnection<L extends PacketListener<L>> {
         input = new DataInputStream(socket.getInputStream());
         // TODO: make use gzip io streams, instead of new DOS(new GZIPOS(socket.getOS())), use new DOS(new BR(socket.getOS()))
         //  DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(new GZIPInputStream(stream)));
-        this.packetHandler = packetHandler;
+        this.networkProtocol = networkProtocol;
         this.readType = readType;
         this.writeType = writeType;
     }
@@ -54,7 +54,6 @@ public class ClientConnection<L extends PacketListener<L>> {
 
     private Thread threadLoop = null;
 
-    @SuppressWarnings("unchecked")
     public void startLoop() {
         if (isLoopRunning)
             throw new UnsupportedOperationException("Cannot start ClientConnection that is already started");
@@ -69,7 +68,7 @@ public class ClientConnection<L extends PacketListener<L>> {
                 } catch (IOException e) {
                     break;
                 }
-                Packet<? extends PacketListener<?>> packet = packetHandler.createPacket(id);
+                Packet<?> packet = networkProtocol.createPacket(id);
                 if (packet == null) continue;
                 if (packet.getType().matches(readType)) {
                     try {
@@ -77,7 +76,7 @@ public class ClientConnection<L extends PacketListener<L>> {
                     } catch (IOException e) {
                         break;
                     }
-                    ((Packet<L>) packet).apply(packetListener);
+                    Packet.apply(packet, packetListener);
                 } else {
                     break;
                 }
@@ -113,7 +112,7 @@ public class ClientConnection<L extends PacketListener<L>> {
         }
         if (packet.getType().matches(writeType)) {
             try {
-                output.writeInt(packetHandler.getId(packet));
+                output.writeInt(networkProtocol.getId(packet));
             } catch (IOException e) {
                 disconnect();
                 return;

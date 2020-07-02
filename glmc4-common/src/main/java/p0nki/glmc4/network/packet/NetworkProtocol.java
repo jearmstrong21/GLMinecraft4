@@ -8,12 +8,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class PacketHandler {
+public class NetworkProtocol {
 
     private final Map<Class<? extends Packet<?>>, Integer> classToId;
     private final Map<Integer, Supplier<? extends Packet<?>>> idToSupplier;
 
-    public PacketHandler() {
+    public NetworkProtocol() {
         classToId = new HashMap<>();
         idToSupplier = new HashMap<>();
 

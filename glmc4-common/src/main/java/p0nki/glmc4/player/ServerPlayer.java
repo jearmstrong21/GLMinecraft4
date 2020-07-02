@@ -1,9 +1,9 @@
 package p0nki.glmc4.player;
 
 import p0nki.glmc4.tag.CompoundTag;
-import p0nki.glmc4.tag.CompoundTagEquivalent;
+import p0nki.glmc4.tag.TagEquivalent;
 
-public class ServerPlayer implements CompoundTagEquivalent<ServerPlayer> {
+public class ServerPlayer implements TagEquivalent<ServerPlayer, CompoundTag> {
 
     private String id;
     private String name;
@@ -31,12 +31,12 @@ public class ServerPlayer implements CompoundTagEquivalent<ServerPlayer> {
     }
 
     @Override
-    public CompoundTag toCompoundTag() {
+    public CompoundTag toTag() {
         return new CompoundTag().insert("id", id).insert("name", name);
     }
 
     @Override
-    public ServerPlayer fromCompoundTag(CompoundTag tag) {
+    public ServerPlayer fromTag(CompoundTag tag) {
         id = tag.getString("id");
         name = tag.getString("name");
         return this;

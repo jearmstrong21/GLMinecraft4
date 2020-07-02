@@ -15,6 +15,7 @@ switch (OperatingSystem.current()) {
 		break
 	case OperatingSystem.MAC_OS:
 		project.ext.lwjglNatives = "natives-macos"
+		applicationDefaultJvmArgs = ["-XstartOnFirstThread"]
 		break
 	case OperatingSystem.WINDOWS:
 		project.ext.lwjglNatives = System.getProperty("os.arch").contains("64") ? "natives-windows" : "natives-windows-x86"

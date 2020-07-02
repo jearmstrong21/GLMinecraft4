@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class CompoundTag extends AbstractMap<String, Tag<?>> implements Tag<CompoundTag>, ToCompoundTag {
+public class CompoundTag extends AbstractMap<String, Tag<?>> implements Tag<CompoundTag>, ToTag<CompoundTag> {
 
     public static final TagReader<CompoundTag> READER = input -> {
         int size = input.readInt();
@@ -102,11 +102,6 @@ public class CompoundTag extends AbstractMap<String, Tag<?>> implements Tag<Comp
     @Override
     public byte type() {
         return COMPOUND;
-    }
-
-    @Override
-    public CompoundTag toCompoundTag() {
-        return this;
     }
 
 }

@@ -35,13 +35,13 @@ public class PacketS2CHello extends PacketS2C {
 
     @Override
     public void read(DataInput input) throws IOException {
-        yourPlayer = new ServerPlayer().fromCompoundTag(CompoundTag.READER.read(input));
+        yourPlayer = new ServerPlayer().fromTag(CompoundTag.READER.read(input));
         allPlayers = TagUtils.fromList(ListTag.READER.read(input), ServerPlayer::new);
     }
 
     @Override
     public void write(DataOutput output) throws IOException {
-        yourPlayer.toCompoundTag().write(output);
+        yourPlayer.toTag().write(output);
         TagUtils.toList(allPlayers).write(output);
     }
 

@@ -6,7 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public interface Tag<T extends Tag<T>> {
+public interface Tag<T extends Tag<T>> extends ToTag<T> {
+
+    @SuppressWarnings("unchecked")
+    default T toTag() {
+        return (T) this;
+    }
 
     static boolean isValidCompoundValue(Object object) {
         if (!(object instanceof Map)) return false;
@@ -15,7 +20,7 @@ public interface Tag<T extends Tag<T>> {
             if (!(value instanceof CharSequence)) return false;
         }
         for (Object value : map.values()) {
-            if (!isTagType(value)) return false;
+            if (!isValidTag(value)) return false;
         }
         return true;
     }
@@ -24,13 +29,13 @@ public interface Tag<T extends Tag<T>> {
         if (object instanceof List) {
             List list = (List) object;
             for (Object value : list) {
-                if (!isTagType(value)) return false;
+                if (!isValidTag(value)) return false;
             }
             return true;
         } else if (object instanceof Object[]) {
             Object[] array = (Object[]) object;
             for (Object value : array) {
-                if (!isTagType(value)) return false;
+                if (!isValidTag(value)) return false;
             }
             return true;
         } else {
@@ -38,17 +43,47 @@ public interface Tag<T extends Tag<T>> {
         }
     }
 
-    static boolean isTagType(Object object) {
-        return object instanceof Tag ||
-                object instanceof Byte ||
+    static boolean isValidTag(Object object) {
+        return object instanceof Byte ||
                 object instanceof byte[] ||
                 object instanceof String ||
                 object instanceof Long ||
                 object instanceof Integer ||
                 object instanceof int[] ||
-                object instanceof ToCompoundTag ||
+                object instanceof ToTag<?> ||
                 isValidCompoundValue(object) ||
                 isValidListValue(object);
+    }
+
+    static CompoundTag ofMap(Map<?, ?> map) {
+        if (!isValidCompoundValue(map))
+            throw new UnsupportedOperationException("Object must be valid compound value");
+        Map<String, Tag<?>> values = new HashMap<>();
+        for (Object key : map.keySet()) {
+            if (!(key instanceof CharSequence))
+                throw new UnsupportedOperationException("Cannot convert non-CharSequence to CharSequence");
+            Object value = values.get(key.toString());
+            if (!isValidTag(value))
+                throw new UnsupportedOperationException("Cannot convert non-Tag to Tag");
+            values.put((String) key, of(value));
+        }
+        return new CompoundTag(values);
+    }
+
+    static ListTag ofList(List<?> list) {
+        Tag<?>[] values = new Tag<?>[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            values[i] = of(list.get(i));
+        }
+        return new ListTag(values);
+    }
+
+    static ListTag ofList(Object[] array) {
+        Tag<?>[] values = new Tag<?>[array.length];
+        for (int i = 0; i < array.length; i++) {
+            values[i] = of(array[i]);
+        }
+        return new ListTag(values);
     }
 
     static Tag<?> of(Object object) {
@@ -58,30 +93,13 @@ public interface Tag<T extends Tag<T>> {
         if (object instanceof String) return new StringTag((String) object);
         if (object instanceof Integer) return new IntTag((Integer) object);
         if (object instanceof int[]) return new IntArrayTag((int[]) object);
-        if (object instanceof ToCompoundTag) return ((ToCompoundTag) object).toCompoundTag();
-        if (isValidCompoundValue(object)) {
-            Map map = (Map) object;
-            Map<String, Tag<?>> values = new HashMap<>();
-            for (Object key : map.keySet()) {
-                values.put(((CharSequence) key).toString(), of(values.get(key)));
-            }
-            return new CompoundTag(values);
-        }
+        if (object instanceof ToTag) return ((ToTag<?>) object).toTag();
+        if (isValidCompoundValue(object)) return ofMap((Map<?, ?>) object);
         if (isValidListValue(object)) {
             if (object instanceof List) {
-                List list = (List) object;
-                Tag<?>[] values = new Tag<?>[list.size()];
-                for (int i = 0; i < list.size(); i++) {
-                    values[i] = of(list.get(i));
-                }
-                return new ListTag(values);
+                return ofList((List<?>) object);
             } else if (object instanceof Object[]) {
-                Object[] array = (Object[]) object;
-                Tag<?>[] values = new Tag<?>[array.length];
-                for (int i = 0; i < array.length; i++) {
-                    values[i] = of(array[i]);
-                }
-                return new ListTag(values);
+                return ofList((Object[]) object);
             } else {
                 throw new AssertionError("This should not have happened");
             }
