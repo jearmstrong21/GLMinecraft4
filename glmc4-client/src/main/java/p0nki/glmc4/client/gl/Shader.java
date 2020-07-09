@@ -39,4 +39,13 @@ public class Shader {
         glUseProgram(shader);
     }
 
+    public void setInt(String name, int value) {
+        glUniform1i(glGetUniformLocation(shader, name), value);
+    }
+
+    public void setTexture(String name, Texture texture, int unit) {
+        setInt(name, unit);
+        texture.use(unit);
+    }
+
 }

@@ -1,7 +1,7 @@
 IMAGES WRITTEN: 19
 DIMENSIONS: 128x64
 PIXELS USED: 4864/8192
-TIME: 148ms
+TIME: 187ms
 -------------
 minecraft:grass_top                                              16x16     /Users/jackarmstrong/Documents/FabricProjects/GLMinecraft4/glmc4-client/build/resources/main/block/grass/top.png
 minecraft:stone                                                  16x16     /Users/jackarmstrong/Documents/FabricProjects/GLMinecraft4/glmc4-client/build/resources/main/block/stone.png

@@ -1,9 +1,12 @@
 package p0nki.glmc4.client;
 
+import p0nki.glmc4.client.assets.LocalLocation;
+import p0nki.glmc4.client.assets.ResourceLocation;
 import p0nki.glmc4.client.assets.TextureAssembler;
 import p0nki.glmc4.client.gl.Mesh;
 import p0nki.glmc4.client.gl.MeshData;
 import p0nki.glmc4.client.gl.Shader;
+import p0nki.glmc4.client.gl.Texture;
 import p0nki.glmc4.network.ClientConnection;
 import p0nki.glmc4.network.packet.NetworkProtocol;
 import p0nki.glmc4.network.packet.PacketType;
@@ -41,6 +44,7 @@ public class GLMC4Client {
 
     private static Mesh mesh;
     private static Shader shader;
+    private static Texture texture;
 
     private static void initialize() {
         shader = new Shader("chunk");
@@ -48,13 +52,16 @@ public class GLMC4Client {
         data.addBuffer(2);
         data.addBuffer(3);
         data.appendBuffer(0, List.of(-.5, -.5, -.5, .5, .5, -.5, .5, .5));
-        data.appendBuffer(1, List.of(0., 0., 0., 1., 0., 0., 0., 1., 0., 1., 2., 0.));
+        data.appendBuffer(1, List.of(0., 0., 0., 1., 0., 0., 0., 1., 0., 1., 1., 0.));
         data.appendTri(List.of(0, 1, 2, 1, 2, 3));
         mesh = new Mesh(data);
+//        texture = new Texture(new LocalLocation("atlas/block.png"));
+        texture = new Texture(new ResourceLocation("faces/xmi.png"));
     }
 
     private static void frame(int frameCount) {
         shader.use();
+        shader.setTexture("tex", texture, 0);
         mesh.render();
     }
 
