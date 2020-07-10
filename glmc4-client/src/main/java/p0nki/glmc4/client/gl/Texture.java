@@ -18,13 +18,16 @@ public class Texture {
     public Texture(Location location) {
         id = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, id);
-        stbi_set_flip_vertically_on_load(true);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        stbi_set_flip_vertically_on_load(false);
         int[] w = new int[1];
         int[] h = new int[1];
         int[] comps = new int[1];
         ByteBuffer data = stbi_load(location.asFile().getAbsolutePath(), w, h, comps, 0);
-        if (data == null)
-            throw new RuntimeException("Failed to load image " + location.asFile().getAbsolutePath());
+        if (data == null) {
+            throw new AssertionError("Failed to load image: " + location.asFile().getAbsolutePath());
+        }
         int format = GL_RGB;
         if (comps[0] == 4) format = GL_RGBA;
         width = w[0];
@@ -38,17 +41,8 @@ public class Texture {
         glBindTexture(GL_TEXTURE_2D, id);
     }
 
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
     public Vector2i getSize() {
         return new Vector2i(width, height);
     }
 
 }
-

@@ -31,6 +31,8 @@ public class MCWindow {
         MCWindow.endCallback = endCallback;
     }
 
+    private static double fps;
+
     public static void start() {
         if (!glfwInit()) {
             throw new UnsupportedOperationException("GLFW could not initialize");
@@ -43,25 +45,36 @@ public class MCWindow {
         ptr = glfwCreateWindow(750, 750, "Minecraft", 0, 0);
         glfwMakeContextCurrent(ptr);
         GL.createCapabilities();
-//        System.out.println(glfwGetVersionString());
-//        System.out.println(glGetInteger(GL_MAJOR_VERSION));
-//        System.out.println(glGetInteger(GL_MINOR_VERSION));
-//        System.out.println(glGetString(GL_VENDOR));
-//        System.out.println(glGetString(GL_RENDERER));
         int framecount = 0;
         initializeCallback.run();
+        double lastTime = 0;
+        int totalFramecount = 0;
         while (!glfwWindowShouldClose(ptr)) {
+            double currentTime = glfwGetTime();
+            double delta = currentTime - lastTime;
+            framecount++;
+            if (delta >= 1.0F) {
+                fps = framecount / delta;
+                framecount = 0;
+                lastTime = currentTime;
+            }
             glViewport(0, 0, getWidth(), getHeight());
-            glClearColor(0.2F, 0, 0, 1);
-            glClear(GL_COLOR_BUFFER_BIT);
+            glClearColor(0, 0, 0, 1);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glEnable(GL_DEPTH_TEST);
+            glDepthFunc(GL_LESS);
             glfwPollEvents();
 
-            frameCallback.accept(framecount++);
+            frameCallback.accept(totalFramecount++);
 
             glfwSwapBuffers(ptr);
         }
         endCallback.run();
         glfwTerminate();
+    }
+
+    public static double getFps() {
+        return fps;
     }
 
     public static int getWidth() {
@@ -76,6 +89,10 @@ public class MCWindow {
         int[] h = new int[1];
         glfwGetFramebufferSize(ptr, w, h);
         return h[0];
+    }
+
+    public static float time() {
+        return (float) glfwGetTime();
     }
 
 }

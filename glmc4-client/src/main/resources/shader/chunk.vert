@@ -1,11 +1,14 @@
 #version 330 core
 
-layout (location=0) in vec2 inPos;
-layout (location=1) in vec3 inCol;
+layout (location=0) in vec3 inPos;
+layout (location=1) in vec2 inUV;
 
-out vec3 col;
+uniform mat4 perspective;
+uniform mat4 view;
+
+out vec2 uv;
 
 void main() {
-    gl_Position=vec4(inPos, 0.0, 1.0);
-    col = inCol;
+    gl_Position=perspective * view * vec4(inPos, 1.0);
+    uv = inUV;
 }

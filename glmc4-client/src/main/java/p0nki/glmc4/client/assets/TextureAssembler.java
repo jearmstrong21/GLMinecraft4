@@ -5,6 +5,7 @@ import p0nki.glmc4.utils.Identifier;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -52,8 +53,13 @@ public class TextureAssembler {
     private final Map<Identifier, File> identifiers;
     private final Map<Identifier, Image> images;
 
-    private Image read(Identifier identifier) throws IOException {
-        BufferedImage img = ImageIO.read(identifiers.get(identifier));
+    private Image read(Identifier identifier) {
+        BufferedImage img;
+        try {
+            img = ImageIO.read(identifiers.get(identifier));
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
         Image image = new Image();
         image.w = img.getWidth();
         image.h = img.getHeight();
@@ -67,8 +73,8 @@ public class TextureAssembler {
         return image;
     }
 
-    private final int width = 128;
-    private final int height = 64;
+    private final int width = 1024;
+    private final int height = 512;
     private int pixelCount = 0;
 
     private boolean canPlace(int[][] data, Identifier identifier, int x, int y) {
@@ -110,7 +116,7 @@ public class TextureAssembler {
 
     private final String directory;
 
-    private TextureAssembler(Identifier identifier, String directory) throws IOException {
+    private TextureAssembler(Identifier identifier, String directory) {
         long start = System.currentTimeMillis();
         this.directory = directory;
         identifiers = listFiles(new Identifier(identifier.getNamespace(), ""), new ResourceLocation(directory).asFile().getAbsolutePath());
@@ -136,9 +142,18 @@ public class TextureAssembler {
             }
         }
         new LocalLocation("atlas/").asFile().mkdirs();
-        ImageIO.write(image, "png", new LocalLocation("atlas/" + directory + ".png").asFile());
+        try {
+            ImageIO.write(image, "png", new LocalLocation("atlas/" + directory + ".png").asFile());
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
         long end = System.currentTimeMillis();
-        PrintWriter writer = new PrintWriter(new LocalLocation("atlas/" + directory + ".txt").asFile());
+        PrintWriter writer;
+        try {
+            writer = new PrintWriter(new LocalLocation("atlas/" + directory + ".txt").asFile());
+        } catch (FileNotFoundException e) {
+            throw new AssertionError(e);
+        }
         writer.println(String.format("IMAGES WRITTEN: %s", identifiers.size()));
         writer.println(String.format("DIMENSIONS: %sx%s", width, height));
         writer.println(String.format("PIXELS USED: %s/%s", pixelCount, width * height));
@@ -150,12 +165,15 @@ public class TextureAssembler {
 
     private static final Map<Identifier, TextureAssembler> assemblers = new HashMap<>();
 
-    public static TextureAssembler get(Identifier identifier) {
-        return assemblers.get(identifier);
+    public AtlasPosition getTexture(Identifier identifier) {
+        Image img = images.get(identifier);
+        return new AtlasPosition(img.x, img.y, img.w, img.h, width, height);
     }
 
-    public static TextureAssembler assemble(Identifier identifier, String directory) throws IOException {
-        return assemblers.put(identifier, new TextureAssembler(identifier, directory));
+    public static TextureAssembler get(Identifier identifier, String directory) {
+        if (!assemblers.containsKey(identifier))
+            assemblers.put(identifier, new TextureAssembler(identifier, directory));
+        return assemblers.get(identifier);
     }
 
 }

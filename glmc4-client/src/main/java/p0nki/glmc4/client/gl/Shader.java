@@ -1,5 +1,7 @@
 package p0nki.glmc4.client.gl;
 
+import org.joml.Matrix4f;
+import org.lwjgl.BufferUtils;
 import p0nki.glmc4.client.assets.ResourceLocation;
 
 import static org.lwjgl.opengl.GL33.*;
@@ -43,9 +45,13 @@ public class Shader {
         glUniform1i(glGetUniformLocation(shader, name), value);
     }
 
-    public void setTexture(String name, Texture texture, int unit) {
+    public void setTexture(String name, Texture value, int unit) {
         setInt(name, unit);
-        texture.use(unit);
+        value.use(unit);
+    }
+
+    public void setMat4f(String name, Matrix4f value) {
+        glUniformMatrix4fv(glGetUniformLocation(shader, name), false, BufferUtils.createFloatBuffer(16).put(value.get(new float[16])).flip());
     }
 
 }
