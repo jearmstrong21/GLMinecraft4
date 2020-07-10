@@ -52,32 +52,16 @@ public class GLMC4Client {
         TextureAssembler BLOCK = TextureAssembler.get(new Identifier("minecraft:block"), "block");
         shader = new Shader("chunk");
         MeshData data = new MeshData();
+
         data.addBuffer(3);
         data.addBuffer(2);
 
-        data.addQuad(0, new Vector3d(0, 1, 0), new Vector3d(0, 0, 1), new Vector3d(0, -1, 0));
-        data.addQuad(1, BLOCK.getTexture(new Identifier("minecraft:faces_xmi")));
-        data.appendTri(List.of(0, 1, 2, 1, 2, 3));
-
-        data.addQuad(0, new Vector3d(1, 1, 1), new Vector3d(0, 0, -1), new Vector3d(0, -1, 0));
-        data.addQuad(1, BLOCK.getTexture(new Identifier("minecraft:faces_xpl")));
-        data.appendTri(List.of(4, 5, 6, 5, 6, 7));
-
-        data.addQuad(0, new Vector3d(0, 0, 0), new Vector3d(1, 0, 0), new Vector3d(0, 0, 1));
-        data.addQuad(1, BLOCK.getTexture(new Identifier("minecraft:faces_ymi")));
-        data.appendTri(List.of(8, 9, 10, 9, 10, 11));
-
-        data.addQuad(0, new Vector3d(0, 1, 0), new Vector3d(1, 0, 0), new Vector3d(0, 0, 1));
-        data.addQuad(1, BLOCK.getTexture(new Identifier("minecraft:faces_ypl")));
-        data.appendTri(List.of(12, 13, 14, 13, 14, 15));
-
-        data.addQuad(0, new Vector3d(1, 1, 0), new Vector3d(-1, 0, 0), new Vector3d(0, -1, 0));
-        data.addQuad(1, BLOCK.getTexture(new Identifier("minecraft:faces_zmi")));
-        data.appendTri(List.of(16, 17, 18, 17, 18, 19));
-
-        data.addQuad(0, new Vector3d(0, 1, 1), new Vector3d(1, 0, 0), new Vector3d(0, -1, 0));
-        data.addQuad(1, BLOCK.getTexture(new Identifier("minecraft:faces_zpl")));
-        data.appendTri(List.of(20, 21, 22, 21, 22, 23));
+        data.addXmiQuad(0, 1, new Vector3d(0), BLOCK.getTexture(new Identifier("minecraft:grass_side")));
+        data.addXplQuad(0, 1, new Vector3d(0), BLOCK.getTexture(new Identifier("minecraft:grass_side")));
+        data.addYmiQuad(0, 1, new Vector3d(0), BLOCK.getTexture(new Identifier("minecraft:dirt")));
+        data.addYplQuad(0, 1, new Vector3d(0), BLOCK.getTexture(new Identifier("minecraft:grass_top")));
+        data.addZmiQuad(0, 1, new Vector3d(0), BLOCK.getTexture(new Identifier("minecraft:grass_side")));
+        data.addZplQuad(0, 1, new Vector3d(0), BLOCK.getTexture(new Identifier("minecraft:grass_side")));
 
         mesh = new Mesh(data);
         texture = new Texture(new LocalLocation("atlas/block.png"));

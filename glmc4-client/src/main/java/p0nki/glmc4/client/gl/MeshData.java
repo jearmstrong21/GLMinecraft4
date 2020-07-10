@@ -6,6 +6,7 @@ import p0nki.glmc4.client.assets.AtlasPosition;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
 public class MeshData {
@@ -13,6 +14,7 @@ public class MeshData {
     private List<List<Double>> data;
     private List<Integer> sizes;
     private List<Integer> tri;
+    private int maxReferredVertex = 0;
 
     public MeshData() {
         data = new ArrayList<>();
@@ -57,6 +59,42 @@ public class MeshData {
         addQuad(buffer, new Vector2d(atlasPosition.x, atlasPosition.y), new Vector2d(atlasPosition.w, 0), new Vector2d(0, atlasPosition.h));
     }
 
+    public void addXmiQuad(int posBuffer, int uvBuffer, Vector3d origin, AtlasPosition atlasPosition) {
+        appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
+        addQuad(posBuffer, new Vector3d(0, 1, 0).add(origin), new Vector3d(0, 0, 1), new Vector3d(0, -1, 0));
+        addQuad(uvBuffer, atlasPosition);
+    }
+
+    public void addXplQuad(int posBuffer, int uvBuffer, Vector3d origin, AtlasPosition atlasPosition) {
+        appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
+        addQuad(posBuffer, new Vector3d(1, 1, 1).add(origin), new Vector3d(0, 0, -1), new Vector3d(0, -1, 0));
+        addQuad(uvBuffer, atlasPosition);
+    }
+
+    public void addYmiQuad(int posBuffer, int uvBuffer, Vector3d origin, AtlasPosition atlasPosition) {
+        appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
+        addQuad(posBuffer, new Vector3d(0, 0, 0).add(origin), new Vector3d(1, 0, 0), new Vector3d(0, 0, 1));
+        addQuad(uvBuffer, atlasPosition);
+    }
+
+    public void addYplQuad(int posBuffer, int uvBuffer, Vector3d origin, AtlasPosition atlasPosition) {
+        appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
+        addQuad(posBuffer, new Vector3d(0, 1, 0).add(origin), new Vector3d(1, 0, 0), new Vector3d(0, 0, 1));
+        addQuad(uvBuffer, atlasPosition);
+    }
+
+    public void addZmiQuad(int posBuffer, int uvBuffer, Vector3d origin, AtlasPosition atlasPosition) {
+        appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
+        addQuad(posBuffer, new Vector3d(1, 1, 0).add(origin), new Vector3d(-1, 0, 0), new Vector3d(0, -1, 0));
+        addQuad(uvBuffer, atlasPosition);
+    }
+
+    public void addZplQuad(int posBuffer, int uvBuffer, Vector3d origin, AtlasPosition atlasPosition) {
+        appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
+        addQuad(posBuffer, new Vector3d(0, 1, 1).add(origin), new Vector3d(1, 0, 0), new Vector3d(0, -1, 0));
+        addQuad(uvBuffer, atlasPosition);
+    }
+
     public void addQuad(int buffer, Vector3d o, Vector3d a, Vector3d b) {
         appendBuffer3f(buffer, List.of(o, new Vector3d(o).add(a), new Vector3d(o).add(b), new Vector3d(o).add(a).add(b)));
     }
@@ -67,5 +105,10 @@ public class MeshData {
 
     public void appendTri(List<Integer> tri) {
         this.tri.addAll(tri);
+        tri.forEach(x -> maxReferredVertex = Math.max(x + 1, maxReferredVertex));
+    }
+
+    public void appendTriOffset(List<Integer> tri) {
+        appendTri(tri.stream().map(x -> x + maxReferredVertex).collect(Collectors.toList()));
     }
 }
