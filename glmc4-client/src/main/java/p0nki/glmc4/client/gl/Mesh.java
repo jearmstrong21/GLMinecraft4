@@ -24,8 +24,8 @@ public class Mesh {
         for (int i = 0; i < data.size(); i++) {
             int vbo = glGenBuffers();
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            glBufferData(GL_ARRAY_BUFFER, ArrayUtils.toPrimitive(data.getData().get(i).toArray(Double[]::new)), GL_STATIC_DRAW);
-            glVertexAttribPointer(i, data.getSizes().get(i), GL_DOUBLE, false, 0, 0);
+            glBufferData(GL_ARRAY_BUFFER, ArrayUtils.toPrimitive(data.getData().get(i).toArray(Float[]::new)), GL_STATIC_DRAW);
+            glVertexAttribPointer(i, data.getSizes().get(i), GL_FLOAT, false, 0, 0);
             glEnableVertexAttribArray(i);
         }
         glBindBuffer(GL_ARRAY_BUFFER, 0);

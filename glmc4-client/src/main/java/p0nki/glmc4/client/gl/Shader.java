@@ -54,4 +54,8 @@ public class Shader {
         glUniformMatrix4fv(glGetUniformLocation(shader, name), false, BufferUtils.createFloatBuffer(16).put(value.get(new float[16])).flip());
     }
 
+    public void setFloat(String name, float value) {
+        glUniform1f(glGetUniformLocation(shader, name), value);
+    }
+
 }

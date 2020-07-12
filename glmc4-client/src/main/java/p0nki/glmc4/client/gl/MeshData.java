@@ -1,17 +1,16 @@
 package p0nki.glmc4.client.gl;
 
-import org.joml.Vector2d;
-import org.joml.Vector3d;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
 import p0nki.glmc4.client.assets.AtlasPosition;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 
 public class MeshData {
 
-    private List<List<Double>> data;
+    private List<List<Float>> data;
     private List<Integer> sizes;
     private List<Integer> tri;
     private int maxReferredVertex = 0;
@@ -26,7 +25,7 @@ public class MeshData {
         return sizes.size();
     }
 
-    public List<List<Double>> getData() {
+    public List<List<Float>> getData() {
         return data;
     }
 
@@ -43,64 +42,71 @@ public class MeshData {
         sizes.add(size);
     }
 
-    public void appendBuffer(int buffer, List<Double> data) {
+    public void appendBuffer(int buffer, List<Float> data) {
         this.data.get(buffer).addAll(data);
     }
 
-    public void appendBuffer2f(int buffer, List<Vector2d> data) {
-        data.stream().flatMapToDouble(vector2f -> DoubleStream.of(vector2f.x, vector2f.y)).forEachOrdered(this.data.get(buffer)::add);
+    public void appendBuffer2f(int buffer, List<Vector2f> data) {
+        for (Vector2f v : data) {
+            this.data.get(buffer).add(v.x);
+            this.data.get(buffer).add(v.y);
+        }
     }
 
-    public void addQuad(int buffer, Vector2d o, Vector2d a, Vector2d b) {
-        appendBuffer2f(buffer, List.of(o, new Vector2d(o).add(a), new Vector2d(o).add(b), new Vector2d(o).add(a).add(b)));
+    public void addQuad(int buffer, Vector2f o, Vector2f a, Vector2f b) {
+        appendBuffer2f(buffer, List.of(o, new Vector2f(o).add(a), new Vector2f(o).add(b), new Vector2f(o).add(a).add(b)));
     }
 
     public void addQuad(int buffer, AtlasPosition atlasPosition) {
-        addQuad(buffer, new Vector2d(atlasPosition.x, atlasPosition.y), new Vector2d(atlasPosition.w, 0), new Vector2d(0, atlasPosition.h));
+        addQuad(buffer, new Vector2f(atlasPosition.x, atlasPosition.y), new Vector2f(atlasPosition.w, 0), new Vector2f(0, atlasPosition.h));
     }
 
-    public void addXmiQuad(int posBuffer, int uvBuffer, Vector3d origin, AtlasPosition atlasPosition) {
+    public void addXmiQuad(int posBuffer, int uvBuffer, Vector3f origin, AtlasPosition atlasPosition) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
-        addQuad(posBuffer, new Vector3d(0, 1, 0).add(origin), new Vector3d(0, 0, 1), new Vector3d(0, -1, 0));
+        addQuad(posBuffer, new Vector3f(0, 1, 0).add(origin), new Vector3f(0, 0, 1), new Vector3f(0, -1, 0));
         addQuad(uvBuffer, atlasPosition);
     }
 
-    public void addXplQuad(int posBuffer, int uvBuffer, Vector3d origin, AtlasPosition atlasPosition) {
+    public void addXplQuad(int posBuffer, int uvBuffer, Vector3f origin, AtlasPosition atlasPosition) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
-        addQuad(posBuffer, new Vector3d(1, 1, 1).add(origin), new Vector3d(0, 0, -1), new Vector3d(0, -1, 0));
+        addQuad(posBuffer, new Vector3f(1, 1, 1).add(origin), new Vector3f(0, 0, -1), new Vector3f(0, -1, 0));
         addQuad(uvBuffer, atlasPosition);
     }
 
-    public void addYmiQuad(int posBuffer, int uvBuffer, Vector3d origin, AtlasPosition atlasPosition) {
+    public void addYmiQuad(int posBuffer, int uvBuffer, Vector3f origin, AtlasPosition atlasPosition) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
-        addQuad(posBuffer, new Vector3d(0, 0, 0).add(origin), new Vector3d(1, 0, 0), new Vector3d(0, 0, 1));
+        addQuad(posBuffer, new Vector3f(0, 0, 0).add(origin), new Vector3f(1, 0, 0), new Vector3f(0, 0, 1));
         addQuad(uvBuffer, atlasPosition);
     }
 
-    public void addYplQuad(int posBuffer, int uvBuffer, Vector3d origin, AtlasPosition atlasPosition) {
+    public void addYplQuad(int posBuffer, int uvBuffer, Vector3f origin, AtlasPosition atlasPosition) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
-        addQuad(posBuffer, new Vector3d(0, 1, 0).add(origin), new Vector3d(1, 0, 0), new Vector3d(0, 0, 1));
+        addQuad(posBuffer, new Vector3f(0, 1, 0).add(origin), new Vector3f(1, 0, 0), new Vector3f(0, 0, 1));
         addQuad(uvBuffer, atlasPosition);
     }
 
-    public void addZmiQuad(int posBuffer, int uvBuffer, Vector3d origin, AtlasPosition atlasPosition) {
+    public void addZmiQuad(int posBuffer, int uvBuffer, Vector3f origin, AtlasPosition atlasPosition) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
-        addQuad(posBuffer, new Vector3d(1, 1, 0).add(origin), new Vector3d(-1, 0, 0), new Vector3d(0, -1, 0));
+        addQuad(posBuffer, new Vector3f(1, 1, 0).add(origin), new Vector3f(-1, 0, 0), new Vector3f(0, -1, 0));
         addQuad(uvBuffer, atlasPosition);
     }
 
-    public void addZplQuad(int posBuffer, int uvBuffer, Vector3d origin, AtlasPosition atlasPosition) {
+    public void addZplQuad(int posBuffer, int uvBuffer, Vector3f origin, AtlasPosition atlasPosition) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
-        addQuad(posBuffer, new Vector3d(0, 1, 1).add(origin), new Vector3d(1, 0, 0), new Vector3d(0, -1, 0));
+        addQuad(posBuffer, new Vector3f(0, 1, 1).add(origin), new Vector3f(1, 0, 0), new Vector3f(0, -1, 0));
         addQuad(uvBuffer, atlasPosition);
     }
 
-    public void addQuad(int buffer, Vector3d o, Vector3d a, Vector3d b) {
-        appendBuffer3f(buffer, List.of(o, new Vector3d(o).add(a), new Vector3d(o).add(b), new Vector3d(o).add(a).add(b)));
+    public void addQuad(int buffer, Vector3f o, Vector3f a, Vector3f b) {
+        appendBuffer3f(buffer, List.of(o, new Vector3f(o).add(a), new Vector3f(o).add(b), new Vector3f(o).add(a).add(b)));
     }
 
-    public void appendBuffer3f(int buffer, List<Vector3d> data) {
-        data.stream().flatMapToDouble(vector3f -> DoubleStream.of(vector3f.x, vector3f.y, vector3f.z)).forEachOrdered(this.data.get(buffer)::add);
+    public void appendBuffer3f(int buffer, List<Vector3f> data) {
+        for (Vector3f v : data) {
+            this.data.get(buffer).add(v.x);
+            this.data.get(buffer).add(v.y);
+            this.data.get(buffer).add(v.z);
+        }
     }
 
     public void appendTri(List<Integer> tri) {

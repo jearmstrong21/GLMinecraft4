@@ -44,7 +44,11 @@ public class MCWindow {
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         ptr = glfwCreateWindow(750, 750, "Minecraft", 0, 0);
         glfwMakeContextCurrent(ptr);
+        glfwSwapInterval(0);
+        glfwShowWindow(ptr);
         GL.createCapabilities();
+        System.out.println(glGetString(GL_RENDERER));
+        System.out.println(glGetString(GL_VERSION));
         int framecount = 0;
         initializeCallback.run();
         double lastTime = 0;
@@ -63,10 +67,10 @@ public class MCWindow {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LESS);
-            glfwPollEvents();
 
             frameCallback.accept(totalFramecount++);
 
+            glfwPollEvents();
             glfwSwapBuffers(ptr);
         }
         endCallback.run();
