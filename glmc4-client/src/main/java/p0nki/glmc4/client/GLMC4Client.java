@@ -48,57 +48,6 @@ public class GLMC4Client {
     private static Mesh mesh;
     private static Shader shader;
     private static Texture texture;
-    private static int tri;
-
-    private static void quad(Vector3f a, Vector3f b) {
-        glColor3f(1, 0, 0);
-        glVertex3f(0, 0, 0);
-
-        glColor3f(0, 1, 0);
-        glVertex3f(a.x, a.y, a.z);
-
-        glColor3f(0, 0, 1);
-        glVertex3f(b.x, b.y, b.z);
-
-        glColor3f(0, 1, 0);
-        glVertex3f(a.x, a.y, a.z);
-
-        glColor3f(1, 1, 1);
-        glVertex3f(a.x + b.x, a.y + b.y, a.z + b.z);
-    }
-
-    private static void xmiQuad() {
-        quad(new Vector3f(0, 1, 0), new Vector3f(0, 0, 1));
-    }
-
-    private static void xplQuad() {
-        glPushMatrix();
-        glTranslatef(1, 0, 0);
-        quad(new Vector3f(0, 1, 0), new Vector3f(0, 0, 1));
-        glPopMatrix();
-    }
-
-    private static void ymiQuad() {
-        quad(new Vector3f(1, 0, 0), new Vector3f(0, 0, 1));
-    }
-
-    private static void yplQuad() {
-        glPushMatrix();
-        glTranslatef(0, 1, 0);
-        quad(new Vector3f(1, 0, 0), new Vector3f(0, 0, 1));
-        glPopMatrix();
-    }
-
-    private static void zmiQuad() {
-        quad(new Vector3f(1, 0, 0), new Vector3f(0, 1, 0));
-    }
-
-    private static void zplQuad() {
-        glPushMatrix();
-        glTranslatef(0, 0, 1);
-        quad(new Vector3f(1, 0, 0), new Vector3f(0, 1, 0));
-        glPopMatrix();
-    }
 
     private static void initialize() {
         TextureAssembler BLOCK = TextureAssembler.get(new Identifier("minecraft:block"), "block");
@@ -111,41 +60,6 @@ public class GLMC4Client {
                 }
             }
         }
-        final boolean d = true;
-//        tri = glGenLists(1);
-//        glNewList(tri, GL_COMPILE);
-//        glBegin(GL_TRIANGLES);
-//
-//        for (int x = 0; x < 16; x++) {
-//            for (int y = 0; y < 256; y++) {
-//                for (int z = 0; z < 16; z++) {
-//                    if (!terrain[x][y][z]) continue;
-//                    boolean xmi = d;
-//                    boolean xpl = d;
-//                    boolean ymi = d;
-//                    boolean ypl = d;
-//                    boolean zmi = d;
-//                    boolean zpl = d;
-//                    if (x > 0) xmi = !terrain[x - 1][y][z];
-//                    if (x < 15) xpl = !terrain[x + 1][y][z];
-//                    if (y > 0) ymi = !terrain[x][y - 1][z];
-//                    if (y < 15) ypl = !terrain[x][y + 1][z];
-//                    if (z > 0) zmi = !terrain[x][y][z - 1];
-//                    if (z < 15) zpl = !terrain[x][y][z + 1];
-//                    glTranslatef(x, y, z);
-//                    if (xmi) xmiQuad();
-//                    if (xpl) xplQuad();
-//                    if (ymi) ymiQuad();
-//                    if (ypl) yplQuad();
-//                    if (zmi) zmiQuad();
-//                    if (zpl) zplQuad();
-//                    glTranslatef(-x, -y, -z);
-//                }
-//            }
-//        }
-//
-//        glEnd();
-//        glEndList();
         shader = new Shader("chunk");
         MeshData data = new MeshData();
 
@@ -155,6 +69,7 @@ public class GLMC4Client {
         AtlasPosition SIDE = BLOCK.getTexture(new Identifier("minecraft:grass_side"));
         AtlasPosition TOP = BLOCK.getTexture(new Identifier("minecraft:grass_top"));
         AtlasPosition BOTTOM = BLOCK.getTexture(new Identifier("minecraft:dirt"));
+        final boolean d = true;
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 256; y++) {
                 for (int z = 0; z < 16; z++) {
@@ -187,14 +102,6 @@ public class GLMC4Client {
     }
 
     private static void frame(int frameCount) {
-//        glBegin(GL_TRIANGLES);
-//        glColor3f(1, 0, 0);
-//        glVertex2f(0, 0);
-//        glColor3f(0, 1, 0);
-//        glVertex2f(0, 1);
-//        glColor3f(0, 0, 1);
-//        glVertex2f(1, 0);
-//        glEnd();
         shader.use();
         shader.setTexture("tex", texture, 0);
         shader.setMat4f("perspective", new Matrix4f().perspective((float) Math.toRadians(80), 1.0F, 0.001F, 100));
@@ -209,10 +116,6 @@ public class GLMC4Client {
                 mesh.render();
             }
         }
-//        glPushMatrix();
-//        glCallList(tri);
-//        glPopMatrix();
-        System.out.println(MCWindow.getFps());
     }
 
     private static void end() {
