@@ -13,12 +13,16 @@ import p0nki.glmc4.network.ClientConnection;
 import p0nki.glmc4.network.packet.NetworkProtocol;
 import p0nki.glmc4.network.packet.PacketType;
 import p0nki.glmc4.network.packet.clientbound.ClientPacketListener;
+import p0nki.glmc4.registry.Registry;
+import p0nki.glmc4.state.block.Blocks;
+import p0nki.glmc4.state.block.blocks.CactusBlock;
+import p0nki.glmc4.state.properties.BooleanProperty;
+import p0nki.glmc4.state.properties.IntProperty;
+import p0nki.glmc4.state.properties.PropertySchema;
 import p0nki.glmc4.utils.Identifier;
 
 import java.io.IOException;
 import java.net.Socket;
-
-import static org.lwjgl.opengl.GL21.*;
 
 public class GLMC4Client {
 
@@ -122,12 +126,28 @@ public class GLMC4Client {
 
     }
 
+    private static void runClient() {
+        try {
+            MCWindow.setInitializeCallback(GLMC4Client::initialize);
+            MCWindow.setFrameCallback(GLMC4Client::frame);
+            MCWindow.setEndCallback(GLMC4Client::end);
+            MCWindow.start();
+        } catch (Error | RuntimeException error) {
+            throw new RuntimeException("Crashes, fix or remove", error);
+        }
+    }
+
+    private static String str(int x) {
+        StringBuilder s = new StringBuilder();
+        for (int i = 31; i >= 0; i--) s.append(1 & (x >> i));
+        return s.toString();
+    }
+
     public static void main(String[] args) {
 //        runSocket();
-        MCWindow.setInitializeCallback(GLMC4Client::initialize);
-        MCWindow.setFrameCallback(GLMC4Client::frame);
-        MCWindow.setEndCallback(GLMC4Client::end);
-        MCWindow.start();
+//        runClient();
+        Blocks.CACTUS.getStates().forEach(System.out::println);
+        System.out.println(Blocks.CACTUS.getDefaultState());
     }
 
 }
