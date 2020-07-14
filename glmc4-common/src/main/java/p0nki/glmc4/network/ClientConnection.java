@@ -36,8 +36,8 @@ public class ClientConnection<L extends PacketListener<L>> {
         this.socket = socket;
 //        outputStream = new DataOutputStream(new GZIPOutputStream(socket.getOutputStream()));
 //        inputStream = new DataInputStream(new GZIPInputStream(socket.getInputStream()));
-        output = new DataOutputStream(socket.getOutputStream());
-        input = new DataInputStream(socket.getInputStream());
+        output = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+        input = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
         // TODO: make use gzip io streams, instead of new DOS(new GZIPOS(socket.getOS())), use new DOS(new BR(socket.getOS()))
         //  DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(new GZIPInputStream(stream)));
         this.networkProtocol = networkProtocol;

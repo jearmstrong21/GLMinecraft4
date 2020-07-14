@@ -3,7 +3,7 @@ package p0nki.glmc4.block;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import p0nki.glmc4.registry.AfterRegisterCallback;
-import p0nki.glmc4.state.properties.PropertySchema;
+import p0nki.glmc4.state.PropertySchema;
 import p0nki.glmc4.utils.Identifier;
 
 import java.util.ArrayList;

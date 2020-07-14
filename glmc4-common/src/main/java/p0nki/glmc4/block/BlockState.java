@@ -1,6 +1,6 @@
 package p0nki.glmc4.block;
 
-import p0nki.glmc4.state.properties.Property;
+import p0nki.glmc4.state.Property;
 import p0nki.glmc4.utils.MathUtils;
 
 public class BlockState {

@@ -1,4 +1,4 @@
-package p0nki.glmc4.state.properties;
+package p0nki.glmc4.state;
 
 import javax.annotation.Nonnull;
 import java.util.*;

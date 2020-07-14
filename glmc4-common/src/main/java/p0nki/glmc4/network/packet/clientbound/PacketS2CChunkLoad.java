@@ -26,15 +26,15 @@ public class PacketS2CChunkLoad extends PacketS2C {
     public void read(DataInput input) throws IOException {
         x = input.readInt();
         z = input.readInt();
-        chunk = new Chunk();
-//        chunk = new Chunk(input);
+//        chunk = new Chunk();
+        chunk = new Chunk(input);
     }
 
     @Override
     public void write(DataOutput output) throws IOException {
         output.writeInt(x);
         output.writeInt(z);
-//        chunk.write(output);
+        chunk.write(output);
     }
 
     @Override

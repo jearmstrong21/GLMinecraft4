@@ -2,7 +2,7 @@ package p0nki.glmc4.block.blocks;
 
 import p0nki.glmc4.block.Block;
 import p0nki.glmc4.block.BlockState;
-import p0nki.glmc4.state.properties.IntProperty;
+import p0nki.glmc4.state.IntProperty;
 
 public class CactusBlock extends Block {
 

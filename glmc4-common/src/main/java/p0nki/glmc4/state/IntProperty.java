@@ -1,4 +1,4 @@
-package p0nki.glmc4.state.properties;
+package p0nki.glmc4.state;
 
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
