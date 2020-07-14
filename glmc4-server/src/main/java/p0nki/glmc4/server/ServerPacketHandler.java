@@ -63,12 +63,12 @@ public class ServerPacketHandler implements ServerPacketListener {
     @Override
     public void onConnected() {
         connection.write(new PacketS2CHello(connection.getPlayer(), MinecraftServer.INSTANCE.getPlayers()));
-//        for (int x = -2; x <= 2; x++) {
-//            for (int z = -2; z <= 2; z++) {
-//                connection.write(new PacketS2CChunkLoad(x, z, generate(x, z)));
-//            }
-//        }
-        connection.write(new PacketS2CChunkLoad(0, 0, generate(0, 0)));
+        for (int x = -1; x <= 1; x++) {
+            for (int z = -1; z <= 1; z++) {
+                connection.write(new PacketS2CChunkLoad(x, z, generate(x, z)));
+            }
+        }
+//        connection.write(new PacketS2CChunkLoad(0, 0, generate(0, 0)));
     }
 
     @Override
