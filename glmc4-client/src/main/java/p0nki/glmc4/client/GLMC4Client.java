@@ -8,6 +8,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.block.Blocks;
+import p0nki.glmc4.block.Chunk;
 import p0nki.glmc4.client.assets.LocalLocation;
 import p0nki.glmc4.client.gl.Mesh;
 import p0nki.glmc4.client.gl.MeshData;
@@ -21,24 +22,37 @@ import p0nki.glmc4.network.packet.NetworkProtocol;
 import p0nki.glmc4.network.packet.PacketType;
 import p0nki.glmc4.network.packet.clientbound.ClientPacketListener;
 import p0nki.glmc4.utils.Identifier;
+import p0nki.glmc4.utils.MathUtils;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class GLMC4Client {
 
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Marker SOCKET = MarkerManager.getMarker("SOCKET");
+    private static final Marker RENDER = MarkerManager.getMarker("RENDER");
+    private static final Map<Long, Chunk> chunks = new HashMap<>();
+    private static final Map<Long, Mesh> meshes = new HashMap<>();
+    private final static Set<Identifier> warnedIdentifiers = new HashSet<>();
+    private final static Lock chunkLock = new ReentrantLock();
+    private static Socket socket;
+
+    private static Shader shader;
+    private static Texture texture;
 
     private static void runSocket() {
-        Socket socket;
         try {
             socket = new Socket("localhost", 3333);
         } catch (IOException ioException) {
             LOGGER.fatal(SOCKET, "Connection refused", ioException);
-            return;
+            System.exit(1);
         }
         LOGGER.info(SOCKET, "Socket connected");
         NetworkProtocol networkProtocol = new NetworkProtocol();
@@ -49,70 +63,46 @@ public class GLMC4Client {
             LOGGER.info(SOCKET, "Error creating connection", ioException);
             return;
         }
-        ClientPacketListener packetListener = new ClientPacketListener(connection);
+        ClientPacketListener packetListener = new ClientPacketHandler(connection);
         connection.setPacketListener(packetListener);
         connection.startLoop();
         LOGGER.info(SOCKET, "Connected to localhost:3333");
     }
 
-    private static Mesh mesh;
-    private static Shader shader;
-    private static Texture texture;
+    public static void onLoad(int x, int z, Chunk chunk) {
+        chunkLock.lock();
+        chunks.put(MathUtils.pack(x, z), chunk);
+        chunkLock.unlock();
+    }
 
-    private static void initialize() {
-        BlockState[][][] terrain = new BlockState[16][256][16];
-        for (int x = 0; x < 16; x++) {
-            for (int z = 0; z < 16; z++) {
-                int h = (x + z) / 4;
-                for (int y = 0; y < 256; y++) {
-                    if (y < h - 4) terrain[x][y][z] = Blocks.STONE.getDefaultState();
-                    else if (y < h) terrain[x][y][z] = Blocks.DIRT.getDefaultState();
-                    else if (y == h) terrain[x][y][z] = Blocks.GRASS.getDefaultState();
-                    else terrain[x][y][z] = Blocks.AIR.getDefaultState();
-                }
-            }
-        }
-        LOGGER.info("16x256x16 chunk data created");
-        shader = new Shader("chunk");
+    private static MeshData mesh(Chunk chunk) {
         MeshData data = MeshData.chunk();
-
-        Set<Identifier> warnedIdentifiers = new HashSet<>();
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 256; y++) {
                 for (int z = 0; z < 16; z++) {
-                    if (terrain[x][y][z].getBlock() == Blocks.AIR) continue;
-                    BlockState state = terrain[x][y][z];
-                    BlockState xmi = Blocks.AIR.getDefaultState();
-                    BlockState xpl = Blocks.AIR.getDefaultState();
-                    BlockState ymi = Blocks.AIR.getDefaultState();
-                    BlockState ypl = Blocks.AIR.getDefaultState();
-                    BlockState zmi = Blocks.AIR.getDefaultState();
-                    BlockState zpl = Blocks.AIR.getDefaultState();
-                    if (x > 0) xmi = terrain[x - 1][y][z];
-                    if (x < 15) xpl = terrain[x + 1][y][z];
-                    if (y > 0) ymi = terrain[x][y - 1][z];
-                    if (y < 255) ypl = terrain[x][y + 1][z];
-                    if (z > 0) zmi = terrain[x][y][z - 1];
-                    if (z < 15) zpl = terrain[x][y][z + 1];
+                    BlockState state = chunk.get(x, y, z);
+                    if (state.getBlock() == Blocks.AIR) continue;
                     Identifier identifier = Blocks.REGISTRY.get(state.getBlock()).getKey();
                     if (BlockRenderers.REGISTRY.hasKey(identifier)) {
                         BlockRenderer renderer = BlockRenderers.REGISTRY.get(identifier).getValue();
-                        BlockRenderContext context = new BlockRenderContext(xmi, xpl, ymi, ypl, zmi, zpl, state);
+                        BlockRenderContext context = new BlockRenderContext(chunk.getOrAir(x - 1, y, z), chunk.getOrAir(x + 1, y, z), chunk.getOrAir(x, y - 1, z), chunk.getOrAir(x, y + 1, z), chunk.getOrAir(x, y, z - 1), chunk.getOrAir(x, y, z + 1), state);
                         MeshData rendered = renderer.render(context);
                         rendered.offset3f(0, x, y, z);
                         data.append(rendered);
                     } else if (!warnedIdentifiers.contains(identifier)) {
-                        System.err.printf("[WARNING] No renderer found for %s. Will not warn again.%n", identifier);
+                        LOGGER.warn(RENDER, "No renderer found for {}", state);
                         warnedIdentifiers.add(identifier);
                     }
                 }
             }
         }
-        LOGGER.info("Mesh created");
+        return data;
+    }
 
-        mesh = new Mesh(data);
+    private static void initialize() {
+        shader = new Shader("chunk");
         texture = new Texture(new LocalLocation("atlas/block.png"));
-        LOGGER.info("Client initialization ended");
+        LOGGER.info(RENDER, "Client initialized");
     }
 
     private static void frame(int frameCount) {
@@ -123,17 +113,28 @@ public class GLMC4Client {
         shader.setMat4f("view", new Matrix4f().lookAt(
                 new Vector3f((float) (8.0f + 25.0F * Math.cos(t)), 10, (float) (8.0F - 25.0F * Math.cos(t - 4)))
                 , new Vector3f(8, 0, 8), new Vector3f(0, 1, 0)));
-        for (int x = -2; x < 3; x++) {
-            for (int z = -2; z < 3; z++) {
-                shader.setFloat("x", x * 16);
-                shader.setFloat("z", z * 16);
-                mesh.render();
+        if (chunkLock.tryLock()) {
+            for (Map.Entry<Long, Chunk> chunk : chunks.entrySet()) {
+                meshes.put(chunk.getKey(), new Mesh(mesh(chunk.getValue())));
             }
+            chunks.clear();
+            chunkLock.unlock();
+        }
+        for (Map.Entry<Long, Mesh> chunk : meshes.entrySet()) {
+            shader.setFloat("x", 16 * MathUtils.unpackFirst(chunk.getKey()));
+            shader.setFloat("z", 16 * MathUtils.unpackSecond(chunk.getKey()));
+            chunk.getValue().render();
         }
     }
 
     private static void end() {
-
+        LOGGER.info(RENDER, "Rendering thread ended. A socket crash after this point is perfectly normal and expected.");
+        try {
+            socket.close();
+        } catch (IOException ioException) {
+            LOGGER.fatal(SOCKET, "Somehow closing the socket threw an exception", ioException);
+        }
+        LOGGER.info(SOCKET, "Socket closed");
     }
 
     private static void runClient() {
@@ -149,7 +150,7 @@ public class GLMC4Client {
 
     public static void main(String[] args) {
         runSocket();
-//        runClient();
+        runClient();
     }
 
 }

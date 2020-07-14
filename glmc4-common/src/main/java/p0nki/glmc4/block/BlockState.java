@@ -1,6 +1,7 @@
 package p0nki.glmc4.block;
 
 import p0nki.glmc4.state.properties.Property;
+import p0nki.glmc4.utils.MathUtils;
 
 public class BlockState {
 
@@ -8,8 +9,8 @@ public class BlockState {
     private int meta;
 
     public BlockState(long value) {
-        this.id = (int) (value >> 32);
-        this.meta = (int) value;
+        this.id = MathUtils.unpackFirst(value);
+        this.meta = MathUtils.unpackSecond(value);
     }
 
     private BlockState(int id, int meta) {
@@ -46,7 +47,7 @@ public class BlockState {
     }
 
     public long toLong() {
-        return (((long) id) << 32) | (meta & 0xffffffffL);
+        return MathUtils.pack(id, meta);
     }
 
 }

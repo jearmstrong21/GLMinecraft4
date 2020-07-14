@@ -58,6 +58,7 @@ public class ClientConnection<L extends PacketListener<L>> {
         if (isLoopRunning)
             throw new UnsupportedOperationException("Cannot start ClientConnection that is already started");
         threadLoop = new Thread(() -> {
+            packetListener.onConnected();
             while (true) {
                 if (socket.isClosed()) {
                     break;
@@ -87,7 +88,6 @@ public class ClientConnection<L extends PacketListener<L>> {
             isLoopRunning = false;
         });
         isLoopRunning = true;
-        packetListener.onConnected();
         threadLoop.start();
     }
 

@@ -21,6 +21,11 @@ public class Chunk {
         }
     }
 
+    public BlockState getOrAir(int x, int y, int z) {
+        if (x < 0 || y < 0 || z < 0 || x >= 16 || y >= 256 || z >= 16) return Blocks.AIR.getDefaultState();
+        return new BlockState(data[index(x, y, z)]);
+    }
+
     private int index(int x, int y, int z) {
         return x + 16 * y + 256 * z;
     }

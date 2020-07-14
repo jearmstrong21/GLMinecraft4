@@ -3,7 +3,6 @@ package p0nki.glmc4.network.packet.clientbound;
 import p0nki.glmc4.player.ServerPlayer;
 import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.tag.ListTag;
-import p0nki.glmc4.utils.DataStreamUtils;
 import p0nki.glmc4.utils.TagUtils;
 
 import java.io.DataInput;
