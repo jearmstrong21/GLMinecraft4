@@ -31,6 +31,10 @@ public class BlockState {
         return this;
     }
 
+    public <T> T get(Property<T> property) {
+        return getBlock().getSchema().get(meta, property);
+    }
+
     @SuppressWarnings("unchecked")
     public BlockState withUnsafe(@SuppressWarnings("rawtypes") Property property, Object value) {
         meta = getBlock().getSchema().set(meta, property, value);

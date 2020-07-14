@@ -12,45 +12,45 @@ public abstract class BakedConstantSidedBlockRenderer extends BakedSidedBlockRen
         super(block);
     }
 
-    protected abstract AtlasPosition renderXmi();
+    protected abstract AtlasPosition xmiTexture(BlockState blockState);
 
-    protected abstract AtlasPosition renderXpl();
+    protected abstract AtlasPosition xplTexture(BlockState blockState);
 
-    protected abstract AtlasPosition renderYmi();
+    protected abstract AtlasPosition ymiTexture(BlockState blockState);
 
-    protected abstract AtlasPosition renderYpl();
+    protected abstract AtlasPosition yplTexture(BlockState blockState);
 
-    protected abstract AtlasPosition renderZmi();
+    protected abstract AtlasPosition zmiTexture(BlockState blockState);
 
-    protected abstract AtlasPosition renderZpl();
+    protected abstract AtlasPosition zplTexture(BlockState blockState);
 
     @Override
     protected MeshData renderXmi(BlockState blockState) {
-        return MeshData.chunk().addXmiQuad(0, 1, new Vector3f(0, 0, 0), renderXmi());
+        return MeshData.chunk().addXmiQuad(0, 1, new Vector3f(0, 0, 0), xmiTexture(blockState));
     }
 
     @Override
     protected MeshData renderXpl(BlockState blockState) {
-        return MeshData.chunk().addXplQuad(0, 1, new Vector3f(0, 0, 0), renderXpl());
+        return MeshData.chunk().addXplQuad(0, 1, new Vector3f(0, 0, 0), xplTexture(blockState));
     }
 
     @Override
     protected MeshData renderYmi(BlockState blockState) {
-        return MeshData.chunk().addYmiQuad(0, 1, new Vector3f(0, 0, 0), renderYmi());
+        return MeshData.chunk().addYmiQuad(0, 1, new Vector3f(0, 0, 0), ymiTexture(blockState));
     }
 
     @Override
     protected MeshData renderYpl(BlockState blockState) {
-        return MeshData.chunk().addYplQuad(0, 1, new Vector3f(0, 0, 0), renderYpl());
+        return MeshData.chunk().addYplQuad(0, 1, new Vector3f(0, 0, 0), yplTexture(blockState));
     }
 
     @Override
     protected MeshData renderZmi(BlockState blockState) {
-        return MeshData.chunk().addZmiQuad(0, 1, new Vector3f(0, 0, 0), renderZmi());
+        return MeshData.chunk().addZmiQuad(0, 1, new Vector3f(0, 0, 0), zmiTexture(blockState));
     }
 
     @Override
     protected MeshData renderZpl(BlockState blockState) {
-        return MeshData.chunk().addZplQuad(0, 1, new Vector3f(0, 0, 0), renderZpl());
+        return MeshData.chunk().addZplQuad(0, 1, new Vector3f(0, 0, 0), zplTexture(blockState));
     }
 }

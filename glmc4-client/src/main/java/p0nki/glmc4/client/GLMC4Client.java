@@ -71,7 +71,7 @@ public class GLMC4Client {
     }
 
     public static void onLoad(int x, int z, Chunk chunk) {
-        LOGGER.debug(SOCKET, "Chunk received {}, {}", x, z);
+        LOGGER.trace(SOCKET, "Chunk received {}, {}", x, z);
         chunkLock.lock();
         chunks.put(MathUtils.pack(x, z), chunk);
         chunkLock.unlock();
@@ -113,12 +113,12 @@ public class GLMC4Client {
         shader.setMat4f("perspective", new Matrix4f().perspective((float) Math.toRadians(80), 1.0F, 0.001F, 100));
         float t = MCWindow.time();
         shader.setMat4f("view", new Matrix4f().lookAt(
-                new Vector3f((float) (8.0f + 25.0F * Math.cos(t)), 10, (float) (8.0F - 25.0F * Math.cos(t - 4)))
-                , new Vector3f(8, 0, 8), new Vector3f(0, 1, 0)));
+                new Vector3f((float) (8.0f + 50.0F * Math.cos(t)), 30, (float) (8.0F - 50.0F * Math.cos(t - 4)))
+                , new Vector3f(0, 0, 0), new Vector3f(0, 1, 0)));
         if (chunkLock.tryLock()) {
             for (Map.Entry<Long, Chunk> chunk : chunks.entrySet()) {
                 meshes.put(chunk.getKey(), new Mesh(mesh(chunk.getValue())));
-                LOGGER.debug(RENDER, "Meshed chunk {}, {}", MathUtils.unpackFirst(chunk.getKey()), MathUtils.unpackSecond(chunk.getKey()));
+                LOGGER.trace(RENDER, "Meshed chunk {}, {}", MathUtils.unpackFirst(chunk.getKey()), MathUtils.unpackSecond(chunk.getKey()));
             }
             chunks.clear();
             chunkLock.unlock();

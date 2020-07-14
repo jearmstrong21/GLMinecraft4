@@ -6,12 +6,16 @@ import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.block.Chunk;
+import p0nki.glmc4.block.blocks.GrassBlock;
 import p0nki.glmc4.network.ClientConnection;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CChunkLoad;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CHello;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CPingRequest;
 import p0nki.glmc4.network.packet.serverbound.PacketC2SPingResponse;
 import p0nki.glmc4.network.packet.serverbound.ServerPacketListener;
+import p0nki.glmc4.utils.MathUtils;
+
+import java.util.Random;
 
 public class ServerPacketHandler implements ServerPacketListener {
 
@@ -35,7 +39,14 @@ public class ServerPacketHandler implements ServerPacketListener {
                 for (int y = 0; y <= h; y++) {
                     if (y < h - 4) c.set(x, y, z, Blocks.STONE.getDefaultState());
                     else if (y < h) c.set(x, y, z, Blocks.DIRT.getDefaultState());
-                    else c.set(x, y, z, Blocks.GRASS.getDefaultState());
+                    else {
+                        Random random = new Random(MathUtils.pack(rx, rz));
+                        random.nextFloat();
+                        random.nextFloat();
+                        random.nextFloat();
+                        random.nextFloat();
+                        c.set(x, y, z, Blocks.GRASS.getDefaultState().with(GrassBlock.SNOWED, random.nextBoolean()));
+                    }
                 }
             }
         }
