@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Configuration xmlns="http://logging.apache.org/log4j/2.0/config">
+    <ThresholdFilter level="Trace"/>
+    <Appenders>
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="%style{[%date]}{BLUE} %highlight{[%threadName/%level]} %style{(%logger{-2}/%marker)}{CYAN} %message%n%style{%throwable}{RED}"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="Trace">
+            <AppenderRef ref="STDOUT"/>
+        </Root>
+    </Loggers>
+</Configuration>

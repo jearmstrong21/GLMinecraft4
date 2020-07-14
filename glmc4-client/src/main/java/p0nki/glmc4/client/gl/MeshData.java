@@ -6,6 +6,7 @@ import p0nki.glmc4.client.assets.AtlasPosition;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class MeshData {
@@ -14,6 +15,10 @@ public class MeshData {
     private List<Integer> sizes;
     private List<Integer> tri;
     private int maxReferredVertex = 0;
+
+    public static MeshData chunk() {
+        return new MeshData().addBuffer(3).addBuffer(2);
+    }
 
     public MeshData() {
         data = new ArrayList<>();
@@ -37,84 +42,122 @@ public class MeshData {
         return tri;
     }
 
-    public void addBuffer(int size) {
+    public MeshData addBuffer(int size) {
         data.add(new ArrayList<>());
         sizes.add(size);
+        return this;
     }
 
-    public void appendBuffer(int buffer, List<Float> data) {
+    public MeshData offset3f(int buffer, float x, float y, float z) {
+        if (sizes.get(buffer) != 3) throw new AssertionError("Invalid buffer");
+        for (int i = 0; i < data.get(buffer).size(); i += 3) {
+            data.get(buffer).set(i, data.get(buffer).get(i) + x);
+            data.get(buffer).set(i + 1, data.get(buffer).get(i + 1) + y);
+            data.get(buffer).set(i + 2, data.get(buffer).get(i + 2) + z);
+        }
+        return this;
+    }
+
+    public MeshData append(MeshData other) {
+        Objects.requireNonNull(other);
+        if (other.data.size() != data.size()) throw new AssertionError("Invalid data");
+        for (int i = 0; i < other.data.size(); i++) {
+            if (sizes.get(i) != (int) other.sizes.get(i)) throw new AssertionError("Invalid data");
+        }
+        appendTriOffset(other.tri);
+        for (int i = 0; i < other.data.size(); i++) {
+            data.get(i).addAll(other.data.get(i));
+        }
+        return this;
+    }
+
+    public MeshData appendBuffer(int buffer, List<Float> data) {
         this.data.get(buffer).addAll(data);
+        return this;
     }
 
-    public void appendBuffer2f(int buffer, List<Vector2f> data) {
+    public MeshData appendBuffer2f(int buffer, List<Vector2f> data) {
         for (Vector2f v : data) {
             this.data.get(buffer).add(v.x);
             this.data.get(buffer).add(v.y);
         }
+        return this;
     }
 
-    public void addQuad(int buffer, Vector2f o, Vector2f a, Vector2f b) {
+    public MeshData addQuad(int buffer, Vector2f o, Vector2f a, Vector2f b) {
         appendBuffer2f(buffer, List.of(o, new Vector2f(o).add(a), new Vector2f(o).add(b), new Vector2f(o).add(a).add(b)));
+        return this;
     }
 
-    public void addQuad(int buffer, AtlasPosition atlasPosition) {
+    public MeshData addQuad(int buffer, AtlasPosition atlasPosition) {
         addQuad(buffer, new Vector2f(atlasPosition.x, atlasPosition.y), new Vector2f(atlasPosition.w, 0), new Vector2f(0, atlasPosition.h));
+        return this;
     }
 
-    public void addXmiQuad(int posBuffer, int uvBuffer, Vector3f origin, AtlasPosition atlasPosition) {
+    public MeshData addXmiQuad(int posBuffer, int uvBuffer, Vector3f origin, AtlasPosition atlasPosition) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
         addQuad(posBuffer, new Vector3f(0, 1, 0).add(origin), new Vector3f(0, 0, 1), new Vector3f(0, -1, 0));
         addQuad(uvBuffer, atlasPosition);
+        return this;
     }
 
-    public void addXplQuad(int posBuffer, int uvBuffer, Vector3f origin, AtlasPosition atlasPosition) {
+    public MeshData addXplQuad(int posBuffer, int uvBuffer, Vector3f origin, AtlasPosition atlasPosition) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
         addQuad(posBuffer, new Vector3f(1, 1, 1).add(origin), new Vector3f(0, 0, -1), new Vector3f(0, -1, 0));
         addQuad(uvBuffer, atlasPosition);
+        return this;
     }
 
-    public void addYmiQuad(int posBuffer, int uvBuffer, Vector3f origin, AtlasPosition atlasPosition) {
+    public MeshData addYmiQuad(int posBuffer, int uvBuffer, Vector3f origin, AtlasPosition atlasPosition) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
         addQuad(posBuffer, new Vector3f(0, 0, 0).add(origin), new Vector3f(1, 0, 0), new Vector3f(0, 0, 1));
         addQuad(uvBuffer, atlasPosition);
+        return this;
     }
 
-    public void addYplQuad(int posBuffer, int uvBuffer, Vector3f origin, AtlasPosition atlasPosition) {
+    public MeshData addYplQuad(int posBuffer, int uvBuffer, Vector3f origin, AtlasPosition atlasPosition) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
         addQuad(posBuffer, new Vector3f(0, 1, 0).add(origin), new Vector3f(1, 0, 0), new Vector3f(0, 0, 1));
         addQuad(uvBuffer, atlasPosition);
+        return this;
     }
 
-    public void addZmiQuad(int posBuffer, int uvBuffer, Vector3f origin, AtlasPosition atlasPosition) {
+    public MeshData addZmiQuad(int posBuffer, int uvBuffer, Vector3f origin, AtlasPosition atlasPosition) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
         addQuad(posBuffer, new Vector3f(1, 1, 0).add(origin), new Vector3f(-1, 0, 0), new Vector3f(0, -1, 0));
         addQuad(uvBuffer, atlasPosition);
+        return this;
     }
 
-    public void addZplQuad(int posBuffer, int uvBuffer, Vector3f origin, AtlasPosition atlasPosition) {
+    public MeshData addZplQuad(int posBuffer, int uvBuffer, Vector3f origin, AtlasPosition atlasPosition) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
         addQuad(posBuffer, new Vector3f(0, 1, 1).add(origin), new Vector3f(1, 0, 0), new Vector3f(0, -1, 0));
         addQuad(uvBuffer, atlasPosition);
+        return this;
     }
 
-    public void addQuad(int buffer, Vector3f o, Vector3f a, Vector3f b) {
+    public MeshData addQuad(int buffer, Vector3f o, Vector3f a, Vector3f b) {
         appendBuffer3f(buffer, List.of(o, new Vector3f(o).add(a), new Vector3f(o).add(b), new Vector3f(o).add(a).add(b)));
+        return this;
     }
 
-    public void appendBuffer3f(int buffer, List<Vector3f> data) {
+    public MeshData appendBuffer3f(int buffer, List<Vector3f> data) {
         for (Vector3f v : data) {
             this.data.get(buffer).add(v.x);
             this.data.get(buffer).add(v.y);
             this.data.get(buffer).add(v.z);
         }
+        return this;
     }
 
-    public void appendTri(List<Integer> tri) {
+    public MeshData appendTri(List<Integer> tri) {
         this.tri.addAll(tri);
         tri.forEach(x -> maxReferredVertex = Math.max(x + 1, maxReferredVertex));
+        return this;
     }
 
-    public void appendTriOffset(List<Integer> tri) {
+    public MeshData appendTriOffset(List<Integer> tri) {
         appendTri(tri.stream().map(x -> x + maxReferredVertex).collect(Collectors.toList()));
+        return this;
     }
 }

@@ -1,9 +1,10 @@
 package p0nki.glmc4.utils;
 
+import org.apache.logging.log4j.MarkerManager;
 import p0nki.glmc4.tag.StringTag;
 import p0nki.glmc4.tag.TagEquivalent;
 
-public class Identifier implements TagEquivalent<Identifier, StringTag> {
+public class Identifier extends MarkerManager.Log4jMarker implements TagEquivalent<Identifier, StringTag> {
 
     public static boolean isValidIdentifier(String id) {
         String[] split = id.split(":");
@@ -28,6 +29,7 @@ public class Identifier implements TagEquivalent<Identifier, StringTag> {
     private String path;
 
     public Identifier(String namespace, String path) {
+        super(namespace + ":" + path);
         assertValidPortion(namespace);
         assertValidPortion(path);
         this.namespace = namespace;
@@ -35,6 +37,7 @@ public class Identifier implements TagEquivalent<Identifier, StringTag> {
     }
 
     public Identifier(String id) {
+        super(id);
         String[] split = id.split(":");
         if (split.length != 2) throw new IllegalArgumentException(id);
         assertValidPortion(split[0]);

@@ -1,6 +1,8 @@
 package p0nki.glmc4.client.assets;
 
-public class AtlasPosition {
+import p0nki.glmc4.utils.Identifier;
+
+public final class AtlasPosition {
 
     public float x;
     public float y;
@@ -12,6 +14,10 @@ public class AtlasPosition {
         this.y = (float) y / th;
         this.w = (float) w / tw;
         this.h = (float) h / th;
+    }
+
+    public static AtlasPosition block(Identifier identifier) {
+        return TextureAssembler.get(new Identifier("minecraft:block")).getTexture(identifier);
     }
 
 }

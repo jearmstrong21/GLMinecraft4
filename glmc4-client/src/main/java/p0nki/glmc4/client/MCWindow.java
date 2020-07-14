@@ -1,5 +1,9 @@
 package p0nki.glmc4.client;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
@@ -9,6 +13,9 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
 public class MCWindow {
+
+    private final static Logger LOGGER = LogManager.getLogger();
+    private final static Marker OPENGL = MarkerManager.getMarker("OpenGL");
 
     private MCWindow() {
 
@@ -47,8 +54,10 @@ public class MCWindow {
         glfwSwapInterval(0);
         glfwShowWindow(ptr);
         GL.createCapabilities();
-        System.out.println(glGetString(GL_RENDERER));
-        System.out.println(glGetString(GL_VERSION));
+        LOGGER.info(OPENGL, "GLFW Version: {}", glfwGetVersionString());
+        LOGGER.info(OPENGL, "OpenGL Vendor: {}", glGetString(GL_VENDOR));
+        LOGGER.info(OPENGL, "OpenGL Version: {}", glGetString(GL_VERSION));
+        LOGGER.info(OPENGL, "OpenGL Renderer: {}", glGetString(GL_RENDERER));
         int framecount = 0;
         initializeCallback.run();
         double lastTime = 0;

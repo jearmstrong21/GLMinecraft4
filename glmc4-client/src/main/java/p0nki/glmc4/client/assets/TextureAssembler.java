@@ -1,5 +1,7 @@
 package p0nki.glmc4.client.assets;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import p0nki.glmc4.utils.Identifier;
 
 import javax.imageio.ImageIO;
@@ -12,6 +14,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TextureAssembler {
+
+    private static final Map<Identifier, TextureAssembler> assemblers = new HashMap<>();
+    private static final Logger LOGGER = LogManager.getLogger();
+
+    static {
+        get(new Identifier("minecraft:block"));
+    }
 
     private static Map<Identifier, File> listFiles(Identifier identifier, String directory) {
         File file = new File(directory);
@@ -114,12 +123,9 @@ public class TextureAssembler {
         throw new AssertionError(identifier.toString());
     }
 
-    private final String directory;
-
-    private TextureAssembler(Identifier identifier, String directory) {
+    private TextureAssembler(Identifier identifier) {
         long start = System.currentTimeMillis();
-        this.directory = directory;
-        identifiers = listFiles(new Identifier(identifier.getNamespace(), ""), new ResourceLocation(directory).asFile().getAbsolutePath());
+        identifiers = listFiles(new Identifier(identifier.getNamespace(), ""), new ResourceLocation(identifier.getPath()).asFile().getAbsolutePath());
         images = new HashMap<>();
         for (Identifier s : identifiers.keySet()) {
             images.put(s, read(s));
@@ -141,16 +147,17 @@ public class TextureAssembler {
                 image.setRGB(x, y, data[x][y]);
             }
         }
+        //noinspection ResultOfMethodCallIgnored
         new LocalLocation("atlas/").asFile().mkdirs();
         try {
-            ImageIO.write(image, "png", new LocalLocation("atlas/" + directory + ".png").asFile());
+            ImageIO.write(image, "png", new LocalLocation("atlas/" + identifier.getPath() + ".png").asFile());
         } catch (IOException e) {
             throw new AssertionError(e);
         }
         long end = System.currentTimeMillis();
         PrintWriter writer;
         try {
-            writer = new PrintWriter(new LocalLocation("atlas/" + directory + ".txt").asFile());
+            writer = new PrintWriter(new LocalLocation("atlas/" + identifier.getPath() + ".txt").asFile());
         } catch (FileNotFoundException e) {
             throw new AssertionError(e);
         }
@@ -161,18 +168,17 @@ public class TextureAssembler {
         writer.println("-------------");
         images.forEach((key, value) -> writer.println(String.format("%-64s %-9s %s", key, value.w + "x" + value.h, value.path)));
         writer.close();
+        LOGGER.info(identifier, "Created texture atlas of size {}x{} in {}ms", width, height, end - start);
     }
-
-    private static final Map<Identifier, TextureAssembler> assemblers = new HashMap<>();
 
     public AtlasPosition getTexture(Identifier identifier) {
         Image img = images.get(identifier);
         return new AtlasPosition(img.x, img.y, img.w, img.h, width, height);
     }
 
-    public static TextureAssembler get(Identifier identifier, String directory) {
+    public static TextureAssembler get(Identifier identifier) {
         if (!assemblers.containsKey(identifier))
-            assemblers.put(identifier, new TextureAssembler(identifier, directory));
+            assemblers.put(identifier, new TextureAssembler(identifier));
         return assemblers.get(identifier);
     }
 

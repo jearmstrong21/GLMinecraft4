@@ -1,52 +1,58 @@
 package p0nki.glmc4.client;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import p0nki.glmc4.client.assets.AtlasPosition;
+import p0nki.glmc4.block.BlockState;
+import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.client.assets.LocalLocation;
-import p0nki.glmc4.client.assets.TextureAssembler;
 import p0nki.glmc4.client.gl.Mesh;
 import p0nki.glmc4.client.gl.MeshData;
 import p0nki.glmc4.client.gl.Shader;
 import p0nki.glmc4.client.gl.Texture;
+import p0nki.glmc4.client.render.block.BlockRenderContext;
+import p0nki.glmc4.client.render.block.BlockRenderer;
+import p0nki.glmc4.client.render.block.BlockRenderers;
 import p0nki.glmc4.network.ClientConnection;
 import p0nki.glmc4.network.packet.NetworkProtocol;
 import p0nki.glmc4.network.packet.PacketType;
 import p0nki.glmc4.network.packet.clientbound.ClientPacketListener;
-import p0nki.glmc4.registry.Registry;
-import p0nki.glmc4.state.block.Blocks;
-import p0nki.glmc4.state.block.blocks.CactusBlock;
-import p0nki.glmc4.state.properties.BooleanProperty;
-import p0nki.glmc4.state.properties.IntProperty;
-import p0nki.glmc4.state.properties.PropertySchema;
 import p0nki.glmc4.utils.Identifier;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.HashSet;
+import java.util.Set;
 
 public class GLMC4Client {
+
+    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Marker SOCKET = MarkerManager.getMarker("SOCKET");
 
     private static void runSocket() {
         Socket socket;
         try {
             socket = new Socket("localhost", 3333);
         } catch (IOException ioException) {
-            System.out.println("Connection refused");
+            LOGGER.fatal(SOCKET, "Connection refused", ioException);
             return;
         }
-        System.out.println("Socket connected");
+        LOGGER.info(SOCKET, "Socket connected");
         NetworkProtocol networkProtocol = new NetworkProtocol();
         ClientConnection<ClientPacketListener> connection;
         try {
             connection = new ClientConnection<>(socket, networkProtocol, PacketType.CLIENTBOUND, PacketType.SERVERBOUND);
         } catch (IOException ioException) {
-            System.out.println("Error created connection object");
+            LOGGER.info(SOCKET, "Error creating connection", ioException);
             return;
         }
         ClientPacketListener packetListener = new ClientPacketListener(connection);
         connection.setPacketListener(packetListener);
         connection.startLoop();
-        System.out.println("Listening on localhost:3333");
+        LOGGER.info(SOCKET, "Connected to localhost:3333");
     }
 
     private static Mesh mesh;
@@ -54,55 +60,59 @@ public class GLMC4Client {
     private static Texture texture;
 
     private static void initialize() {
-        TextureAssembler BLOCK = TextureAssembler.get(new Identifier("minecraft:block"), "block");
-        boolean[][][] terrain = new boolean[16][256][16];
+        BlockState[][][] terrain = new BlockState[16][256][16];
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
                 int h = (x + z) / 4;
                 for (int y = 0; y < 256; y++) {
-                    terrain[x][y][z] = y < h;
+                    if (y < h - 4) terrain[x][y][z] = Blocks.STONE.getDefaultState();
+                    else if (y < h) terrain[x][y][z] = Blocks.DIRT.getDefaultState();
+                    else if (y == h) terrain[x][y][z] = Blocks.GRASS.getDefaultState();
+                    else terrain[x][y][z] = Blocks.AIR.getDefaultState();
                 }
             }
         }
+        LOGGER.info("16x256x16 chunk data created");
         shader = new Shader("chunk");
-        MeshData data = new MeshData();
+        MeshData data = MeshData.chunk();
 
-        data.addBuffer(3);
-        data.addBuffer(2);
-
-        AtlasPosition SIDE = BLOCK.getTexture(new Identifier("minecraft:grass_side"));
-        AtlasPosition TOP = BLOCK.getTexture(new Identifier("minecraft:grass_top"));
-        AtlasPosition BOTTOM = BLOCK.getTexture(new Identifier("minecraft:dirt"));
-        final boolean d = true;
+        Set<Identifier> warnedIdentifiers = new HashSet<>();
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 256; y++) {
                 for (int z = 0; z < 16; z++) {
-                    if (!terrain[x][y][z]) continue;
-                    boolean xmi = d;
-                    boolean xpl = d;
-                    boolean ymi = d;
-                    boolean ypl = d;
-                    boolean zmi = d;
-                    boolean zpl = d;
-                    if (x > 0) xmi = !terrain[x - 1][y][z];
-                    if (x < 15) xpl = !terrain[x + 1][y][z];
-                    if (y > 0) ymi = !terrain[x][y - 1][z];
-                    if (y < 15) ypl = !terrain[x][y + 1][z];
-                    if (z > 0) zmi = !terrain[x][y][z - 1];
-                    if (z < 15) zpl = !terrain[x][y][z + 1];
-                    Vector3f o = new Vector3f(x, y, z);
-                    if (xmi) data.addXmiQuad(0, 1, o, SIDE);
-                    if (xpl) data.addXplQuad(0, 1, o, SIDE);
-                    if (ymi) data.addYmiQuad(0, 1, o, BOTTOM);
-                    if (ypl) data.addYplQuad(0, 1, o, TOP);
-                    if (zmi) data.addZmiQuad(0, 1, o, SIDE);
-                    if (zpl) data.addZplQuad(0, 1, o, SIDE);
+                    if (terrain[x][y][z].getBlock() == Blocks.AIR) continue;
+                    BlockState state = terrain[x][y][z];
+                    BlockState xmi = Blocks.AIR.getDefaultState();
+                    BlockState xpl = Blocks.AIR.getDefaultState();
+                    BlockState ymi = Blocks.AIR.getDefaultState();
+                    BlockState ypl = Blocks.AIR.getDefaultState();
+                    BlockState zmi = Blocks.AIR.getDefaultState();
+                    BlockState zpl = Blocks.AIR.getDefaultState();
+                    if (x > 0) xmi = terrain[x - 1][y][z];
+                    if (x < 15) xpl = terrain[x + 1][y][z];
+                    if (y > 0) ymi = terrain[x][y - 1][z];
+                    if (y < 255) ypl = terrain[x][y + 1][z];
+                    if (z > 0) zmi = terrain[x][y][z - 1];
+                    if (z < 15) zpl = terrain[x][y][z + 1];
+                    Identifier identifier = Blocks.REGISTRY.get(state.getBlock()).getKey();
+                    if (BlockRenderers.REGISTRY.hasKey(identifier)) {
+                        BlockRenderer renderer = BlockRenderers.REGISTRY.get(identifier).getValue();
+                        BlockRenderContext context = new BlockRenderContext(xmi, xpl, ymi, ypl, zmi, zpl, state);
+                        MeshData rendered = renderer.render(context);
+                        rendered.offset3f(0, x, y, z);
+                        data.append(rendered);
+                    } else if (!warnedIdentifiers.contains(identifier)) {
+                        System.err.printf("[WARNING] No renderer found for %s. Will not warn again.%n", identifier);
+                        warnedIdentifiers.add(identifier);
+                    }
                 }
             }
         }
+        LOGGER.info("Mesh created");
 
         mesh = new Mesh(data);
         texture = new Texture(new LocalLocation("atlas/block.png"));
+        LOGGER.info("Client initialization ended");
     }
 
     private static void frame(int frameCount) {
@@ -137,17 +147,9 @@ public class GLMC4Client {
         }
     }
 
-    private static String str(int x) {
-        StringBuilder s = new StringBuilder();
-        for (int i = 31; i >= 0; i--) s.append(1 & (x >> i));
-        return s.toString();
-    }
-
     public static void main(String[] args) {
-//        runSocket();
+        runSocket();
 //        runClient();
-        Blocks.CACTUS.getStates().forEach(System.out::println);
-        System.out.println(Blocks.CACTUS.getDefaultState());
     }
 
 }

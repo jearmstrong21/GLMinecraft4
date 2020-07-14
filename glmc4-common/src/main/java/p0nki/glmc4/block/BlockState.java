@@ -1,4 +1,4 @@
-package p0nki.glmc4.state.block;
+package p0nki.glmc4.block;
 
 import p0nki.glmc4.state.properties.Property;
 
@@ -12,9 +12,13 @@ public class BlockState {
         this.meta = (int) value;
     }
 
-    public BlockState(int id, int meta) {
+    private BlockState(int id, int meta) {
         this.id = id;
         this.meta = meta;
+    }
+
+    public int getMeta() {
+        return meta;
     }
 
     public BlockState copy() {
@@ -22,19 +26,23 @@ public class BlockState {
     }
 
     public <T> BlockState with(Property<T> property, T value) {
-        meta = Blocks.REGISTRY.get(id).getValue().getSchema().set(meta, property, value);
+        meta = getBlock().getSchema().set(meta, property, value);
         return this;
     }
 
     @SuppressWarnings("unchecked")
     public BlockState withUnsafe(@SuppressWarnings("rawtypes") Property property, Object value) {
-        meta = Blocks.REGISTRY.get(id).getValue().getSchema().set(meta, property, value);
+        meta = getBlock().getSchema().set(meta, property, value);
         return this;
     }
 
     @Override
     public String toString() {
         return Blocks.REGISTRY.get(id).getKey() + Blocks.REGISTRY.get(id).getValue().getSchema().toString(meta);
+    }
+
+    public Block getBlock() {
+        return Blocks.REGISTRY.get(id).getValue();
     }
 
     public long toLong() {

@@ -1,12 +1,18 @@
-package p0nki.glmc4.state.block;
+package p0nki.glmc4.block;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import p0nki.glmc4.registry.AfterRegisterCallback;
 import p0nki.glmc4.state.properties.PropertySchema;
+import p0nki.glmc4.utils.Identifier;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class Block {
+public abstract class Block implements AfterRegisterCallback {
+
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private final PropertySchema schema;
     private List<BlockState> states;
@@ -16,7 +22,10 @@ public abstract class Block {
         initProperties();
     }
 
-    final void afterRegister() {
+    @Override
+    public void onAfterRegister(Identifier identifier, int index) {
+        // This must be onAfterRegister since getDefaultState() requires
+        //  that the block is already registered and that the numerical ID known
         states = new ArrayList<>();
         schema.forEach(objects -> {
             BlockState state = getDefaultState();
@@ -25,6 +34,7 @@ public abstract class Block {
             }
             states.add(state);
         });
+        LOGGER.debug(identifier, "{} states, {} properties", states.size(), schema.getProperties().size());
         states = Collections.unmodifiableList(states);
     }
 
@@ -37,7 +47,7 @@ public abstract class Block {
     }
 
     public BlockState getDefaultState() {
-        return new BlockState(Blocks.REGISTRY.get(this).getIndex(), 0);
+        return new BlockState((long) Blocks.REGISTRY.get(this).getIndex() << 32);
     }
 
     public List<BlockState> getStates() {

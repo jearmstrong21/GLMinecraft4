@@ -11,11 +11,15 @@ allprojects {
 
 	dependencies {
 		compileJava {
-			compile 'com.google.code.findbugs:jsr305:3.0.2'
-			compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
-			compile "org.joml:joml:1.9.24"
-			implementation("com.google.guava:guava:29.0-jre")
+			implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
+			implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
+			implementation group: 'org.joml', name: 'joml', version: '1.9.24'
+			implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.3'
+			implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.3'
+			implementation group: 'com.google.guava', name: 'guava', version: '29.0-jre'
 		}
 	}
+
+	sourceSets.main.resources.srcDirs += "../src/main/resources"
 
 }

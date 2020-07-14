@@ -1,5 +1,9 @@
 package p0nki.glmc4.server;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
 import p0nki.glmc4.network.ClientConnection;
 import p0nki.glmc4.network.packet.clientbound.PacketS2C;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CChatMessage;
@@ -12,6 +16,9 @@ import p0nki.glmc4.utils.Words;
 import java.util.*;
 
 public class MinecraftServer {
+
+    private static Logger LOGGER = LogManager.getLogger();
+    private static Marker CHAT = MarkerManager.getMarker("CHAT");
 
     public static MinecraftServer INSTANCE = null;
 
@@ -50,7 +57,7 @@ public class MinecraftServer {
     }
 
     public void writeGlobalChatMessage(String source, String message) {
-        System.out.println(String.format("GLOBAL CHAT MESSAGE <%s> %s", source, message));
+        LOGGER.info(CHAT, "<{}> {}", source, message);
         writeAll(new PacketS2CChatMessage(source, message));
     }
 

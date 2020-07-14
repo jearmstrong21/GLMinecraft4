@@ -23,6 +23,7 @@ public class NetworkProtocol {
         register(PacketS2CPingRequest.class, PacketS2CPingRequest::new);
         register(PacketS2CPlayerJoin.class, PacketS2CPlayerJoin::new);
         register(PacketS2CPlayerLeave.class, PacketS2CPlayerLeave::new);
+        register(PacketS2CChunkLoad.class, PacketS2CChunkLoad::new);
 
         //C2S
         register(PacketC2SPingResponse.class, PacketC2SPingResponse::new);

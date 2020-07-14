@@ -1,10 +1,21 @@
 package p0nki.glmc4.network.packet.clientbound;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
 import p0nki.glmc4.network.ClientConnection;
 import p0nki.glmc4.network.packet.PacketListener;
 import p0nki.glmc4.network.packet.serverbound.PacketC2SPingResponse;
+import p0nki.glmc4.player.ServerPlayer;
+
+import java.util.stream.Collectors;
 
 public class ClientPacketListener implements PacketListener<ClientPacketListener> {
+
+    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Marker CHAT = MarkerManager.getMarker("CHAT");
+    private static final Marker PLAYERLIST = MarkerManager.getMarker("PLAYERLIST");
 
     private final ClientConnection<ClientPacketListener> connection;
 
@@ -14,7 +25,7 @@ public class ClientPacketListener implements PacketListener<ClientPacketListener
 
     @Override
     public void onConnected() {
-        System.out.println("CLIENT CONNECTED TO SERVER");
+        LOGGER.info("Connected to server");
     }
 
     public void onPingRequest(PacketS2CPingRequest packet) {
@@ -22,26 +33,30 @@ public class ClientPacketListener implements PacketListener<ClientPacketListener
     }
 
     public void onPlayerLeave(PacketS2CPlayerLeave packet) {
-        System.out.println("ON PLAYER LEAVE. "+packet.getId());
+        LOGGER.info(PLAYERLIST, "Player left: {}", packet.getId());
+    }
+
+    public void onChunkLoad(PacketS2CChunkLoad packet) {
+        LOGGER.info("Chunk load {}, {}", packet.getX(), packet.getZ());
     }
 
     public void onHello(PacketS2CHello packet) {
         connection.setPlayer(packet.getYourPlayer());
-        System.out.println("YOUR PLAYER IS " + packet.getYourPlayer().getId() + ":" + packet.getYourPlayer().getName());
-        packet.getAllPlayers().forEach(player -> System.out.println("Current players: " + player));
+        LOGGER.info(PLAYERLIST, "Your player is {}", packet.getYourPlayer().toString());
+        LOGGER.info(PLAYERLIST, "Currently logged in players: {}", packet.getAllPlayers().stream().map(ServerPlayer::toString).collect(Collectors.joining(", ")));
     }
 
     public void onPlayerJoin(PacketS2CPlayerJoin packet) {
-        System.out.println("ON PLAYER JOINED. " + packet.getPlayer().toString());
+        LOGGER.info(PLAYERLIST, "Player joined: {}", packet.getPlayer());
     }
 
     @Override
     public void onDisconnected(String reason) {
-        System.out.println("Disconnected " + reason);
+        LOGGER.fatal("Disconnected: {}", reason);
     }
 
     public void onChatMessage(PacketS2CChatMessage chatMessage) {
-        System.out.println(String.format("CHAT MESSAGE <%s> %s", chatMessage.getSource(), chatMessage.getMessage()));
+        LOGGER.info(CHAT, "<{}> {}", chatMessage.getSource(), chatMessage.getMessage());
     }
 
     @Override

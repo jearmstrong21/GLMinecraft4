@@ -1,11 +1,16 @@
 package p0nki.glmc4.registry;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
 import p0nki.glmc4.utils.Identifier;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 public class Registry<T> {
+
+    private final static Logger LOGGER = LogManager.getLogger();
 
     public static final class Entry<T> {
         private final Identifier identifier;
@@ -31,23 +36,35 @@ public class Registry<T> {
         }
     }
 
+    private final String name;
     private final Map<Identifier, Entry<T>> identifierMap;
     private final Map<T, Entry<T>> valueMap;
     private final List<Entry<T>> entries;
+    private final Marker marker;
 
-    public Registry() {
+    public Registry(String name) {
+        this.name = name;
+        marker = MarkerManager.getMarker(name);
         identifierMap = new HashMap<>();
         valueMap = new HashMap<>();
         entries = new ArrayList<>();
     }
 
-    public void register(Identifier identifier, T value, Consumer<Entry<T>> afterRegister) {
+    private Entry<T> internalRegister(Identifier identifier, T value) {
         if (identifierMap.containsKey(identifier)) throw new AssertionError(identifier);
         Entry<T> entry = new Entry<>(identifier, value, entries.size());
         identifierMap.put(identifier, entry);
         valueMap.put(value, entry);
         entries.add(entry);
-        afterRegister.accept(entry);
+        return entry;
+    }
+
+    public void register(Identifier identifier, T value) {
+        if (value instanceof AfterRegisterCallback) {
+            ((AfterRegisterCallback) value).onAfterRegister(identifier, internalRegister(identifier, value).getIndex());
+        } else {
+            internalRegister(identifier, value);
+        }
     }
 
     public void assertHasKey(Identifier identifier) {
