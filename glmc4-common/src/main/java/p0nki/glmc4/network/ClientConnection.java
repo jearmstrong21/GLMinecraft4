@@ -13,6 +13,8 @@ import java.net.Socket;
 
 public class ClientConnection<L extends PacketListener<L>> {
 
+    private final static String DEBUG_STR = "Aa0Aa1Aa2Aa3Aa4Aa5Aa6Aa7Aa8Aa9Ab0Ab1Ab2Ab3Ab4Ab5Ab6Ab7Ab8Ab9Ac0Ac1Ac2Ac3Ac4Ac5Ac6Ac7Ac8Ac9Ad0Ad1Ad2A";
+
     private final Socket socket;
     private final DataOutput output;
     private final DataInput input;
@@ -74,10 +76,10 @@ public class ClientConnection<L extends PacketListener<L>> {
                 if (packet.getType().matches(readType)) {
                     try {
                         packet.read(input);
-                        byte[] b = new byte["Aa0Aa1Aa2Aa3Aa4Aa5Aa6Aa7Aa8Aa9Ab0Ab1Ab2Ab3Ab4Ab5Ab6Ab7Ab8Ab9Ac0Ac1Ac2Ac3Ac4Ac5Ac6Ac7Ac8Ac9Ad0Ad1Ad2A".length()];
+                        byte[] b = new byte[DEBUG_STR.length()];
                         input.readFully(b);
-                        if (!new String(b).equals("Aa0Aa1Aa2Aa3Aa4Aa5Aa6Aa7Aa8Aa9Ab0Ab1Ab2Ab3Ab4Ab5Ab6Ab7Ab8Ab9Ac0Ac1Ac2Ac3Ac4Ac5Ac6Ac7Ac8Ac9Ad0Ad1Ad2A")) {
-                            throw new AssertionError(String.format("Expected 1) but got 2)\n1) %s\n2) %s", "Aa0Aa1Aa2Aa3Aa4Aa5Aa6Aa7Aa8Aa9Ab0Ab1Ab2Ab3Ab4Ab5Ab6Ab7Ab8Ab9Ac0Ac1Ac2Ac3Ac4Ac5Ac6Ac7Ac8Ac9Ad0Ad1Ad2A", new String(b)));
+                        if (!new String(b).equals(DEBUG_STR)) {
+                            throw new AssertionError(String.format("Expected 1) but got 2)\n1) %s\n2) %s", DEBUG_STR, new String(b)));
                         }
                     } catch (IOException e) {
                         break;
@@ -121,7 +123,7 @@ public class ClientConnection<L extends PacketListener<L>> {
             }
             try {
                 packet.write(output);
-                output.writeBytes("Aa0Aa1Aa2Aa3Aa4Aa5Aa6Aa7Aa8Aa9Ab0Ab1Ab2Ab3Ab4Ab5Ab6Ab7Ab8Ab9Ac0Ac1Ac2Ac3Ac4Ac5Ac6Ac7Ac8Ac9Ad0Ad1Ad2A");
+                output.writeBytes(DEBUG_STR);
             } catch (IOException e) {
                 if (packet.isWriteErrorSkippable()) return;
                 disconnect();
