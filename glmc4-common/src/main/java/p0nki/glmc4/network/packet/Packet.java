@@ -1,14 +1,13 @@
 package p0nki.glmc4.network.packet;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
+import p0nki.glmc4.network.PacketReadBuf;
+import p0nki.glmc4.network.PacketWriteBuf;
 
 public interface Packet<L extends PacketListener<L>> {
 
-    void read(DataInput input) throws IOException;
+    void read(PacketReadBuf input);
 
-    void write(DataOutput output) throws IOException;
+    void write(PacketWriteBuf output);
 
     void apply(L listener);
 

@@ -1,10 +1,9 @@
 package p0nki.glmc4.tag;
 
-import java.io.DataInput;
-import java.io.IOException;
+import p0nki.glmc4.network.PacketReadBuf;
 
 public interface TagReader<T extends Tag<T>> {
 
-    T read(DataInput input) throws IOException;
+    T read(PacketReadBuf input);
 
 }

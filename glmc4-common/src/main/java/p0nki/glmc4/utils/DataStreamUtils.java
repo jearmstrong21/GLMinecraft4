@@ -1,11 +1,10 @@
 package p0nki.glmc4.utils;
 
+import p0nki.glmc4.network.PacketReadBuf;
+import p0nki.glmc4.network.PacketWriteBuf;
 import p0nki.glmc4.tag.Tag;
 
 import javax.annotation.Nullable;
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
 
 public class DataStreamUtils {
 
@@ -13,23 +12,8 @@ public class DataStreamUtils {
 
     }
 
-    public static byte[] readBytes(DataInput input, int count) throws IOException {
-        byte[] value = new byte[count];
-        input.readFully(value);
-        return value;
-    }
-
-    public static void writeString(DataOutput output, String value) throws IOException {
-        output.writeInt(value.length());
-        output.writeBytes(value);
-    }
-
-    public static String readString(DataInput input) throws IOException {
-        return new String(readBytes(input, input.readInt()));
-    }
-
     @Nullable
-    public static Tag<?> readTag(DataInput input) throws IOException {
+    public static Tag<?> readTag(PacketReadBuf input) {
         byte type = input.readByte();
         if (Tag.isValidTag(type)) {
             return Tag.getReader(type).read(input);
@@ -38,7 +22,7 @@ public class DataStreamUtils {
         }
     }
 
-    public static void writeTag(DataOutput output, Tag<?> tag) throws IOException {
+    public static void writeTag(PacketWriteBuf output, Tag<?> tag) {
         output.writeByte(tag.type()); // TODO MAKE THIS A WRITE_BYTE
         tag.write(output);
     }

@@ -1,7 +1,7 @@
 package p0nki.glmc4.tag;
 
-import java.io.DataOutput;
-import java.io.IOException;
+import p0nki.glmc4.network.PacketWriteBuf;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -146,7 +146,7 @@ public interface Tag<T extends Tag<T>> extends ToTag<T> {
         }
     }
 
-    void write(DataOutput output) throws IOException;
+    void write(PacketWriteBuf output);
 
     TagReader<T> reader();
 

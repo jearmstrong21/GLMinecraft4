@@ -1,13 +1,12 @@
 package p0nki.glmc4.network.packet.clientbound;
 
+import p0nki.glmc4.network.PacketReadBuf;
+import p0nki.glmc4.network.PacketWriteBuf;
 import p0nki.glmc4.server.ServerPlayer;
 import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.tag.ListTag;
 import p0nki.glmc4.utils.TagUtils;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
 import java.util.List;
 
 public class PacketS2CHello extends PacketS2C {
@@ -33,13 +32,13 @@ public class PacketS2CHello extends PacketS2C {
     }
 
     @Override
-    public void read(DataInput input) throws IOException {
+    public void read(PacketReadBuf input) {
         yourPlayer = new ServerPlayer().fromTag(CompoundTag.READER.read(input));
         allPlayers = TagUtils.fromList(ListTag.READER.read(input), ServerPlayer::new);
     }
 
     @Override
-    public void write(DataOutput output) throws IOException {
+    public void write(PacketWriteBuf output) {
         yourPlayer.toTag().write(output);
         TagUtils.toList(allPlayers).write(output);
     }

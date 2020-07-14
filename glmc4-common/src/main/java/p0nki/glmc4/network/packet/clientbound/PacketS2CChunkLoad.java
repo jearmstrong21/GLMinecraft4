@@ -1,10 +1,8 @@
 package p0nki.glmc4.network.packet.clientbound;
 
 import p0nki.glmc4.block.Chunk;
-
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
+import p0nki.glmc4.network.PacketReadBuf;
+import p0nki.glmc4.network.PacketWriteBuf;
 
 public class PacketS2CChunkLoad extends PacketS2C {
 
@@ -23,15 +21,14 @@ public class PacketS2CChunkLoad extends PacketS2C {
     }
 
     @Override
-    public void read(DataInput input) throws IOException {
+    public void read(PacketReadBuf input) {
         x = input.readInt();
         z = input.readInt();
-//        chunk = new Chunk();
         chunk = new Chunk(input);
     }
 
     @Override
-    public void write(DataOutput output) throws IOException {
+    public void write(PacketWriteBuf output) {
         output.writeInt(x);
         output.writeInt(z);
         chunk.write(output);

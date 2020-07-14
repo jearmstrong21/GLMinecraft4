@@ -2,12 +2,26 @@
 <Configuration xmlns="http://logging.apache.org/log4j/2.0/config">
     <ThresholdFilter level="Trace"/>
     <Appenders>
+        <Console name="REDIRECTED_STDOUT" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="%style{[%date]}{BLUE} %highlight{[%threadName]} %style{[STDOUT]}{CYAN} %message%n"/>
+            <MarkerFilter marker="STDOUT" onMatch="ACCEPT" onDeny="DENY"/>
+        </Console>
+        <Console name="REDIRECTED_STDERR" target="SYSTEM_ERR">
+            <PatternLayout
+                    pattern="%style{[%date]}{BLUE} %highlight{[%threadName]} %style{[STDERR]}{CYAN} %style{%message}{RED}%n"/>
+            <MarkerFilter marker="STDERR" onMatch="ACCEPT" onDeny="DENY"/>
+        </Console>
         <Console name="STDOUT" target="SYSTEM_OUT">
             <PatternLayout
                     pattern="%style{[%date]}{BLUE} %highlight{[%threadName/%level]} %style{(%logger{-2}/%marker)}{CYAN} %message%n%style{%throwable}{RED}"/>
         </Console>
     </Appenders>
     <Loggers>
+        <Logger name="p0nki.glmc4.LoggerPrintStream" level="info" additivity="false">
+            <AppenderRef ref="REDIRECTED_STDOUT"/>
+            <AppenderRef ref="REDIRECTED_STDERR"/>
+        </Logger>
         <Root level="Trace">
             <AppenderRef ref="STDOUT"/>
         </Root>

@@ -1,7 +1,7 @@
 package p0nki.glmc4.network.packet.clientbound;
 
-import java.io.DataInput;
-import java.io.DataOutput;
+import p0nki.glmc4.network.PacketReadBuf;
+import p0nki.glmc4.network.PacketWriteBuf;
 
 public class PacketS2CPingRequest extends PacketS2C {
 
@@ -10,12 +10,12 @@ public class PacketS2CPingRequest extends PacketS2C {
     }
 
     @Override
-    public void read(DataInput input) {
+    public void read(PacketReadBuf input) {
 
     }
 
     @Override
-    public void write(DataOutput output) {
+    public void write(PacketWriteBuf output) {
 
     }
 

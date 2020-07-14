@@ -54,10 +54,10 @@ public class MCWindow {
         glfwSwapInterval(0);
         glfwShowWindow(ptr);
         GL.createCapabilities();
-        LOGGER.info(OPENGL, "GLFW Version: {}", glfwGetVersionString());
-        LOGGER.info(OPENGL, "OpenGL Vendor: {}", glGetString(GL_VENDOR));
-        LOGGER.info(OPENGL, "OpenGL Version: {}", glGetString(GL_VERSION));
-        LOGGER.info(OPENGL, "OpenGL Renderer: {}", glGetString(GL_RENDERER));
+//        LOGGER.info(OPENGL, "GLFW Version: {}", glfwGetVersionString());
+//        LOGGER.info(OPENGL, "OpenGL Vendor: {}", glGetString(GL_VENDOR));
+//        LOGGER.info(OPENGL, "OpenGL Version: {}", glGetString(GL_VERSION));
+//        LOGGER.info(OPENGL, "OpenGL Renderer: {}", glGetString(GL_RENDERER));
         int framecount = 0;
         initializeCallback.run();
         double lastTime = 0;

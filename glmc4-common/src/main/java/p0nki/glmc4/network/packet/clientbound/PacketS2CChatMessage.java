@@ -1,8 +1,7 @@
 package p0nki.glmc4.network.packet.clientbound;
 
-import p0nki.glmc4.utils.DataStreamUtils;
-
-import java.io.*;
+import p0nki.glmc4.network.PacketReadBuf;
+import p0nki.glmc4.network.PacketWriteBuf;
 
 public class PacketS2CChatMessage extends PacketS2C {
 
@@ -27,15 +26,15 @@ public class PacketS2CChatMessage extends PacketS2C {
     }
 
     @Override
-    public void read(DataInput input) throws IOException {
-        source = DataStreamUtils.readString(input);
-        message = DataStreamUtils.readString(input);
+    public void read(PacketReadBuf input) {
+        source = input.readString();
+        message = input.readString();
     }
 
     @Override
-    public void write(DataOutput output) throws IOException {
-        DataStreamUtils.writeString(output, source);
-        DataStreamUtils.writeString(output, message);
+    public void write(PacketWriteBuf output) {
+        output.writeString(source);
+        output.writeString(message);
     }
 
     @Override

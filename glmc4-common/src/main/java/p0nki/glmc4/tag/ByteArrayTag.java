@@ -1,15 +1,13 @@
 package p0nki.glmc4.tag;
 
 import org.apache.commons.lang3.ArrayUtils;
-import p0nki.glmc4.utils.DataStreamUtils;
+import p0nki.glmc4.network.PacketWriteBuf;
 
-import java.io.DataOutput;
-import java.io.IOException;
 import java.util.AbstractList;
 
 public class ByteArrayTag extends AbstractList<Byte> implements Tag<ByteArrayTag> {
 
-    public static final TagReader<ByteArrayTag> READER = input -> new ByteArrayTag(DataStreamUtils.readBytes(input, input.readInt()));
+    public static final TagReader<ByteArrayTag> READER = input -> new ByteArrayTag(input.readBytes(input.readInt()));
 
     private byte[] values;
 
@@ -51,9 +49,9 @@ public class ByteArrayTag extends AbstractList<Byte> implements Tag<ByteArrayTag
     }
 
     @Override
-    public void write(DataOutput output) throws IOException {
+    public void write(PacketWriteBuf output) {
         output.writeInt(values.length);
-        output.write(values);
+        output.writeBytes(values);
     }
 
     @Override

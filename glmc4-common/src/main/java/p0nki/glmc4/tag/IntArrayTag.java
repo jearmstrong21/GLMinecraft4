@@ -1,9 +1,8 @@
 package p0nki.glmc4.tag;
 
 import org.apache.commons.lang3.ArrayUtils;
+import p0nki.glmc4.network.PacketWriteBuf;
 
-import java.io.DataOutput;
-import java.io.IOException;
 import java.util.AbstractList;
 
 public class IntArrayTag extends AbstractList<Integer> implements Tag<IntArrayTag> {
@@ -55,7 +54,7 @@ public class IntArrayTag extends AbstractList<Integer> implements Tag<IntArrayTa
     }
 
     @Override
-    public void write(DataOutput output) throws IOException {
+    public void write(PacketWriteBuf output) {
         output.writeInt(values.length);
         for (int i : values) output.writeInt(i);
     }

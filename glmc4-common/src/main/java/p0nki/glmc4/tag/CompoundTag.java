@@ -1,10 +1,9 @@
 package p0nki.glmc4.tag;
 
+import p0nki.glmc4.network.PacketWriteBuf;
 import p0nki.glmc4.utils.DataStreamUtils;
 
 import javax.annotation.Nonnull;
-import java.io.DataOutput;
-import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +15,7 @@ public class CompoundTag extends AbstractMap<String, Tag<?>> implements Tag<Comp
         int size = input.readInt();
         Map<String, Tag<?>> values = new HashMap<>();
         for (int i = 0; i < size; i++) {
-            values.put(DataStreamUtils.readString(input), DataStreamUtils.readTag(input));
+            values.put(input.readString(), DataStreamUtils.readTag(input));
         }
         return new CompoundTag(values);
     };
@@ -86,10 +85,10 @@ public class CompoundTag extends AbstractMap<String, Tag<?>> implements Tag<Comp
     }
 
     @Override
-    public void write(DataOutput output) throws IOException {
+    public void write(PacketWriteBuf output) {
         output.writeInt(values.size());
         for (Entry<String, Tag<?>> entry : values.entrySet()) {
-            DataStreamUtils.writeString(output, entry.getKey());
+            output.writeString(entry.getKey());
             DataStreamUtils.writeTag(output, entry.getValue());
         }
     }

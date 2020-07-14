@@ -1,8 +1,7 @@
 package p0nki.glmc4.block;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
+import p0nki.glmc4.network.PacketReadBuf;
+import p0nki.glmc4.network.PacketWriteBuf;
 
 public class Chunk {
 
@@ -19,7 +18,7 @@ public class Chunk {
         }
     }
 
-    public Chunk(DataInput input) throws IOException {
+    public Chunk(PacketReadBuf input) {
         data = new long[16][256][16];
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 256; y++) {
@@ -35,7 +34,7 @@ public class Chunk {
         return new BlockState(data[x][y][z]);
     }
 
-    public void write(DataOutput output) throws IOException {
+    public void write(PacketWriteBuf output) {
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 256; y++) {
                 for (int z = 0; z < 16; z++) {

@@ -1,10 +1,7 @@
 package p0nki.glmc4.network.packet.clientbound;
 
-import p0nki.glmc4.utils.DataStreamUtils;
-
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
+import p0nki.glmc4.network.PacketReadBuf;
+import p0nki.glmc4.network.PacketWriteBuf;
 
 public class PacketS2CPlayerLeave extends PacketS2C {
 
@@ -23,13 +20,13 @@ public class PacketS2CPlayerLeave extends PacketS2C {
     }
 
     @Override
-    public void read(DataInput input) throws IOException {
-        id = DataStreamUtils.readString(input);
+    public void read(PacketReadBuf input) {
+        id = input.readString();
     }
 
     @Override
-    public void write(DataOutput output) throws IOException {
-        DataStreamUtils.writeString(output, id);
+    public void write(PacketWriteBuf output) {
+        output.writeString(id);
     }
 
     @Override

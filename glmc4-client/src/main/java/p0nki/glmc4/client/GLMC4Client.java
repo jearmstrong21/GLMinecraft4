@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import p0nki.glmc4.Bootstrap;
 import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.block.Chunk;
@@ -153,6 +154,7 @@ public class GLMC4Client {
     }
 
     public static void main(String[] args) {
+        Bootstrap.initialize();
         runSocket();
         runClient();
     }

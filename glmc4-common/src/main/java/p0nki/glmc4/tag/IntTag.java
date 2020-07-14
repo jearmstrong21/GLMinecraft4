@@ -1,7 +1,6 @@
 package p0nki.glmc4.tag;
 
-import java.io.DataOutput;
-import java.io.IOException;
+import p0nki.glmc4.network.PacketWriteBuf;
 
 public class IntTag implements Tag<IntTag> {
 
@@ -18,7 +17,7 @@ public class IntTag implements Tag<IntTag> {
     }
 
     @Override
-    public void write(DataOutput output) throws IOException {
+    public void write(PacketWriteBuf output) {
         output.writeInt(value);
     }
 

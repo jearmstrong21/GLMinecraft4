@@ -17,8 +17,9 @@ import java.net.Socket;
 
 public class ClientConnection<L extends PacketListener<L>> {
 
-    private final static String DEBUG_STR = "Aa0Aa1Aa2Aa3Aa4Aa5Aa6Aa7Aa8Aa9Ab0Ab1Ab2Ab3Ab4Ab5Ab6Ab7Ab8Ab9Ac0Ac1Ac2Ac3Ac4Ac5Ac6Ac7Ac8Ac9Ad0Ad1Ad2A";
+    //    private final static String DEBUG_STR = "Aa0Aa1Aa2Aa3Aa4Aa5Aa6Aa7Aa8Aa9Ab0Ab1Ab2Ab3Ab4Ab5Ab6Ab7Ab8Ab9Ac0Ac1Ac2Ac3Ac4Ac5Ac6Ac7Ac8Ac9Ad0Ad1Ad2A";
     private final static Logger LOGGER = LogManager.getLogger();
+    private static int COUNTER = 0;
     private final static Marker READLOOP = MarkerManager.getMarker("READLOOP");
     private final static Marker WRITE = MarkerManager.getMarker("WRITE");
 
@@ -36,8 +37,10 @@ public class ClientConnection<L extends PacketListener<L>> {
         this.socket = socket;
 //        outputStream = new DataOutputStream(new GZIPOutputStream(socket.getOutputStream()));
 //        inputStream = new DataInputStream(new GZIPInputStream(socket.getInputStream()));
-        output = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-        input = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+//        output = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+//        input = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+        output = new DataOutputStream(socket.getOutputStream());
+        input = new DataInputStream(socket.getInputStream());
         // TODO: make use gzip io streams, instead of new DOS(new GZIPOS(socket.getOS())), use new DOS(new BR(socket.getOS()))
         //  DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(new GZIPInputStream(stream)));
         this.networkProtocol = networkProtocol;
@@ -75,34 +78,29 @@ public class ClientConnection<L extends PacketListener<L>> {
                     dcReason = "Socket closed";
                     break;
                 }
-                int id;
+                int totalLength;
+                byte[] totalPacket;
                 try {
-                    id = input.readInt();
-                } catch (IOException e) {
-                    LOGGER.fatal(READLOOP, "Error while reading packet ID", e);
-                    dcReason = "Error while reading packet ID";
+                    totalLength = input.readInt();
+                    //TODO add totalLength size check so clients can't crash the server with out of memory error
+                    totalPacket = new byte[totalLength];
+                    input.readFully(totalPacket);
+                } catch (IOException ioException) {
+                    LOGGER.fatal(READLOOP, "Exception while reading packet", ioException);
                     break;
                 }
+                PacketReadBuf readBuf = new PacketReadBuf(totalPacket);
+                int id = readBuf.readInt();
                 Packet<?> packet = networkProtocol.createPacket(id);
-                if (packet == null) continue;
+                if (packet == null) {
+                    LOGGER.warn(READLOOP, "Null packet created by protocol for ID {}", id);
+                    continue;
+                }
                 if (packet.getType().matches(readType)) {
-                    try {
-                        packet.read(input);
-                        byte[] b = new byte[DEBUG_STR.length()];
-                        input.readFully(b);
-                        if (!new String(b).equals(DEBUG_STR)) {
-                            dcReason = "Invalid DEBUG_STR";
-                            LOGGER.fatal(READLOOP, "Expected <{}>", DEBUG_STR);
-                            LOGGER.fatal(READLOOP, "Received <{}>", new String(b));
-                            break;
-                        }
-                    } catch (IOException e) {
-                        dcReason = "Error while reading packet data";
-                        LOGGER.fatal(READLOOP, "Error while reading packet data", e);
-                        break;
-                    }
+                    packet.read(readBuf);
                     Packet.apply(packet, packetListener);
                 } else {
+                    LOGGER.fatal(READLOOP, "Invalid packet type sent with ID {}", id);
                     break;
                 }
             }
@@ -110,7 +108,7 @@ public class ClientConnection<L extends PacketListener<L>> {
                 MinecraftServer.INSTANCE.removeConnection(player.getId());
             if (packetListener instanceof ClientPacketListener) packetListener.onDisconnected(String.valueOf(dcReason));
             isLoopRunning = false;
-        });
+        }, "Connection-" + (COUNTER++));
         isLoopRunning = true;
         threadLoop.start();
     }
@@ -125,27 +123,23 @@ public class ClientConnection<L extends PacketListener<L>> {
         try {
             socket.close();
         } catch (IOException ioException) {
-            System.out.println("Error closing socket: " + ioException.getMessage());
+            LOGGER.fatal("Error closing socket. This can probably be ignored.", ioException);
         }
     }
 
     public void write(Packet<?> packet) { // TODO make this a packet queue? speed gains?
         if (!isLoopRunning || socket.isClosed()) return;
         if (packet.getType().matches(writeType)) {
+            PacketWriteBuf writeBuf = new PacketWriteBuf();
+            int id = networkProtocol.getId(packet);
+            writeBuf.writeInt(id);
+            packet.write(writeBuf);
+            int totalLength = writeBuf.size();
             try {
-                output.writeInt(networkProtocol.getId(packet));
-            } catch (IOException e) {
-                disconnect();
-                LOGGER.fatal(WRITE, "Error writing packet ID", e);
-                e.printStackTrace();
-                return;
-            }
-            try {
-                packet.write(output);
-                output.writeBytes(DEBUG_STR);
-            } catch (IOException e) {
-                if (packet.isWriteErrorSkippable()) return;
-                LOGGER.fatal(WRITE, "Error writing packet data", e);
+                output.writeInt(totalLength);
+                output.write(writeBuf.array());
+            } catch (IOException ioException) {
+                LOGGER.fatal(WRITE, "Error writing packet data", ioException);
                 disconnect();
             }
         } else {

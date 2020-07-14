@@ -1,10 +1,9 @@
 package p0nki.glmc4.tag;
 
 import org.apache.commons.lang3.ArrayUtils;
+import p0nki.glmc4.network.PacketWriteBuf;
 import p0nki.glmc4.utils.DataStreamUtils;
 
-import java.io.DataOutput;
-import java.io.IOException;
 import java.util.AbstractList;
 
 public class ListTag extends AbstractList<Tag<?>> implements Tag<ListTag> {
@@ -61,7 +60,7 @@ public class ListTag extends AbstractList<Tag<?>> implements Tag<ListTag> {
     }
 
     @Override
-    public void write(DataOutput output) throws IOException {
+    public void write(PacketWriteBuf output) {
         output.writeInt(values.length);
         for (Tag<?> value : values) {
             DataStreamUtils.writeTag(output, value);
