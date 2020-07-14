@@ -5,6 +5,38 @@ import java.util.function.Function;
 
 public abstract class Either<L, R> {
 
+    public static <L, R> Either<L, R> left(L value) {
+        return new Left<>(value);
+    }
+
+    public static <L, R> Either<L, R> right(R value) {
+        return new Right<>(value);
+    }
+
+    public abstract <L1, R1> Either<L1, R1> mapBoth(Function<L, L1> f1, Function<R, R1> f2);
+
+    public abstract <T> T map(Function<L, T> f1, Function<R, T> f2);
+
+    public abstract Either<L, R> ifLeft(Consumer<L> consumer);
+
+    public abstract Either<L, R> ifRight(Consumer<R> consumer);
+
+    public abstract Optional<L> left();
+
+    public abstract Optional<R> right();
+
+    public <T> Either<T, R> mapLeft(Function<L, T> function) {
+        return map(t -> left(function.apply(t)), Either::right);
+    }
+
+    public <T> Either<L, T> mapRight(Function<R, T> function) {
+        return map(Either::left, t -> right(function.apply(t)));
+    }
+
+    public Either<R, L> swap() {
+        return map(Either::right, Either::left);
+    }
+
     private static final class Left<L, R> extends Either<L, R> {
 
         private final L value;
@@ -83,38 +115,6 @@ public abstract class Either<L, R> {
         public Optional<R> right() {
             return Optional.of(value);
         }
-    }
-
-    public abstract <L1, R1> Either<L1, R1> mapBoth(Function<L, L1> f1, Function<R, R1> f2);
-
-    public abstract <T> T map(Function<L, T> f1, Function<R, T> f2);
-
-    public abstract Either<L, R> ifLeft(Consumer<L> consumer);
-
-    public abstract Either<L, R> ifRight(Consumer<R> consumer);
-
-    public abstract Optional<L> left();
-
-    public abstract Optional<R> right();
-
-    public <T> Either<T, R> mapLeft(Function<L, T> function) {
-        return map(t -> left(function.apply(t)), Either::right);
-    }
-
-    public <T> Either<L, T> mapRight(Function<R, T> function) {
-        return map(Either::left, t -> right(function.apply(t)));
-    }
-
-    public Either<R, L> swap() {
-        return map(Either::right, Either::left);
-    }
-
-    public static <L, R> Either<L, R> left(L value) {
-        return new Left<>(value);
-    }
-
-    public static <L, R> Either<L, R> right(R value) {
-        return new Right<>(value);
     }
 
 }

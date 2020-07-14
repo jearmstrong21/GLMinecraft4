@@ -16,7 +16,7 @@ import p0nki.glmc4.network.packet.serverbound.ServerPacketListener;
 public class ServerPacketHandler implements ServerPacketListener {
 
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final Marker WORLDGEN = MarkerManager.getMarker("WORLDGEN");
+    private static final Marker WORLD = MarkerManager.getMarker("WORLD");
     private final ClientConnection<ServerPacketListener> connection;
     private long lastPingResponse = -1;
     private boolean hasSentPing = false;
@@ -39,7 +39,7 @@ public class ServerPacketHandler implements ServerPacketListener {
                 }
             }
         }
-        LOGGER.info(WORLDGEN, "Generated chunk {}, {}", cx, cz);
+        LOGGER.info(WORLD, "Generated chunk {}, {}", cx, cz);
         return c;
     }
 

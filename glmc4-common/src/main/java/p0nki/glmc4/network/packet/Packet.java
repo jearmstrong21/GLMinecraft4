@@ -5,6 +5,11 @@ import p0nki.glmc4.network.PacketWriteBuf;
 
 public interface Packet<L extends PacketListener<L>> {
 
+    @SuppressWarnings("unchecked")
+    static <L extends PacketListener<L>> void apply(Packet<?> packet, L listener) {
+        ((Packet<L>) packet).apply(listener);
+    }
+
     void read(PacketReadBuf input);
 
     void write(PacketWriteBuf output);
@@ -12,14 +17,5 @@ public interface Packet<L extends PacketListener<L>> {
     void apply(L listener);
 
     PacketType getType();
-
-    default boolean isWriteErrorSkippable() {
-        return false;
-    }
-
-    @SuppressWarnings("unchecked")
-    static <L extends PacketListener<L>> void apply(Packet<?> packet, L listener) {
-        ((Packet<L>) packet).apply(listener);
-    }
 
 }

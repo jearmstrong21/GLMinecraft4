@@ -15,16 +15,16 @@ import static org.lwjgl.opengl.GL11.*;
 public class MCWindow {
 
     private final static Logger LOGGER = LogManager.getLogger();
-    private final static Marker OPENGL = MarkerManager.getMarker("OpenGL");
-
-    private MCWindow() {
-
-    }
-
+    private final static Marker OPENGL = MarkerManager.getMarker("OPENGL");
     private static long ptr;
     private static Runnable initializeCallback;
     private static IntConsumer frameCallback;
     private static Runnable endCallback;
+    private static double fps;
+
+    private MCWindow() {
+
+    }
 
     public static void setInitializeCallback(Runnable initializeCallback) {
         MCWindow.initializeCallback = initializeCallback;
@@ -37,8 +37,6 @@ public class MCWindow {
     public static void setEndCallback(Runnable endCallback) {
         MCWindow.endCallback = endCallback;
     }
-
-    private static double fps;
 
     public static void start() {
         if (!glfwInit()) {
@@ -54,10 +52,10 @@ public class MCWindow {
         glfwSwapInterval(0);
         glfwShowWindow(ptr);
         GL.createCapabilities();
-//        LOGGER.info(OPENGL, "GLFW Version: {}", glfwGetVersionString());
-//        LOGGER.info(OPENGL, "OpenGL Vendor: {}", glGetString(GL_VENDOR));
-//        LOGGER.info(OPENGL, "OpenGL Version: {}", glGetString(GL_VERSION));
-//        LOGGER.info(OPENGL, "OpenGL Renderer: {}", glGetString(GL_RENDERER));
+        LOGGER.info(OPENGL, "GLFW Version: {}", glfwGetVersionString());
+        LOGGER.info(OPENGL, "OpenGL Vendor: {}", glGetString(GL_VENDOR));
+        LOGGER.info(OPENGL, "OpenGL Version: {}", glGetString(GL_VERSION));
+        LOGGER.info(OPENGL, "OpenGL Renderer: {}", glGetString(GL_RENDERER));
         int framecount = 0;
         initializeCallback.run();
         double lastTime = 0;

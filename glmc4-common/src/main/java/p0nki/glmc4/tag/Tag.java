@@ -8,14 +8,19 @@ import java.util.Map;
 
 public interface Tag<T extends Tag<T>> extends ToTag<T> {
 
-    @SuppressWarnings("unchecked")
-    default T toTag() {
-        return (T) this;
-    }
+    int BYTE = 0;
+    int BYTE_ARRAY = 1;
+    int STRING = 2;
+    int LONG = 3;
+    int LONG_ARRAY = 4;
+    int INT = 5;
+    int INT_ARRAY = 6;
+    int COMPOUND = 7;
+    int LIST = 8;
 
     static boolean isValidCompoundValue(Object object) {
         if (!(object instanceof Map)) return false;
-        Map map = (Map) object;
+        Map<?, ?> map = (Map<?, ?>) object;
         for (Object value : map.keySet()) {
             if (!(value instanceof CharSequence)) return false;
         }
@@ -27,7 +32,7 @@ public interface Tag<T extends Tag<T>> extends ToTag<T> {
 
     static boolean isValidListValue(Object object) {
         if (object instanceof List) {
-            List list = (List) object;
+            List<?> list = (List<?>) object;
             for (Object value : list) {
                 if (!isValidTag(value)) return false;
             }
@@ -107,16 +112,6 @@ public interface Tag<T extends Tag<T>> extends ToTag<T> {
         throw new UnsupportedOperationException("Cannot convert " + object + " of class " + object.getClass() + " to a tag");
     }
 
-    int BYTE = 0;
-    int BYTE_ARRAY = 1;
-    int STRING = 2;
-    int LONG = 3;
-    int LONG_ARRAY = 4;
-    int INT = 5;
-    int INT_ARRAY = 6;
-    int COMPOUND = 7;
-    int LIST = 8;
-
     static boolean isTagId(int id) {
         return id == BYTE || id == BYTE_ARRAY || id == STRING || id == LONG || id == LONG_ARRAY || id == INT || id == INT_ARRAY || id == COMPOUND || id == LIST;
     }
@@ -144,6 +139,11 @@ public interface Tag<T extends Tag<T>> extends ToTag<T> {
             default:
                 throw new UnsupportedOperationException("Cannot find reader for id " + id);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    default T toTag() {
+        return (T) this;
     }
 
     void write(PacketWriteBuf output);

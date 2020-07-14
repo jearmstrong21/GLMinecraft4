@@ -6,25 +6,6 @@ import p0nki.glmc4.tag.TagEquivalent;
 
 public class Identifier extends MarkerManager.Log4jMarker implements TagEquivalent<Identifier, StringTag> {
 
-    public static boolean isValidIdentifier(String id) {
-        String[] split = id.split(":");
-        if (split.length != 2) return false;
-        if (!isValidPortion(split[0])) return false;
-        return isValidPortion(split[1]);
-    }
-
-    public static void assertValidIdentifier(String id) {
-        if (!isValidIdentifier(id)) throw new UnsupportedOperationException("Invalid identifier " + id);
-    }
-
-    public static boolean isValidPortion(String value) {
-        return value.chars().allMatch(x -> (Character.isLowerCase(x) && Character.isAlphabetic(x)) || Character.isDigit(x) || x == '_');
-    }
-
-    public static void assertValidPortion(String value) {
-        if (!isValidPortion(value)) throw new UnsupportedOperationException("Invalid identifier portion " + value);
-    }
-
     private String namespace;
     private String path;
 
@@ -44,6 +25,25 @@ public class Identifier extends MarkerManager.Log4jMarker implements TagEquivale
         assertValidPortion(split[1]);
         namespace = split[0];
         path = split[1];
+    }
+
+    public static boolean isValidIdentifier(String id) {
+        String[] split = id.split(":");
+        if (split.length != 2) return false;
+        if (!isValidPortion(split[0])) return false;
+        return isValidPortion(split[1]);
+    }
+
+    public static void assertValidIdentifier(String id) {
+        if (!isValidIdentifier(id)) throw new UnsupportedOperationException("Invalid identifier " + id);
+    }
+
+    public static boolean isValidPortion(String value) {
+        return value.chars().allMatch(x -> (Character.isLowerCase(x) && Character.isAlphabetic(x)) || Character.isDigit(x) || x == '_');
+    }
+
+    public static void assertValidPortion(String value) {
+        if (!isValidPortion(value)) throw new UnsupportedOperationException("Invalid identifier portion " + value);
     }
 
     public String getNamespace() {

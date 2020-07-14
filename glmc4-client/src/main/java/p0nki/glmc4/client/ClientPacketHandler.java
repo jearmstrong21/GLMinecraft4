@@ -15,7 +15,7 @@ public class ClientPacketHandler implements ClientPacketListener {
 
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Marker CHAT = MarkerManager.getMarker("CHAT");
-    private static final Marker PLAYERLIST = MarkerManager.getMarker("PLAYERLIST");
+    private static final Marker PLAYERS = MarkerManager.getMarker("PLAYERS");
 
     private final ClientConnection<ClientPacketListener> connection;
 
@@ -33,7 +33,7 @@ public class ClientPacketHandler implements ClientPacketListener {
     }
 
     public void onPlayerLeave(PacketS2CPlayerLeave packet) {
-        LOGGER.info(PLAYERLIST, "Player left: {}", packet.getId());
+        LOGGER.info(PLAYERS, "Player left: {}", packet.getId());
     }
 
     public void onChunkLoad(PacketS2CChunkLoad packet) {
@@ -42,12 +42,12 @@ public class ClientPacketHandler implements ClientPacketListener {
 
     public void onHello(PacketS2CHello packet) {
         connection.setPlayer(packet.getYourPlayer());
-        LOGGER.info(PLAYERLIST, "Your player is {}", packet.getYourPlayer().toString());
-        LOGGER.info(PLAYERLIST, "Currently logged in players: {}", packet.getAllPlayers().stream().map(ServerPlayer::toString).collect(Collectors.joining(", ")));
+        LOGGER.info(PLAYERS, "Your player is {}", packet.getYourPlayer().toString());
+        LOGGER.info(PLAYERS, "Currently logged in players: {}", packet.getAllPlayers().stream().map(ServerPlayer::toString).collect(Collectors.joining(", ")));
     }
 
     public void onPlayerJoin(PacketS2CPlayerJoin packet) {
-        LOGGER.info(PLAYERLIST, "Player joined: {}", packet.getPlayer());
+        LOGGER.info(PLAYERS, "Player joined: {}", packet.getPlayer());
     }
 
     @Override

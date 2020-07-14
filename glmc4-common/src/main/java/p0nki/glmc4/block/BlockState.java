@@ -5,7 +5,7 @@ import p0nki.glmc4.utils.MathUtils;
 
 public class BlockState {
 
-    private int id;
+    private final int id;
     private int meta;
 
     public BlockState(long value) {

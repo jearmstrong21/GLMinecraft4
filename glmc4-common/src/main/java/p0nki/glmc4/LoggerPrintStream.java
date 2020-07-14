@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 
+import javax.annotation.Nonnull;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Locale;
@@ -50,7 +51,7 @@ public class LoggerPrintStream extends PrintStream {
     }
 
     @Override
-    public void print(char[] s) {
+    public void print(@Nonnull char[] s) {
         log(new String(s));
     }
 
@@ -100,7 +101,7 @@ public class LoggerPrintStream extends PrintStream {
     }
 
     @Override
-    public void println(char[] x) {
+    public void println(@Nonnull char[] x) {
         log(new String(x));
     }
 
@@ -115,13 +116,13 @@ public class LoggerPrintStream extends PrintStream {
     }
 
     @Override
-    public PrintStream printf(String format, Object... args) {
+    public PrintStream printf(@Nonnull String format, Object... args) {
         log(String.format(format, args));
         return this;
     }
 
     @Override
-    public PrintStream printf(Locale l, String format, Object... args) {
+    public PrintStream printf(Locale l, @Nonnull String format, Object... args) {
         log(String.format(l, format, args));
         return this;
     }

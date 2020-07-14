@@ -6,31 +6,30 @@ import java.util.function.Consumer;
 
 public class PropertySchema {
 
+    private static final IllegalArgumentException INVALID_PROPERTY = new IllegalArgumentException("Invalid property");
+    private static final IllegalArgumentException INVALID_VALUE = new IllegalArgumentException("Invalid value");
     private final List<Property<?>> properties;
-    private final Map<Property<?>, Integer> bitstart;
+    private final Map<Property<?>, Integer> bitStart;
     private int currentUsedBits = 0;
 
     public PropertySchema() {
         properties = new ArrayList<>();
-        bitstart = new HashMap<>();
+        bitStart = new HashMap<>();
     }
 
     public <T> void addProperty(Property<T> property) {
         properties.add(property);
-        bitstart.put(property, currentUsedBits);
+        bitStart.put(property, currentUsedBits);
         currentUsedBits += property.bits();
         if (currentUsedBits >= 32) throw INVALID_PROPERTY;
     }
-
-    private static final IllegalArgumentException INVALID_PROPERTY = new IllegalArgumentException("Invalid property");
-    private static final IllegalArgumentException INVALID_VALUE = new IllegalArgumentException("Invalid value");
 
     public boolean hasProperty(Property<?> property) {
         return properties.contains(property);
     }
 
     private int mask(Property<?> property) {
-        return (~(1 << property.bits()) << (32 - property.bits())) >>> bitstart.get(property);
+        return (~(1 << property.bits()) << (32 - property.bits())) >>> bitStart.get(property);
     }
 
     public int clear(int state, Property<?> property) {
@@ -45,7 +44,7 @@ public class PropertySchema {
         if (!property.supportsValue(value)) throw INVALID_VALUE;
         int mask = mask(property);
         state &= ~mask;
-        state |= mask & property.getIndex(value) << 32 - bitstart.get(property) - property.bits();
+        state |= mask & property.getIndex(value) << 32 - bitStart.get(property) - property.bits();
         return state;
     }
 
@@ -53,7 +52,7 @@ public class PropertySchema {
     public <T> T get(int state, Property<T> property) {
         if (!hasProperty(property)) throw INVALID_PROPERTY;
         int mask = mask(property);
-        int index = (state & mask) >>> 32 - bitstart.get(property) - property.bits();
+        int index = (state & mask) >>> 32 - bitStart.get(property) - property.bits();
         if (index < 0 || index >= property.values().size()) throw INVALID_VALUE;
         return Objects.requireNonNull(property.values().get(index));
     }

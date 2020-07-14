@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<Configuration xmlns="http://logging.apache.org/log4j/2.0/config">
+<!-- xmlns="http://logging.apache.org/log4j/2.0/config" -->
+<Configuration>
     <ThresholdFilter level="Trace"/>
     <Appenders>
         <Console name="REDIRECTED_STDOUT" target="SYSTEM_OUT">
             <PatternLayout
                     pattern="%style{[%date]}{BLUE} %highlight{[%threadName]} %style{[STDOUT]}{CYAN} %message%n"/>
-            <MarkerFilter marker="STDOUT" onMatch="ACCEPT" onDeny="DENY"/>
+            <MarkerFilter marker="STDOUT" onMatch="ACCEPT" onMismatch="DENY"/>
         </Console>
         <Console name="REDIRECTED_STDERR" target="SYSTEM_ERR">
             <PatternLayout
                     pattern="%style{[%date]}{BLUE} %highlight{[%threadName]} %style{[STDERR]}{CYAN} %style{%message}{RED}%n"/>
-            <MarkerFilter marker="STDERR" onMatch="ACCEPT" onDeny="DENY"/>
+            <MarkerFilter marker="STDERR" onMatch="ACCEPT" onMismatch="DENY"/>
         </Console>
         <Console name="STDOUT" target="SYSTEM_OUT">
             <PatternLayout

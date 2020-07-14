@@ -12,14 +12,14 @@ public class ServerPlayer implements TagEquivalent<ServerPlayer, CompoundTag> {
 
     }
 
-    @Override
-    public String toString() {
-        return String.format("ServerPlayer[id=%s:name=%s]", id, name);
-    }
-
     public ServerPlayer(String id, String name) {
         this.id = id;
         this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("ServerPlayer[id=%s:name=%s]", id, name);
     }
 
     public String getId() {

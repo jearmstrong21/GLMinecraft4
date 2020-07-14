@@ -16,13 +16,14 @@ import java.util.*;
 
 public class MinecraftServer {
 
-    private static Logger LOGGER = LogManager.getLogger();
-    private static Marker CHAT = MarkerManager.getMarker("CHAT");
+    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Marker CHAT = MarkerManager.getMarker("CHAT");
 
     public static MinecraftServer INSTANCE = null;
 
     private final Map<String, ClientConnection<ServerPacketListener>> connections = new HashMap<>();
     private final List<ServerPlayer> players = new ArrayList<>();
+    private final Set<String> playerIdsToRemove = new HashSet<>();
 
     public MinecraftServer() {
         if (INSTANCE != null) throw new UnsupportedOperationException();
@@ -72,8 +73,6 @@ public class MinecraftServer {
     public List<ServerPlayer> getPlayers() {
         return players;
     }
-
-    private final Set<String> playerIdsToRemove = new HashSet<>();
 
     public void removeConnection(String id) {
         playerIdsToRemove.add(id);

@@ -11,19 +11,19 @@ import java.util.stream.Collectors;
 
 public class MeshData {
 
-    private List<List<Float>> data;
-    private List<Integer> sizes;
-    private List<Integer> tri;
+    private final List<List<Float>> data;
+    private final List<Integer> sizes;
+    private final List<Integer> tri;
     private int maxReferredVertex = 0;
-
-    public static MeshData chunk() {
-        return new MeshData().addBuffer(3).addBuffer(2);
-    }
 
     public MeshData() {
         data = new ArrayList<>();
         sizes = new ArrayList<>();
         tri = new ArrayList<>();
+    }
+
+    public static MeshData chunk() {
+        return new MeshData().addBuffer(3).addBuffer(2);
     }
 
     public int size() {

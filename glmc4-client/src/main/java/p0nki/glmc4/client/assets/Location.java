@@ -8,10 +8,6 @@ public interface Location {
 
     File asFile();
 
-    default void makeParentFolder() {
-        asFile().getParentFile().mkdirs();
-    }
-
     default String loadText() {
         try {
             return Files.readString(asFile().toPath());

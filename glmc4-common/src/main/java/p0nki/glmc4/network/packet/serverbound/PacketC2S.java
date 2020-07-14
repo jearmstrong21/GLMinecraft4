@@ -7,6 +7,6 @@ public abstract class PacketC2S implements Packet<ServerPacketListener> {
 
     @Override
     public final PacketType getType() {
-        return PacketType.SERVERBOUND;
+        return PacketType.CLIENT_TO_SERVER;
     }
 }

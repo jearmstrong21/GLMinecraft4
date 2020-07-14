@@ -59,7 +59,7 @@ public class GLMC4Client {
         NetworkProtocol networkProtocol = new NetworkProtocol();
         ClientConnection<ClientPacketListener> connection;
         try {
-            connection = new ClientConnection<>(socket, networkProtocol, PacketType.CLIENTBOUND, PacketType.SERVERBOUND);
+            connection = new ClientConnection<>(socket, networkProtocol, PacketType.SERVER_TO_CLIENT, PacketType.CLIENT_TO_SERVER);
         } catch (IOException ioException) {
             LOGGER.info(SOCKET, "Error creating connection", ioException);
             return;

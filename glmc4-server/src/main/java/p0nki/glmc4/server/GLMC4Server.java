@@ -23,7 +23,7 @@ public class GLMC4Server {
         NetworkProtocol networkProtocol = new NetworkProtocol();
         //noinspection InfiniteLoopStatement
         while (true) {
-            ClientConnection<ServerPacketListener> connection = new ClientConnection<>(serverSocket.accept(), networkProtocol, PacketType.SERVERBOUND, PacketType.CLIENTBOUND);
+            ClientConnection<ServerPacketListener> connection = new ClientConnection<>(serverSocket.accept(), networkProtocol, PacketType.CLIENT_TO_SERVER, PacketType.SERVER_TO_CLIENT);
             ServerPacketListener packetListener = new ServerPacketHandler(connection);
             connection.setPacketListener(packetListener);
             MinecraftServer.INSTANCE.joinPlayer(connection);

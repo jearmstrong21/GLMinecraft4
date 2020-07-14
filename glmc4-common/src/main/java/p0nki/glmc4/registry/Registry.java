@@ -1,53 +1,30 @@
 package p0nki.glmc4.registry;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.Marker;
-import org.apache.logging.log4j.MarkerManager;
 import p0nki.glmc4.utils.Identifier;
 
 import java.util.*;
 
 public class Registry<T> {
 
-    private final static Logger LOGGER = LogManager.getLogger();
-
-    public static final class Entry<T> {
-        private final Identifier identifier;
-        private final T value;
-        private final int index;
-
-        public Entry(Identifier identifier, T value, int index) {
-            this.identifier = identifier;
-            this.value = value;
-            this.index = index;
-        }
-
-        public Identifier getKey() {
-            return identifier;
-        }
-
-        public T getValue() {
-            return value;
-        }
-
-        public int getIndex() {
-            return index;
-        }
-    }
+//    private final static Logger LOGGER = LogManager.getLogger();
 
     private final String name;
     private final Map<Identifier, Entry<T>> identifierMap;
     private final Map<T, Entry<T>> valueMap;
     private final List<Entry<T>> entries;
-    private final Marker marker;
 
     public Registry(String name) {
         this.name = name;
-        marker = MarkerManager.getMarker(name);
+//        marker = MarkerManager.getMarker(name);
         identifierMap = new HashMap<>();
         valueMap = new HashMap<>();
         entries = new ArrayList<>();
+    }
+//    private final Marker marker;
+
+    @Override
+    public String toString() {
+        return String.format("Registry[%s]", name);
     }
 
     private Entry<T> internalRegister(Identifier identifier, T value) {
@@ -116,6 +93,30 @@ public class Registry<T> {
     public Entry<T> get(int index) {
         assertHasIndex(index);
         return entries.get(index);
+    }
+
+    public static final class Entry<T> {
+        private final Identifier identifier;
+        private final T value;
+        private final int index;
+
+        public Entry(Identifier identifier, T value, int index) {
+            this.identifier = identifier;
+            this.value = value;
+            this.index = index;
+        }
+
+        public Identifier getKey() {
+            return identifier;
+        }
+
+        public T getValue() {
+            return value;
+        }
+
+        public int getIndex() {
+            return index;
+        }
     }
 
 }
