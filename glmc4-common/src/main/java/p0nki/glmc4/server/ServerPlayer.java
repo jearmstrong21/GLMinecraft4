@@ -1,4 +1,4 @@
-package p0nki.glmc4.player;
+package p0nki.glmc4.server;
 
 import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.tag.TagEquivalent;

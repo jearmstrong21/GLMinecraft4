@@ -1,7 +1,7 @@
 IMAGES WRITTEN: 25
 DIMENSIONS: 1024x512
 PIXELS USED: 398080/524288
-TIME: 280ms
+TIME: 278ms
 -------------
 minecraft:stone                                                  16x16     /Users/jackarmstrong/Documents/FabricProjects/GLMinecraft4/glmc4-client/build/resources/main/block/stone.png
 minecraft:tnt_bottom                                             16x16     /Users/jackarmstrong/Documents/FabricProjects/GLMinecraft4/glmc4-client/build/resources/main/block/tnt/bottom.png

@@ -7,7 +7,7 @@ import org.apache.logging.log4j.MarkerManager;
 import p0nki.glmc4.network.ClientConnection;
 import p0nki.glmc4.network.packet.clientbound.*;
 import p0nki.glmc4.network.packet.serverbound.PacketC2SPingResponse;
-import p0nki.glmc4.player.ServerPlayer;
+import p0nki.glmc4.server.ServerPlayer;
 
 import java.util.stream.Collectors;
 
@@ -37,7 +37,6 @@ public class ClientPacketHandler implements ClientPacketListener {
     }
 
     public void onChunkLoad(PacketS2CChunkLoad packet) {
-        LOGGER.info("Chunk load {}, {}", packet.getX(), packet.getZ());
         GLMC4Client.onLoad(packet.getX(), packet.getZ(), packet.getChunk());
     }
 
@@ -53,7 +52,8 @@ public class ClientPacketHandler implements ClientPacketListener {
 
     @Override
     public void onDisconnected(String reason) {
-        LOGGER.fatal("Disconnected: {}", reason);
+        LOGGER.fatal("Disconnected: {}, exiting", reason);
+        System.exit(1);
     }
 
     public void onChatMessage(PacketS2CChatMessage chatMessage) {

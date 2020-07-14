@@ -70,6 +70,7 @@ public class GLMC4Client {
     }
 
     public static void onLoad(int x, int z, Chunk chunk) {
+        LOGGER.debug(SOCKET, "Chunk received {}, {}", x, z);
         chunkLock.lock();
         chunks.put(MathUtils.pack(x, z), chunk);
         chunkLock.unlock();
@@ -116,9 +117,12 @@ public class GLMC4Client {
         if (chunkLock.tryLock()) {
             for (Map.Entry<Long, Chunk> chunk : chunks.entrySet()) {
                 meshes.put(chunk.getKey(), new Mesh(mesh(chunk.getValue())));
+                LOGGER.debug(RENDER, "Meshed chunk {}, {}", MathUtils.unpackFirst(chunk.getKey()), MathUtils.unpackSecond(chunk.getKey()));
             }
             chunks.clear();
             chunkLock.unlock();
+        } else {
+            LOGGER.trace(RENDER, "Unable to obtain chunk lock. Will attempt next frame");
         }
         for (Map.Entry<Long, Mesh> chunk : meshes.entrySet()) {
             shader.setFloat("x", 16 * MathUtils.unpackFirst(chunk.getKey()));

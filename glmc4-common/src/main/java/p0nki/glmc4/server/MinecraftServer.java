@@ -10,7 +10,6 @@ import p0nki.glmc4.network.packet.clientbound.PacketS2CChatMessage;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CPlayerJoin;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CPlayerLeave;
 import p0nki.glmc4.network.packet.serverbound.ServerPacketListener;
-import p0nki.glmc4.player.ServerPlayer;
 import p0nki.glmc4.utils.Words;
 
 import java.util.*;
@@ -53,7 +52,7 @@ public class MinecraftServer {
                 playerIdsToRemove.clear();
             }
         };
-        new Timer().schedule(pingPlayers, 0, 1000);
+        new Timer().schedule(pingPlayers, 0, 100);
     }
 
     public void writeGlobalChatMessage(String source, String message) {

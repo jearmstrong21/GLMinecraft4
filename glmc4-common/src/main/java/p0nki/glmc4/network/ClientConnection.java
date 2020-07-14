@@ -5,8 +5,8 @@ import p0nki.glmc4.network.packet.Packet;
 import p0nki.glmc4.network.packet.PacketListener;
 import p0nki.glmc4.network.packet.PacketType;
 import p0nki.glmc4.network.packet.clientbound.ClientPacketListener;
-import p0nki.glmc4.player.ServerPlayer;
 import p0nki.glmc4.server.MinecraftServer;
+import p0nki.glmc4.server.ServerPlayer;
 
 import java.io.*;
 import java.net.Socket;
@@ -74,6 +74,11 @@ public class ClientConnection<L extends PacketListener<L>> {
                 if (packet.getType().matches(readType)) {
                     try {
                         packet.read(input);
+                        byte[] b = new byte["Aa0Aa1Aa2Aa3Aa4Aa5Aa6Aa7Aa8Aa9Ab0Ab1Ab2Ab3Ab4Ab5Ab6Ab7Ab8Ab9Ac0Ac1Ac2Ac3Ac4Ac5Ac6Ac7Ac8Ac9Ad0Ad1Ad2A".length()];
+                        input.readFully(b);
+                        if (!new String(b).equals("Aa0Aa1Aa2Aa3Aa4Aa5Aa6Aa7Aa8Aa9Ab0Ab1Ab2Ab3Ab4Ab5Ab6Ab7Ab8Ab9Ac0Ac1Ac2Ac3Ac4Ac5Ac6Ac7Ac8Ac9Ad0Ad1Ad2A")) {
+                            throw new AssertionError(String.format("Expected 1) but got 2)\n1) %s\n2) %s", "Aa0Aa1Aa2Aa3Aa4Aa5Aa6Aa7Aa8Aa9Ab0Ab1Ab2Ab3Ab4Ab5Ab6Ab7Ab8Ab9Ac0Ac1Ac2Ac3Ac4Ac5Ac6Ac7Ac8Ac9Ad0Ad1Ad2A", new String(b)));
+                        }
                     } catch (IOException e) {
                         break;
                     }
@@ -106,10 +111,7 @@ public class ClientConnection<L extends PacketListener<L>> {
     }
 
     public void write(Packet<?> packet) { // TODO make this a packet queue? speed gains?
-        if (!isLoopRunning || socket.isClosed()) {
-//            MinecraftServer.INSTANCE.removeConnection(player.getId());
-            return;
-        }
+        if (!isLoopRunning || socket.isClosed()) return;
         if (packet.getType().matches(writeType)) {
             try {
                 output.writeInt(networkProtocol.getId(packet));
@@ -119,6 +121,7 @@ public class ClientConnection<L extends PacketListener<L>> {
             }
             try {
                 packet.write(output);
+                output.writeBytes("Aa0Aa1Aa2Aa3Aa4Aa5Aa6Aa7Aa8Aa9Ab0Ab1Ab2Ab3Ab4Ab5Ab6Ab7Ab8Ab9Ac0Ac1Ac2Ac3Ac4Ac5Ac6Ac7Ac8Ac9Ad0Ad1Ad2A");
             } catch (IOException e) {
                 if (packet.isWriteErrorSkippable()) return;
                 disconnect();

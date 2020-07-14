@@ -1,6 +1,6 @@
 package p0nki.glmc4.network.packet.clientbound;
 
-import p0nki.glmc4.player.ServerPlayer;
+import p0nki.glmc4.server.ServerPlayer;
 import p0nki.glmc4.tag.CompoundTag;
 
 import java.io.DataInput;
