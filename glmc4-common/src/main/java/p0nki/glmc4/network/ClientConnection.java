@@ -12,7 +12,9 @@ import p0nki.glmc4.network.packet.clientbound.ClientPacketListener;
 import p0nki.glmc4.server.MinecraftServer;
 import p0nki.glmc4.server.ServerPlayer;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.Socket;
 
 public class ClientConnection<L extends PacketListener<L>> {
@@ -23,8 +25,6 @@ public class ClientConnection<L extends PacketListener<L>> {
     private final static Marker WRITE = MarkerManager.getMarker("WRITE");
     private static int COUNTER = 0;
     private final Socket socket;
-    private final DataOutput output;
-    private final DataInput input;
     private final NetworkProtocol networkProtocol;
     private final PacketType readType;
     private final PacketType writeType;
@@ -32,11 +32,13 @@ public class ClientConnection<L extends PacketListener<L>> {
     private boolean isLoopRunning = false;
     private ServerPlayer player = null;
     private Thread threadLoop = null;
+    private final DataInputStream inputStream;
+    private final DataOutputStream outputStream;
 
     public ClientConnection(Socket socket, NetworkProtocol networkProtocol, PacketType readType, PacketType writeType) throws IOException {
         this.socket = socket;
-        output = new DataOutputStream(socket.getOutputStream());
-        input = new DataInputStream(socket.getInputStream());
+        inputStream = new DataInputStream(socket.getInputStream());
+        outputStream = new DataOutputStream(socket.getOutputStream());
         this.networkProtocol = networkProtocol;
         this.readType = readType;
         this.writeType = writeType;
@@ -73,15 +75,19 @@ public class ClientConnection<L extends PacketListener<L>> {
                 int totalLength;
                 byte[] totalPacket;
                 try {
-                    totalLength = input.readInt();
+                    totalLength = inputStream.readInt();
                     //TODO add totalLength size check so clients can't crash the server with out of memory error
                     totalPacket = new byte[totalLength];
-                    input.readFully(totalPacket);
+                    int readCount = 0;
+                    while (readCount < totalLength) {
+                        readCount += inputStream.read(totalPacket, readCount, totalLength - readCount);
+                    }
                 } catch (IOException ioException) {
                     LOGGER.fatal(READ, "Exception while reading packet", ioException);
                     break;
                 }
-                PacketReadBuf readBuf = new PacketReadBuf(totalPacket);
+                PacketReadBuf readBuf = new PacketReadBuf(inputStream, totalPacket);
+//                LOGGER.trace(READ, "buf size {}", totalLength);
                 int id = readBuf.readInt();
                 Packet<?> packet = networkProtocol.createPacket(id);
                 if (packet == null) {
@@ -122,14 +128,14 @@ public class ClientConnection<L extends PacketListener<L>> {
     public void write(Packet<?> packet) { // TODO make this a packet queue? speed gains?
         if (!isLoopRunning || socket.isClosed()) return;
         if (packet.getType() == writeType) {
-            PacketWriteBuf writeBuf = new PacketWriteBuf();
+            PacketWriteBuf writeBuf = new PacketWriteBuf(outputStream);
             int id = networkProtocol.getId(packet);
             writeBuf.writeInt(id);
             packet.write(writeBuf);
             int totalLength = writeBuf.size();
             try {
-                output.writeInt(totalLength);
-                output.write(writeBuf.array());
+                outputStream.writeInt(totalLength);
+                outputStream.write(writeBuf.array());
             } catch (IOException ioException) {
                 LOGGER.fatal(WRITE, "Error writing packet data", ioException);
                 disconnect();

@@ -23,7 +23,7 @@ public class Chunk {
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 256; y++) {
                 for (int z = 0; z < 16; z++) {
-                    data[x][y][z] = input.readLong();
+                    data[x][y][z] = y < 16 ? input.readLong() : 0;
                 }
             }
         }
@@ -36,7 +36,7 @@ public class Chunk {
 
     public void write(PacketWriteBuf output) {
         for (int x = 0; x < 16; x++) {
-            for (int y = 0; y < 256; y++) {
+            for (int y = 0; y < 16; y++) {
                 for (int z = 0; z < 16; z++) {
                     output.writeLong(data[x][y][z]);
                 }

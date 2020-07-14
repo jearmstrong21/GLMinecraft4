@@ -34,7 +34,7 @@ public abstract class Block implements AfterRegisterCallback {
             }
             states.add(state);
         });
-        LOGGER.debug(identifier, "{} states, {} properties", states.size(), schema.getProperties().size());
+//        LOGGER.debug(identifier, "{} states, {} properties", states.size(), schema.getProperties().size());
         states = Collections.unmodifiableList(states);
     }
 

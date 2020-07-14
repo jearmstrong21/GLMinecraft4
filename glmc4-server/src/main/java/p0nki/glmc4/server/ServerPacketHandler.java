@@ -50,7 +50,7 @@ public class ServerPacketHandler implements ServerPacketListener {
                 }
             }
         }
-        LOGGER.info(WORLD, "Generated chunk {}, {}", cx, cz);
+//        LOGGER.info(WORLD, "Generated chunk {}, {}", cx, cz);
         return c;
     }
 

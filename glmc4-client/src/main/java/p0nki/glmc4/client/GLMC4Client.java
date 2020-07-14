@@ -110,7 +110,7 @@ public class GLMC4Client {
     private static void frame(int frameCount) {
         shader.use();
         shader.setTexture("tex", texture, 0);
-        shader.setMat4f("perspective", new Matrix4f().perspective((float) Math.toRadians(80), 1.0F, 0.001F, 100));
+        shader.setMat4f("perspective", new Matrix4f().perspective((float) Math.toRadians(80), 1.0F, 0.001F, 300));
         float t = MCWindow.time();
         shader.setMat4f("view", new Matrix4f().lookAt(
                 new Vector3f((float) (8.0f + 50.0F * Math.cos(t)), 30, (float) (8.0F - 50.0F * Math.cos(t - 4)))
@@ -118,7 +118,7 @@ public class GLMC4Client {
         if (chunkLock.tryLock()) {
             for (Map.Entry<Long, Chunk> chunk : chunks.entrySet()) {
                 meshes.put(chunk.getKey(), new Mesh(mesh(chunk.getValue())));
-                LOGGER.trace(RENDER, "Meshed chunk {}, {}", MathUtils.unpackFirst(chunk.getKey()), MathUtils.unpackSecond(chunk.getKey()));
+//                LOGGER.trace(RENDER, "Meshed chunk {}, {}", MathUtils.unpackFirst(chunk.getKey()), MathUtils.unpackSecond(chunk.getKey()));
             }
             chunks.clear();
             chunkLock.unlock();
