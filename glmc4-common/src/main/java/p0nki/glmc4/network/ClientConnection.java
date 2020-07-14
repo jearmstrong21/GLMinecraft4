@@ -1,5 +1,9 @@
 package p0nki.glmc4.network;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
 import p0nki.glmc4.network.packet.NetworkProtocol;
 import p0nki.glmc4.network.packet.Packet;
 import p0nki.glmc4.network.packet.PacketListener;
@@ -14,6 +18,9 @@ import java.net.Socket;
 public class ClientConnection<L extends PacketListener<L>> {
 
     private final static String DEBUG_STR = "Aa0Aa1Aa2Aa3Aa4Aa5Aa6Aa7Aa8Aa9Ab0Ab1Ab2Ab3Ab4Ab5Ab6Ab7Ab8Ab9Ac0Ac1Ac2Ac3Ac4Ac5Ac6Ac7Ac8Ac9Ad0Ad1Ad2A";
+    private final static Logger LOGGER = LogManager.getLogger();
+    private final static Marker READLOOP = MarkerManager.getMarker("READLOOP");
+    private final static Marker WRITE = MarkerManager.getMarker("WRITE");
 
     private final Socket socket;
     private final DataOutput output;
@@ -61,14 +68,19 @@ public class ClientConnection<L extends PacketListener<L>> {
             throw new UnsupportedOperationException("Cannot start ClientConnection that is already started");
         threadLoop = new Thread(() -> {
             packetListener.onConnected();
+            String dcReason = null;
             while (true) {
                 if (socket.isClosed()) {
+                    LOGGER.fatal(READLOOP, "Socket closed");
+                    dcReason = "Socket closed";
                     break;
                 }
                 int id;
                 try {
                     id = input.readInt();
                 } catch (IOException e) {
+                    LOGGER.fatal(READLOOP, "Error while reading packet ID", e);
+                    dcReason = "Error while reading packet ID";
                     break;
                 }
                 Packet<?> packet = networkProtocol.createPacket(id);
@@ -79,9 +91,14 @@ public class ClientConnection<L extends PacketListener<L>> {
                         byte[] b = new byte[DEBUG_STR.length()];
                         input.readFully(b);
                         if (!new String(b).equals(DEBUG_STR)) {
-                            throw new AssertionError(String.format("Expected 1) but got 2)\n1) %s\n2) %s", DEBUG_STR, new String(b)));
+                            dcReason = "Invalid DEBUG_STR";
+                            LOGGER.fatal(READLOOP, "Expected <{}>", DEBUG_STR);
+                            LOGGER.fatal(READLOOP, "Received <{}>", new String(b));
+                            break;
                         }
                     } catch (IOException e) {
+                        dcReason = "Error while reading packet data";
+                        LOGGER.fatal(READLOOP, "Error while reading packet data", e);
                         break;
                     }
                     Packet.apply(packet, packetListener);
@@ -91,7 +108,7 @@ public class ClientConnection<L extends PacketListener<L>> {
             }
             if (MinecraftServer.INSTANCE != null)
                 MinecraftServer.INSTANCE.removeConnection(player.getId());
-            if (packetListener instanceof ClientPacketListener) packetListener.onDisconnected("Socket closed");
+            if (packetListener instanceof ClientPacketListener) packetListener.onDisconnected(String.valueOf(dcReason));
             isLoopRunning = false;
         });
         isLoopRunning = true;
@@ -119,6 +136,8 @@ public class ClientConnection<L extends PacketListener<L>> {
                 output.writeInt(networkProtocol.getId(packet));
             } catch (IOException e) {
                 disconnect();
+                LOGGER.fatal(WRITE, "Error writing packet ID", e);
+                e.printStackTrace();
                 return;
             }
             try {
@@ -126,6 +145,7 @@ public class ClientConnection<L extends PacketListener<L>> {
                 output.writeBytes(DEBUG_STR);
             } catch (IOException e) {
                 if (packet.isWriteErrorSkippable()) return;
+                LOGGER.fatal(WRITE, "Error writing packet data", e);
                 disconnect();
             }
         } else {
