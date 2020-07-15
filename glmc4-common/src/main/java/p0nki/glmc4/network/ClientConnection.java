@@ -18,8 +18,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 public class ClientConnection<L extends PacketListener<L>> {
 
@@ -43,10 +41,8 @@ public class ClientConnection<L extends PacketListener<L>> {
 
     public ClientConnection(Socket socket, NetworkProtocol networkProtocol, PacketType readType, PacketType writeType) throws IOException {
         this.socket = socket;
-//        inputStream = new DataInputStream(socket.getInputStream());
-//        outputStream = new DataOutputStream(socket.getOutputStream());
-        inputStream = new DataInputStream(new GZIPInputStream(socket.getInputStream()));
-        outputStream = new DataOutputStream(new GZIPOutputStream(socket.getOutputStream()));
+        inputStream = new DataInputStream(socket.getInputStream());
+        outputStream = new DataOutputStream(socket.getOutputStream());
         this.networkProtocol = networkProtocol;
         this.readType = readType;
         this.writeType = writeType;

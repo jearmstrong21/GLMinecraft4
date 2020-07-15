@@ -1,7 +1,9 @@
 package p0nki.glmc4.client.gl;
 
+import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 import p0nki.glmc4.client.assets.AtlasPosition;
 
 import java.util.ArrayList;
@@ -48,12 +50,14 @@ public class MeshData {
         return this;
     }
 
-    public MeshData offset3f(int buffer, float x, float y, float z) {
-        if (sizes.get(buffer) != 3) throw new AssertionError("Invalid buffer");
+    public MeshData mult4(int buffer, Matrix4f matrix) {
+        if (sizes.get(buffer) != 3) throw new AssertionError("Invalid buffer size");
         for (int i = 0; i < data.get(buffer).size(); i += 3) {
-            data.get(buffer).set(i, data.get(buffer).get(i) + x);
-            data.get(buffer).set(i + 1, data.get(buffer).get(i + 1) + y);
-            data.get(buffer).set(i + 2, data.get(buffer).get(i + 2) + z);
+            Vector4f original = new Vector4f(data.get(buffer).get(i), data.get(buffer).get(i + 1), data.get(buffer).get(i + 2), 1);
+            original.mul(matrix);
+            data.get(buffer).set(i, original.x);
+            data.get(buffer).set(i + 1, original.y);
+            data.get(buffer).set(i + 2, original.z);
         }
         return this;
     }

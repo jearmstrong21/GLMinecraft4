@@ -64,6 +64,7 @@ public class GLMC4Client {
             LOGGER.info(SOCKET, "Error creating connection", ioException);
             return;
         }
+        LOGGER.debug(SOCKET, "Connection created");
         ClientPacketListener packetListener = new ClientPacketHandler(connection);
         connection.setPacketListener(packetListener);
         connection.startLoop();
@@ -89,7 +90,7 @@ public class GLMC4Client {
                         BlockRenderer renderer = BlockRenderers.REGISTRY.get(identifier).getValue();
                         BlockRenderContext context = new BlockRenderContext(chunk.getOrAir(x - 1, y, z), chunk.getOrAir(x + 1, y, z), chunk.getOrAir(x, y - 1, z), chunk.getOrAir(x, y + 1, z), chunk.getOrAir(x, y, z - 1), chunk.getOrAir(x, y, z + 1), state);
                         MeshData rendered = renderer.render(context);
-                        rendered.offset3f(0, x, y, z);
+                        rendered.mult4(0, new Matrix4f().translate(x, y, z));
                         data.append(rendered);
                     } else if (!warnedIdentifiers.contains(identifier)) {
                         LOGGER.warn(RENDER, "No renderer found for {}", state);
