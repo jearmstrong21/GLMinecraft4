@@ -15,6 +15,10 @@ public class PacketReadBuf {
         return value;
     }
 
+    public float readFloat() {
+        return buffer.getFloat();
+    }
+
     public int readInt() {
         return buffer.getInt();
     }

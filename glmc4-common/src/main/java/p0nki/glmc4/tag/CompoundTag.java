@@ -1,13 +1,12 @@
 package p0nki.glmc4.tag;
 
+import org.joml.Vector3f;
 import p0nki.glmc4.network.PacketWriteBuf;
 import p0nki.glmc4.utils.DataStreamUtils;
+import p0nki.glmc4.utils.TagUtils;
 
 import javax.annotation.Nonnull;
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class CompoundTag extends AbstractMap<String, Tag<?>> implements Tag<CompoundTag>, ToTag<CompoundTag> {
 
@@ -32,6 +31,16 @@ public class CompoundTag extends AbstractMap<String, Tag<?>> implements Tag<Comp
 
     public CompoundTag insert(String key, Object value) {
         values.put(key, Tag.of(value));
+        return this;
+    }
+
+    public CompoundTag insert(String key, Vector3f value) {
+        values.put(key, TagUtils.of(value));
+        return this;
+    }
+
+    public CompoundTag insert(String key, UUID value) {
+        values.put(key, TagUtils.of(value));
         return this;
     }
 
@@ -65,6 +74,14 @@ public class CompoundTag extends AbstractMap<String, Tag<?>> implements Tag<Comp
 
     public long getLong(String key) {
         return ((LongTag) values.get(key)).get();
+    }
+
+    public Vector3f get3f(String key) {
+        return TagUtils.from3f(values.get(key));
+    }
+
+    public UUID getUUID(String key) {
+        return TagUtils.fromUUID(values.get(key));
     }
 
     public String getString(String key) {

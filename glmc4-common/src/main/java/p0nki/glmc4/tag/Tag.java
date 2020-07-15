@@ -17,6 +17,7 @@ public interface Tag<T extends Tag<T>> extends ToTag<T> {
     int INT_ARRAY = 6;
     int COMPOUND = 7;
     int LIST = 8;
+    int FLOAT = 9;
 
     static boolean isValidCompoundValue(Object object) {
         if (!(object instanceof Map)) return false;
@@ -56,6 +57,7 @@ public interface Tag<T extends Tag<T>> extends ToTag<T> {
                 object instanceof Integer ||
                 object instanceof int[] ||
                 object instanceof ToTag<?> ||
+                object instanceof Float ||
                 isValidCompoundValue(object) ||
                 isValidListValue(object);
     }
@@ -99,6 +101,7 @@ public interface Tag<T extends Tag<T>> extends ToTag<T> {
         if (object instanceof Integer) return new IntTag((Integer) object);
         if (object instanceof int[]) return new IntArrayTag((int[]) object);
         if (object instanceof ToTag) return ((ToTag<?>) object).toTag();
+        if (object instanceof Float) return new FloatTag((Float) object);
         if (isValidCompoundValue(object)) return ofMap((Map<?, ?>) object);
         if (isValidListValue(object)) {
             if (object instanceof List) {
@@ -113,7 +116,7 @@ public interface Tag<T extends Tag<T>> extends ToTag<T> {
     }
 
     static boolean isTagId(int id) {
-        return id == BYTE || id == BYTE_ARRAY || id == STRING || id == LONG || id == LONG_ARRAY || id == INT || id == INT_ARRAY || id == COMPOUND || id == LIST;
+        return id == BYTE || id == BYTE_ARRAY || id == STRING || id == LONG || id == LONG_ARRAY || id == INT || id == INT_ARRAY || id == COMPOUND || id == LIST || id == FLOAT;
     }
 
     static TagReader<?> getReader(int id) {
@@ -136,6 +139,8 @@ public interface Tag<T extends Tag<T>> extends ToTag<T> {
                 return CompoundTag.READER;
             case LIST:
                 return ListTag.READER;
+            case FLOAT:
+                return FloatTag.READER;
             default:
                 throw new UnsupportedOperationException("Cannot find reader for id " + id);
         }

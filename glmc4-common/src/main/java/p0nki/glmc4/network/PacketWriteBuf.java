@@ -17,6 +17,10 @@ public class PacketWriteBuf {
         value.write(this);
     }
 
+    public void writeFloat(float value) {
+        writeBytes(ByteBuffer.allocate(Float.BYTES).putFloat(value).array());
+    }
+
     public void writeInt(int value) {
         writeBytes(ByteBuffer.allocate(Integer.BYTES).putInt(value).array());
     }

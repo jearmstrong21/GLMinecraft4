@@ -21,7 +21,7 @@ public class ListTag extends AbstractList<Tag<?>> implements Tag<ListTag> {
         values = new Tag<?>[0];
     }
 
-    public ListTag(Tag<?>[] values) {
+    public ListTag(Tag<?>... values) {
         this.values = values;
     }
 

@@ -15,7 +15,7 @@ public class DataStreamUtils {
     @Nullable
     public static Tag<?> readTag(PacketReadBuf input) {
         byte type = input.readByte();
-        if (Tag.isValidTag(type)) {
+        if (Tag.isTagId(type)) {
             return Tag.getReader(type).read(input);
         } else {
             return null;
