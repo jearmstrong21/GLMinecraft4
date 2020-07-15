@@ -82,7 +82,6 @@ public class ClientConnection<L extends PacketListener<L>> {
                         dcReason = "Max packet size exceeded";
                         break;
                     }
-                    //TODO add totalLength size check so clients can't crash the server with out of memory error
                     totalPacket = new byte[totalLength];
                     int readCount = 0;
                     while (readCount < totalLength) {
@@ -120,9 +119,16 @@ public class ClientConnection<L extends PacketListener<L>> {
                     Packet<?> packet = packetsToWrite.remove(0);
                     PacketWriteBuf writeBuf = new PacketWriteBuf();
                     int id = networkProtocol.getId(packet);
-                    writeBuf.writeInt(id);
-                    packet.write(writeBuf);
+                    try {
+                        writeBuf.writeInt(id);
+                        packet.write(writeBuf);
+                    } catch (PacketByteBufOverflow exception) {
+                        LOGGER.fatal(WRITE, "Overflow detected while writing packet ID {} and type {}", id, packet.getClass(), exception);
+                    }
                     int totalLength = writeBuf.size();
+                    if (totalLength > MAX_PACKET_SIZE) {
+                        LOGGER.fatal(WRITE, "Somehow the packet buffer managed to overflow with packet ID {} and type {}", id, packet.getClass());
+                    }
                     try {
                         outputStream.writeInt(totalLength);
                         outputStream.write(writeBuf.array());
@@ -132,6 +138,7 @@ public class ClientConnection<L extends PacketListener<L>> {
                     }
                 }
             }
+            readLoop.interrupt();
         }, "Connection-Write-" + CONNECTION_COUNTER);
         CONNECTION_COUNTER++;
         isLoopRunning = true;

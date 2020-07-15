@@ -2,7 +2,6 @@ package p0nki.glmc4.network;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +39,7 @@ public class PacketWriteBuf {
     public void writeByte(byte value) {
         bytes.add(value);
         if (bytes.size() >= ClientConnection.MAX_PACKET_SIZE) {
-            throw new BufferOverflowException();
+            throw new PacketByteBufOverflow();
         }
     }
 
