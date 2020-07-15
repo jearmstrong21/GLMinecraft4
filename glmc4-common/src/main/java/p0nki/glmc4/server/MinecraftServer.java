@@ -5,7 +5,8 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import p0nki.glmc4.network.ClientConnection;
-import p0nki.glmc4.network.packet.clientbound.PacketS2C;
+import p0nki.glmc4.network.packet.Packet;
+import p0nki.glmc4.network.packet.clientbound.ClientPacketListener;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CChatMessage;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CPlayerJoin;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CPlayerLeave;
@@ -78,7 +79,7 @@ public class MinecraftServer {
         playerIdsToRemove.add(id);
     }
 
-    private void writeAll(PacketS2C packet) {
+    private void writeAll(Packet<ClientPacketListener> packet) {
         connections.forEach((key, connection) -> connection.write(packet));
     }
 

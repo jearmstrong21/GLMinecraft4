@@ -5,8 +5,11 @@ import org.apache.logging.log4j.Logger;
 import p0nki.glmc4.block.Chunk;
 import p0nki.glmc4.network.PacketReadBuf;
 import p0nki.glmc4.network.PacketWriteBuf;
+import p0nki.glmc4.network.packet.Packet;
+import p0nki.glmc4.network.packet.PacketDirection;
+import p0nki.glmc4.network.packet.PacketTypes;
 
-public class PacketS2CChunkLoad extends PacketS2C {
+public class PacketS2CChunkLoad extends Packet<ClientPacketListener> {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -15,10 +18,11 @@ public class PacketS2CChunkLoad extends PacketS2C {
     private Chunk chunk;
 
     public PacketS2CChunkLoad() {
-
+        super(PacketDirection.SERVER_TO_CLIENT, PacketTypes.S2C_CHUNK_LOAD);
     }
 
     public PacketS2CChunkLoad(int x, int z, Chunk chunk) {
+        super(PacketDirection.SERVER_TO_CLIENT, PacketTypes.S2C_CHUNK_LOAD);
         this.x = x;
         this.z = z;
         this.chunk = chunk;

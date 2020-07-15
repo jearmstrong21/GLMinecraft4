@@ -4,6 +4,9 @@ import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.entity.EntityTypes;
 import p0nki.glmc4.network.PacketReadBuf;
 import p0nki.glmc4.network.PacketWriteBuf;
+import p0nki.glmc4.network.packet.Packet;
+import p0nki.glmc4.network.packet.PacketDirection;
+import p0nki.glmc4.network.packet.PacketTypes;
 import p0nki.glmc4.server.ServerPlayer;
 import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.tag.ListTag;
@@ -11,16 +14,17 @@ import p0nki.glmc4.utils.TagUtils;
 
 import java.util.List;
 
-public class PacketS2CHello extends PacketS2C {
+public class PacketS2CHello extends Packet<ClientPacketListener> {
 
     private ServerPlayer yourPlayer;
     private List<ServerPlayer> allPlayers;
 
     public PacketS2CHello() {
-
+        super(PacketDirection.SERVER_TO_CLIENT, PacketTypes.S2C_HELLO);
     }
 
     public PacketS2CHello(ServerPlayer yourPlayer, List<ServerPlayer> allPlayers) {
+        super(PacketDirection.SERVER_TO_CLIENT, PacketTypes.S2C_HELLO);
         this.yourPlayer = yourPlayer;
         this.allPlayers = allPlayers;
     }
@@ -35,6 +39,7 @@ public class PacketS2CHello extends PacketS2C {
 
     @Override
     public void read(PacketReadBuf input) {
+        PacketTypes.REGISTRY.verify(input);
         yourPlayer = new ServerPlayer().fromTag(CompoundTag.READER.read(input));
         allPlayers = TagUtils.fromList(ListTag.READER.read(input), ServerPlayer::new);
         Blocks.REGISTRY.verify(input);
@@ -43,6 +48,7 @@ public class PacketS2CHello extends PacketS2C {
 
     @Override
     public void write(PacketWriteBuf output) {
+        PacketTypes.REGISTRY.write(output);
         yourPlayer.toTag().write(output);
         TagUtils.toList(allPlayers).write(output);
         Blocks.REGISTRY.write(output);

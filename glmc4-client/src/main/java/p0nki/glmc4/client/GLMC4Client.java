@@ -19,8 +19,7 @@ import p0nki.glmc4.client.render.block.BlockRenderContext;
 import p0nki.glmc4.client.render.block.BlockRenderer;
 import p0nki.glmc4.client.render.block.BlockRenderers;
 import p0nki.glmc4.network.ClientConnection;
-import p0nki.glmc4.network.packet.NetworkProtocol;
-import p0nki.glmc4.network.packet.PacketType;
+import p0nki.glmc4.network.packet.PacketDirection;
 import p0nki.glmc4.network.packet.clientbound.ClientPacketListener;
 import p0nki.glmc4.utils.Identifier;
 import p0nki.glmc4.utils.MathUtils;
@@ -56,10 +55,9 @@ public class GLMC4Client {
             System.exit(1);
         }
         LOGGER.info(SOCKET, "Socket connected");
-        NetworkProtocol networkProtocol = new NetworkProtocol();
         ClientConnection<ClientPacketListener> connection;
         try {
-            connection = new ClientConnection<>(socket, networkProtocol, PacketType.SERVER_TO_CLIENT, PacketType.CLIENT_TO_SERVER);
+            connection = new ClientConnection<>(socket, PacketDirection.SERVER_TO_CLIENT, PacketDirection.CLIENT_TO_SERVER);
         } catch (IOException ioException) {
             LOGGER.info(SOCKET, "Error creating connection", ioException);
             return;

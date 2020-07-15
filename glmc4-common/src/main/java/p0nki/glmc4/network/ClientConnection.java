@@ -4,10 +4,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
-import p0nki.glmc4.network.packet.NetworkProtocol;
 import p0nki.glmc4.network.packet.Packet;
+import p0nki.glmc4.network.packet.PacketDirection;
 import p0nki.glmc4.network.packet.PacketListener;
-import p0nki.glmc4.network.packet.PacketType;
+import p0nki.glmc4.network.packet.PacketTypes;
 import p0nki.glmc4.network.packet.clientbound.ClientPacketListener;
 import p0nki.glmc4.server.MinecraftServer;
 import p0nki.glmc4.server.ServerPlayer;
@@ -28,9 +28,8 @@ public class ClientConnection<L extends PacketListener<L>> {
     private final static Marker WRITE = MarkerManager.getMarker("WRITE");
     private static int CONNECTION_COUNTER = 0;
     private final Socket socket;
-    private final NetworkProtocol networkProtocol;
-    private final PacketType readType;
-    private final PacketType writeType;
+    private final PacketDirection readDirection;
+    private final PacketDirection writeDirection;
     private L packetListener;
     private boolean isLoopRunning = false;
     private ServerPlayer player = null;
@@ -39,13 +38,12 @@ public class ClientConnection<L extends PacketListener<L>> {
     private final DataInputStream inputStream;
     private final DataOutputStream outputStream;
 
-    public ClientConnection(Socket socket, NetworkProtocol networkProtocol, PacketType readType, PacketType writeType) throws IOException {
+    public ClientConnection(Socket socket, PacketDirection readDirection, PacketDirection writeDirection) throws IOException {
         this.socket = socket;
         inputStream = new DataInputStream(socket.getInputStream());
         outputStream = new DataOutputStream(socket.getOutputStream());
-        this.networkProtocol = networkProtocol;
-        this.readType = readType;
-        this.writeType = writeType;
+        this.readDirection = readDirection;
+        this.writeDirection = writeDirection;
     }
 
     public L getPacketListener() {
@@ -94,12 +92,12 @@ public class ClientConnection<L extends PacketListener<L>> {
                 }
                 PacketReadBuf readBuf = new PacketReadBuf(totalPacket);
                 int id = readBuf.readInt();
-                Packet<?> packet = networkProtocol.createPacket(id);
+                Packet<?> packet = PacketTypes.REGISTRY.get(id).getValue().create();
                 if (packet == null) {
                     LOGGER.warn(READ, "Null packet created by protocol for ID {}", id);
                     continue;
                 }
-                if (packet.getType() == readType) {
+                if (packet.getDirection() == readDirection) {
                     packet.read(readBuf);
                     Packet.apply(packet, packetListener);
                 } else {
@@ -118,7 +116,7 @@ public class ClientConnection<L extends PacketListener<L>> {
                 if (packetsToWrite.size() > 0) {
                     Packet<?> packet = packetsToWrite.remove(0);
                     PacketWriteBuf writeBuf = new PacketWriteBuf();
-                    int id = networkProtocol.getId(packet);
+                    int id = PacketTypes.REGISTRY.get(packet.getType()).getIndex();
                     try {
                         writeBuf.writeInt(id);
                         packet.write(writeBuf);
@@ -164,7 +162,7 @@ public class ClientConnection<L extends PacketListener<L>> {
 
     public void write(Packet<?> packet) { // TODO make this a packet queue? speed gains?
         if (!isLoopRunning || socket.isClosed()) return;
-        if (packet.getType() == writeType) {
+        if (packet.getDirection() == writeDirection) {
             packetsToWrite.add(packet);
         } else {
             disconnect();
