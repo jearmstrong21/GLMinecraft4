@@ -1,8 +1,17 @@
 package p0nki.glmc4.network.packet;
 
-public enum PacketType {
+import java.util.function.Supplier;
 
-    CLIENT_TO_SERVER,
-    SERVER_TO_CLIENT
+public class PacketType<P extends Packet<?>> {
+
+    private final Supplier<P> supplier;
+
+    public PacketType(Supplier<P> supplier) {
+        this.supplier = supplier;
+    }
+
+    public P create() {
+        return supplier.get();
+    }
 
 }
