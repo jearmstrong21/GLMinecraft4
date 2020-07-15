@@ -1,5 +1,6 @@
 package p0nki.glmc4.client;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
@@ -45,8 +46,11 @@ public class MCWindow {
         glfwSetErrorCallback(GLFWErrorCallback.createPrint());
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        if (SystemUtils.IS_OS_MAC_OSX) {
+            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+            LOGGER.warn(OPENGL, "CREATING FORWARD COMPAT CORE PROFILE CONTEXT FOR OPENGL. THIS IS ONLY DONE ON MAC OS. IF YOU ARE NOT ON A MAC OS THIS IS AN ISSUE AND WILL LIKELY CRASH.");
+        }
         ptr = glfwCreateWindow(750, 750, "Minecraft", 0, 0);
         glfwMakeContextCurrent(ptr);
         glfwSwapInterval(0);
