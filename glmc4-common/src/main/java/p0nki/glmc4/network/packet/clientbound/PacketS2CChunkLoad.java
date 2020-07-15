@@ -1,10 +1,14 @@
 package p0nki.glmc4.network.packet.clientbound;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import p0nki.glmc4.block.Chunk;
 import p0nki.glmc4.network.PacketReadBuf;
 import p0nki.glmc4.network.PacketWriteBuf;
 
 public class PacketS2CChunkLoad extends PacketS2C {
+
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private int x;
     private int z;
@@ -24,14 +28,14 @@ public class PacketS2CChunkLoad extends PacketS2C {
     public void read(PacketReadBuf input) {
         x = input.readInt();
         z = input.readInt();
-        chunk = new Chunk(input);
+        chunk = input.read(Chunk::new);
     }
 
     @Override
     public void write(PacketWriteBuf output) {
         output.writeInt(x);
         output.writeInt(z);
-        chunk.write(output);
+        output.write(chunk);
     }
 
     @Override

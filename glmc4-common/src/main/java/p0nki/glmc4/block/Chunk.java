@@ -1,29 +1,23 @@
 package p0nki.glmc4.block;
 
+import p0nki.glmc4.network.ByteBufEquivalent;
 import p0nki.glmc4.network.PacketReadBuf;
 import p0nki.glmc4.network.PacketWriteBuf;
 
-public class Chunk {
+public class Chunk implements ByteBufEquivalent {
 
     private final long[][][] data;
 
     public Chunk() {
         data = new long[16][256][16];
-        for (int x = 0; x < 16; x++) {
-            for (int y = 0; y < 256; y++) {
-                for (int z = 0; z < 16; z++) {
-                    data[x][y][z] = 0;
-                }
-            }
-        }
     }
 
-    public Chunk(PacketReadBuf input) {
-        data = new long[16][256][16];
+    @Override
+    public void read(PacketReadBuf input) {
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 256; y++) {
                 for (int z = 0; z < 16; z++) {
-                    data[x][y][z] = y < 16 ? input.readLong() : 0;
+                    data[x][y][z] = input.readLong();
                 }
             }
         }
@@ -34,9 +28,10 @@ public class Chunk {
         return new BlockState(data[x][y][z]);
     }
 
+    @Override
     public void write(PacketWriteBuf output) {
         for (int x = 0; x < 16; x++) {
-            for (int y = 0; y < 16; y++) {
+            for (int y = 0; y < 256; y++) {
                 for (int z = 0; z < 16; z++) {
                     output.writeLong(data[x][y][z]);
                 }

@@ -31,7 +31,7 @@ public class NetworkProtocol {
     }
 
     private <P extends Packet<?>> void register(Class<P> type, Supplier<P> factory) {
-        int id = classToId.size();
+        int id = classToId.size() + 1;
         classToId.put(type, id);
         idToSupplier.put(id, factory);
     }

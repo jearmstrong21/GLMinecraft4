@@ -2,22 +2,20 @@ package p0nki.glmc4.network;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.io.OutputStream;
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PacketWriteBuf {
 
-    private final OutputStream outputStream;
     private final List<Byte> bytes = new ArrayList<>();
 
-    public PacketWriteBuf(OutputStream outputStream) {
-        this.outputStream = outputStream;
+    public PacketWriteBuf() {
     }
 
-    public OutputStream getOutputStream() {
-        return outputStream;
+    public void write(ByteBufEquivalent value) {
+        value.write(this);
     }
 
     public void writeInt(int value) {
@@ -41,11 +39,14 @@ public class PacketWriteBuf {
 
     public void writeByte(byte value) {
         bytes.add(value);
+        if (bytes.size() >= ClientConnection.MAX_PACKET_SIZE) {
+            throw new BufferOverflowException();
+        }
     }
 
     public void writeBytes(byte[] value) {
         for (byte b : value) {
-            bytes.add(b);
+            writeByte(b);
         }
     }
 

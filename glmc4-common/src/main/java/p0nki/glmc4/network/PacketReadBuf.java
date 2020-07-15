@@ -1,20 +1,20 @@
 package p0nki.glmc4.network;
 
-import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.function.Supplier;
 
 public class PacketReadBuf {
 
-    private final InputStream inputStream;
     private final ByteBuffer buffer;
 
-    public PacketReadBuf(InputStream inputStream, byte[] bytes) {
-        this.inputStream = inputStream;
+    public PacketReadBuf(byte[] bytes) {
         buffer = ByteBuffer.wrap(bytes);
     }
 
-    public InputStream getInputStream() {
-        return inputStream;
+    public <T extends ByteBufEquivalent> T read(Supplier<T> supplier) {
+        T t = supplier.get();
+        t.read(this);
+        return t;
     }
 
     public int readInt() {

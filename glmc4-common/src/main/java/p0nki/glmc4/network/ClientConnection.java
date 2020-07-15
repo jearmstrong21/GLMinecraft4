@@ -16,14 +16,17 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ClientConnection<L extends PacketListener<L>> {
 
-    //    private final static String DEBUG_STR = "Aa0Aa1Aa2Aa3Aa4Aa5Aa6Aa7Aa8Aa9Ab0Ab1Ab2Ab3Ab4Ab5Ab6Ab7Ab8Ab9Ac0Ac1Ac2Ac3Ac4Ac5Ac6Ac7Ac8Ac9Ad0Ad1Ad2A";
+    public final static int MAX_PACKET_SIZE = 600000;
+
     private final static Logger LOGGER = LogManager.getLogger();
     private final static Marker READ = MarkerManager.getMarker("READ");
     private final static Marker WRITE = MarkerManager.getMarker("WRITE");
-    private static int COUNTER = 0;
+    private static int CONNECTION_COUNTER = 0;
     private final Socket socket;
     private final NetworkProtocol networkProtocol;
     private final PacketType readType;
@@ -31,7 +34,8 @@ public class ClientConnection<L extends PacketListener<L>> {
     private L packetListener;
     private boolean isLoopRunning = false;
     private ServerPlayer player = null;
-    private Thread threadLoop = null;
+    private final List<Packet<?>> packetsToWrite = new CopyOnWriteArrayList<>();
+    private Thread readLoop = null;
     private final DataInputStream inputStream;
     private final DataOutputStream outputStream;
 
@@ -60,22 +64,24 @@ public class ClientConnection<L extends PacketListener<L>> {
         this.player = player;
     }
 
+    private Thread writeLoop = null;
+
     public void startLoop() {
         if (isLoopRunning)
             throw new UnsupportedOperationException("Cannot start ClientConnection that is already started");
-        threadLoop = new Thread(() -> {
+        readLoop = new Thread(() -> {
             packetListener.onConnected();
             String dcReason = null;
-            while (true) {
-                if (socket.isClosed()) {
-                    LOGGER.fatal(READ, "Socket closed");
-                    dcReason = "Socket closed";
-                    break;
-                }
+            while (isLoopRunning && !socket.isClosed()) {
                 int totalLength;
                 byte[] totalPacket;
                 try {
                     totalLength = inputStream.readInt();
+                    if (totalLength > MAX_PACKET_SIZE) {
+                        LOGGER.fatal(READ, "Packet of size {} > {} received", totalLength, MAX_PACKET_SIZE);
+                        dcReason = "Max packet size exceeded";
+                        break;
+                    }
                     //TODO add totalLength size check so clients can't crash the server with out of memory error
                     totalPacket = new byte[totalLength];
                     int readCount = 0;
@@ -84,10 +90,10 @@ public class ClientConnection<L extends PacketListener<L>> {
                     }
                 } catch (IOException ioException) {
                     LOGGER.fatal(READ, "Exception while reading packet", ioException);
+                    dcReason = "Error while reading packet data";
                     break;
                 }
-                PacketReadBuf readBuf = new PacketReadBuf(inputStream, totalPacket);
-//                LOGGER.trace(READ, "buf size {}", totalLength);
+                PacketReadBuf readBuf = new PacketReadBuf(totalPacket);
                 int id = readBuf.readInt();
                 Packet<?> packet = networkProtocol.createPacket(id);
                 if (packet == null) {
@@ -99,6 +105,7 @@ public class ClientConnection<L extends PacketListener<L>> {
                     Packet.apply(packet, packetListener);
                 } else {
                     LOGGER.fatal(READ, "Invalid packet type sent with ID {}", id);
+                    dcReason = "Invalid packet type";
                     break;
                 }
             }
@@ -106,15 +113,37 @@ public class ClientConnection<L extends PacketListener<L>> {
                 MinecraftServer.INSTANCE.removeConnection(player.getId());
             if (packetListener instanceof ClientPacketListener) packetListener.onDisconnected(String.valueOf(dcReason));
             isLoopRunning = false;
-        }, "Connection-" + (COUNTER++));
+        }, "Connection-Read-" + CONNECTION_COUNTER);
+        writeLoop = new Thread(() -> {
+            while (isLoopRunning && !socket.isClosed()) {
+                if (packetsToWrite.size() > 0) {
+                    Packet<?> packet = packetsToWrite.remove(0);
+                    PacketWriteBuf writeBuf = new PacketWriteBuf();
+                    int id = networkProtocol.getId(packet);
+                    writeBuf.writeInt(id);
+                    packet.write(writeBuf);
+                    int totalLength = writeBuf.size();
+                    try {
+                        outputStream.writeInt(totalLength);
+                        outputStream.write(writeBuf.array());
+                    } catch (IOException ioException) {
+                        LOGGER.fatal(WRITE, "Error writing packet data", ioException);
+                        disconnect();
+                    }
+                }
+            }
+        }, "Connection-Write-" + CONNECTION_COUNTER);
+        CONNECTION_COUNTER++;
         isLoopRunning = true;
-        threadLoop.start();
+        readLoop.start();
+        writeLoop.start();
     }
 
     private void disconnect() {
         isLoopRunning = false;
         if (packetListener instanceof ClientPacketListener) packetListener.onDisconnected("Socket closed");
-        threadLoop.interrupt();
+        readLoop.interrupt();
+        writeLoop.interrupt();
     }
 
     public void close() {
@@ -128,18 +157,7 @@ public class ClientConnection<L extends PacketListener<L>> {
     public void write(Packet<?> packet) { // TODO make this a packet queue? speed gains?
         if (!isLoopRunning || socket.isClosed()) return;
         if (packet.getType() == writeType) {
-            PacketWriteBuf writeBuf = new PacketWriteBuf(outputStream);
-            int id = networkProtocol.getId(packet);
-            writeBuf.writeInt(id);
-            packet.write(writeBuf);
-            int totalLength = writeBuf.size();
-            try {
-                outputStream.writeInt(totalLength);
-                outputStream.write(writeBuf.array());
-            } catch (IOException ioException) {
-                LOGGER.fatal(WRITE, "Error writing packet data", ioException);
-                disconnect();
-            }
+            packetsToWrite.add(packet);
         } else {
             disconnect();
         }
