@@ -28,7 +28,7 @@ public class PacketS2CChunkLoad extends PacketS2C {
     public void read(PacketReadBuf input) {
         x = input.readInt();
         z = input.readInt();
-        chunk = input.read(Chunk::new);
+        chunk = input.read(new Chunk());
     }
 
     @Override

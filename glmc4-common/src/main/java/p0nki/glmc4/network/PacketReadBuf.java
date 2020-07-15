@@ -1,7 +1,6 @@
 package p0nki.glmc4.network;
 
 import java.nio.ByteBuffer;
-import java.util.function.Supplier;
 
 public class PacketReadBuf {
 
@@ -11,10 +10,9 @@ public class PacketReadBuf {
         buffer = ByteBuffer.wrap(bytes);
     }
 
-    public <T extends ByteBufEquivalent> T read(Supplier<T> supplier) {
-        T t = supplier.get();
-        t.read(this);
-        return t;
+    public <T extends ByteBufEquivalent> T read(T value) {
+        value.read(this);
+        return value;
     }
 
     public int readInt() {
