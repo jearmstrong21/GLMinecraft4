@@ -4,6 +4,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
+import org.joml.Vector3f;
+import p0nki.glmc4.entity.Entity;
+import p0nki.glmc4.entity.TestEntity;
 import p0nki.glmc4.network.ClientConnection;
 import p0nki.glmc4.network.packet.Packet;
 import p0nki.glmc4.network.packet.clientbound.ClientPacketListener;
@@ -22,6 +25,7 @@ public class MinecraftServer {
 
     public static MinecraftServer INSTANCE = null;
 
+    private final List<Entity> entities = new ArrayList<>();
     private final Map<String, ClientConnection<ServerPacketListener>> connections = new HashMap<>();
     private final List<ServerPlayer> players = new ArrayList<>();
     private final Set<String> playerIdsToRemove = new HashSet<>();
@@ -54,12 +58,18 @@ public class MinecraftServer {
                 playerIdsToRemove.clear();
             }
         };
+        TestEntity testEntity = new TestEntity(new Vector3f(0, 0, 0), UUID.randomUUID(), new Vector3f(0.25F, 0.3F, 0.6F));
+        entities.add(testEntity);
         new Timer().schedule(pingPlayers, 0, 100);
     }
 
     public void writeGlobalChatMessage(String source, String message) {
         LOGGER.info(CHAT, "<{}> {}", source, message);
         writeAll(new PacketS2CChatMessage(source, message));
+    }
+
+    public List<Entity> getEntities() {
+        return entities;
     }
 
     public void joinPlayer(ClientConnection<ServerPacketListener> connection) {

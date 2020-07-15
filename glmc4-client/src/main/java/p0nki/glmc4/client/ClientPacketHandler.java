@@ -37,13 +37,14 @@ public class ClientPacketHandler implements ClientPacketListener {
     }
 
     public void onChunkLoad(PacketS2CChunkLoad packet) {
-        GLMC4Client.onLoad(packet.getX(), packet.getZ(), packet.getChunk());
+        GLMC4Client.onLoadChunk(packet.getX(), packet.getZ(), packet.getChunk());
     }
 
     public void onHello(PacketS2CHello packet) {
         connection.setPlayer(packet.getYourPlayer());
         LOGGER.info(PLAYERS, "Your player is {}", packet.getYourPlayer().toString());
         LOGGER.info(PLAYERS, "Currently logged in players: {}", packet.getAllPlayers().stream().map(ServerPlayer::toString).collect(Collectors.joining(", ")));
+        GLMC4Client.loadInitialEntities(packet.getAllEntities());
     }
 
     public void onPlayerJoin(PacketS2CPlayerJoin packet) {

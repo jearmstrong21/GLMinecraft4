@@ -3,9 +3,20 @@ package p0nki.glmc4.entity;
 import org.joml.Vector3f;
 import p0nki.glmc4.tag.CompoundTag;
 
+import java.util.UUID;
+
 public class TestEntity extends Entity {
 
     private Vector3f color;
+
+    public TestEntity(Vector3f position, UUID uuid, Vector3f color) {
+        super(EntityTypes.TEST, position, uuid);
+        this.color = color;
+    }
+
+    public Vector3f getColor() {
+        return color;
+    }
 
     public TestEntity(CompoundTag tag) {
         super(EntityTypes.TEST, tag);

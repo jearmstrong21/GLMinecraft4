@@ -10,13 +10,15 @@ import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.block.Chunk;
 import p0nki.glmc4.client.assets.LocalLocation;
-import p0nki.glmc4.client.gl.Mesh;
-import p0nki.glmc4.client.gl.MeshData;
-import p0nki.glmc4.client.gl.Shader;
-import p0nki.glmc4.client.gl.Texture;
+import p0nki.glmc4.client.gl.*;
 import p0nki.glmc4.client.render.block.BlockRenderContext;
 import p0nki.glmc4.client.render.block.BlockRenderer;
 import p0nki.glmc4.client.render.block.BlockRenderers;
+import p0nki.glmc4.client.render.entity.EntityRenderer;
+import p0nki.glmc4.client.render.entity.EntityRenderers;
+import p0nki.glmc4.entity.Entity;
+import p0nki.glmc4.entity.EntityType;
+import p0nki.glmc4.entity.EntityTypes;
 import p0nki.glmc4.network.ClientConnection;
 import p0nki.glmc4.network.packet.PacketDirection;
 import p0nki.glmc4.network.packet.clientbound.ClientPacketListener;
@@ -25,10 +27,7 @@ import p0nki.glmc4.utils.MathUtils;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -45,6 +44,12 @@ public class GLMC4Client {
 
     private static Shader shader;
     private static Texture texture;
+
+    private static List<Entity> entities = new ArrayList<>();
+
+    public static void loadInitialEntities(List<Entity> entities) {
+        GLMC4Client.entities = entities;
+    }
 
     private static void runSocket() {
         try {
@@ -68,8 +73,7 @@ public class GLMC4Client {
         LOGGER.info(SOCKET, "Connected to localhost:3333");
     }
 
-    public static void onLoad(int x, int z, Chunk chunk) {
-        LOGGER.trace(SOCKET, "Chunk received {}, {}", x, z);
+    public static void onLoadChunk(int x, int z, Chunk chunk) {
         chunkLock.lock();
         chunks.put(MathUtils.pack(x, z), chunk);
         chunkLock.unlock();
@@ -103,20 +107,24 @@ public class GLMC4Client {
         shader = new Shader("chunk");
         texture = new Texture(new LocalLocation("atlas/block.png"));
         LOGGER.info(RENDER, "Client initialized");
+        EntityRenderers.REGISTRY.getEntries().forEach(entry -> entry.getValue().initialize());
     }
 
     private static void frame(int frameCount) {
+        float t = MCWindow.time();
+        Matrix4f perspective = new Matrix4f().perspective((float) Math.toRadians(80), 1.0F, 0.001F, 300);
+        float camHeight = 4;
+        float camRadius = 10;
+        Matrix4f view = new Matrix4f().lookAt(
+                new Vector3f((float) (camRadius * Math.cos(t)), camHeight, (float) (camHeight * Math.sin(t)))
+                , new Vector3f(0, 0, 0), new Vector3f(0, 1, 0));
+        WorldRenderContext context = new WorldRenderContext(perspective, view);
         shader.use();
         shader.setTexture("tex", texture, 0);
-        shader.setMat4f("perspective", new Matrix4f().perspective((float) Math.toRadians(80), 1.0F, 0.001F, 300));
-        float t = MCWindow.time();
-        shader.setMat4f("view", new Matrix4f().lookAt(
-                new Vector3f((float) (8.0f + 50.0F * Math.cos(t)), 30, (float) (8.0F - 50.0F * Math.cos(t - 4)))
-                , new Vector3f(0, 0, 0), new Vector3f(0, 1, 0)));
+        shader.set(context);
         if (chunkLock.tryLock()) {
             for (Map.Entry<Long, Chunk> chunk : chunks.entrySet()) {
                 meshes.put(chunk.getKey(), new Mesh(mesh(chunk.getValue())));
-//                LOGGER.trace(RENDER, "Meshed chunk {}, {}", MathUtils.unpackFirst(chunk.getKey()), MathUtils.unpackSecond(chunk.getKey()));
             }
             chunks.clear();
             chunkLock.unlock();
@@ -126,7 +134,14 @@ public class GLMC4Client {
         for (Map.Entry<Long, Mesh> chunk : meshes.entrySet()) {
             shader.setFloat("x", 16 * MathUtils.unpackFirst(chunk.getKey()));
             shader.setFloat("z", 16 * MathUtils.unpackSecond(chunk.getKey()));
-            chunk.getValue().render();
+//            chunk.getValue().render();
+        }
+
+        for (Entity entity : entities) {
+            EntityType<?> type = entity.getType();
+            Identifier identifier = EntityTypes.REGISTRY.get(type).getKey();
+            EntityRenderer<?> renderer = EntityRenderers.REGISTRY.get(identifier).getValue();
+            renderer.render(context, entity);
         }
     }
 

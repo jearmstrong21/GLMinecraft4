@@ -12,6 +12,12 @@ public class Entity implements TagEquivalent<Entity, CompoundTag> {
     private UUID uuid;
     private final EntityType<?> type;
 
+    public Entity(EntityType<?> type, Vector3f position, UUID uuid) {
+        this.type = type;
+        this.position = position;
+        this.uuid = uuid;
+    }
+
     public Entity(EntityType<?> type, CompoundTag tag) {
         this.type = type;
         fromTag(tag);
