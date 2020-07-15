@@ -58,7 +58,8 @@ public class MinecraftServer {
                 playerIdsToRemove.clear();
             }
         };
-        TestEntity testEntity = new TestEntity(new Vector3f(0, 0, 0), UUID.randomUUID(), new Vector3f(0.25F, 0.3F, 0.6F));
+//        TestEntity testEntity = new TestEntity(new Vector3f(0, 0, 0), UUID.randomUUID(), new Vector3f(0.25F, 0.3F, 0.6F));
+        TestEntity testEntity = new TestEntity(new Vector3f(0, 0, 0), UUID.randomUUID(), new Vector3f(1));
         entities.add(testEntity);
         new Timer().schedule(pingPlayers, 0, 100);
     }
