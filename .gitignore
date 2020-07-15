@@ -139,3 +139,6 @@ gradle-app.setting
 
 # Ignore Gradle build output directory
 build
+
+glmc4-client/run
+glmc4-server/run
