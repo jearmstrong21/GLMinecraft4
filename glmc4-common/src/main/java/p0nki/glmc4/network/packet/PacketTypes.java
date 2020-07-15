@@ -19,7 +19,7 @@ public class PacketTypes {
 
     public static final PacketType<PacketC2SPingResponse> C2S_PING_RESPONSE = new PacketType<>(PacketC2SPingResponse::new);
 
-    static {
+    public static void initialize() {
         REGISTRY.register(new Identifier("minecraft:s2c_hello"), S2C_HELLO);
 
         REGISTRY.register(new Identifier("minecraft:s2c_chat_message"), S2C_CHAT_MESSAGE);

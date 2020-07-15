@@ -11,7 +11,7 @@ public class EntityTypes {
     public static final EntityType<PlayerEntity> PLAYER = new EntityType<>(new Vector3f(0.6F, 1.8F, 0.6F), PlayerEntity::new);
     public static final EntityType<TestEntity> TEST = new EntityType<>(new Vector3f(1, 1, 1), TestEntity::new);
 
-    static {
+    public static void initialize() {
         REGISTRY.register(new Identifier("minecraft:player"), PLAYER);
         REGISTRY.register(new Identifier("minecraft:test"), TEST);
     }

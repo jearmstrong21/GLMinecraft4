@@ -14,7 +14,7 @@ public class BlockRenderers {
     public static final GrassBlockRenderer GRASS = new GrassBlockRenderer();
     public static final StoneBlockRenderer STONE = new StoneBlockRenderer();
 
-    static {
+    public static void initialize() {
         REGISTRY.register(new Identifier("minecraft:dirt"), DIRT);
         REGISTRY.register(new Identifier("minecraft:grass"), GRASS);
         REGISTRY.register(new Identifier("minecraft:stone"), STONE);

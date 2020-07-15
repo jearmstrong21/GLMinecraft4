@@ -18,10 +18,6 @@ public class TextureAssembler {
     private static final Map<Identifier, TextureAssembler> assemblers = new HashMap<>();
     private static final Logger LOGGER = LogManager.getLogger();
 
-    static {
-        get(new Identifier("minecraft:block"));
-    }
-
     private final Map<Identifier, File> identifiers;
     private final Map<Identifier, Image> images;
     private final int width = 1024;

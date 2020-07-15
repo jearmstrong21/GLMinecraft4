@@ -14,7 +14,7 @@ public class Blocks {
     public final static GrassBlock GRASS = new GrassBlock();
     public final static StoneBlock STONE = new StoneBlock();
 
-    static {
+    public static void initialize() {
         REGISTRY.register(new Identifier("minecraft:air"), AIR);
         REGISTRY.register(new Identifier("minecraft:cactus"), CACTUS);
         REGISTRY.register(new Identifier("minecraft:dirt"), DIRT);
