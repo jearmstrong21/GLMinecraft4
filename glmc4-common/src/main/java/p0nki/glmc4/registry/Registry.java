@@ -1,30 +1,57 @@
 package p0nki.glmc4.registry;
 
+import p0nki.glmc4.network.PacketReadBuf;
+import p0nki.glmc4.network.PacketWriteBuf;
 import p0nki.glmc4.utils.Identifier;
 
 import java.util.*;
 
 public class Registry<T> {
 
-//    private final static Logger LOGGER = LogManager.getLogger();
-
-    private final String name;
     private final Map<Identifier, Entry<T>> identifierMap;
     private final Map<T, Entry<T>> valueMap;
     private final List<Entry<T>> entries;
 
-    public Registry(String name) {
-        this.name = name;
-//        marker = MarkerManager.getMarker(name);
+    public Registry() {
         identifierMap = new HashMap<>();
         valueMap = new HashMap<>();
         entries = new ArrayList<>();
     }
-//    private final Marker marker;
 
-    @Override
-    public String toString() {
-        return String.format("Registry[%s]", name);
+    public void write(PacketWriteBuf output) {
+        output.writeInt(entries.size());
+        for (Entry<T> entry : entries) {
+            output.writeString(entry.getKey().toString());
+            if (entry.getValue() instanceof VersionedRegistrable) {
+                output.writeBoolean(true);
+                output.writeInt(((VersionedRegistrable) entry.getValue()).getVersion());
+            } else {
+                output.writeBoolean(false);
+            }
+        }
+    }
+
+    public void verify(PacketReadBuf input) {
+        if (!check(input)) {
+            RuntimeException e = new RuntimeException("Invalid registry for server");
+            e.fillInStackTrace();
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+
+    public boolean check(PacketReadBuf input) {
+        int size = input.readInt();
+        if (size != entries.size()) return false;
+        for (int i = 0; i < size; i++) {
+            Identifier identifier = new Identifier(input.readString());
+            if (!entries.get(i).getKey().equals(identifier)) return false;
+            if (input.readBoolean()) {
+                if (!(entries.get(i).getValue() instanceof VersionedRegistrable)) return false;
+                if (((VersionedRegistrable) entries.get(i).getValue()).getVersion() != input.readInt()) return false;
+            }
+        }
+        return true;
     }
 
     private Entry<T> internalRegister(Identifier identifier, T value) {

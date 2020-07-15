@@ -8,7 +8,7 @@ import p0nki.glmc4.utils.Identifier;
 
 public class BlockRenderers {
 
-    public static final Registry<BlockRenderer> REGISTRY = new Registry<>("BlockRenderer");
+    public static final Registry<BlockRenderer> REGISTRY = new Registry<>();
 
     public static final DirtBlockRenderer DIRT = new DirtBlockRenderer();
     public static final GrassBlockRenderer GRASS = new GrassBlockRenderer();

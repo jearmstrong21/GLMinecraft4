@@ -3,6 +3,7 @@ package p0nki.glmc4.tag;
 import org.joml.Vector3f;
 import p0nki.glmc4.network.PacketWriteBuf;
 import p0nki.glmc4.utils.DataStreamUtils;
+import p0nki.glmc4.utils.Identifier;
 import p0nki.glmc4.utils.TagUtils;
 
 import javax.annotation.Nonnull;
@@ -82,6 +83,10 @@ public class CompoundTag extends AbstractMap<String, Tag<?>> implements Tag<Comp
 
     public UUID getUUID(String key) {
         return TagUtils.fromUUID(values.get(key));
+    }
+
+    public Identifier getIdentifier(String key) {
+        return new Identifier(getString(key));
     }
 
     public String getString(String key) {

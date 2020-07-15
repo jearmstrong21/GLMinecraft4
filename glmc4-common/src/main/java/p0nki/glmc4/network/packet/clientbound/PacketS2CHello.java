@@ -1,5 +1,7 @@
 package p0nki.glmc4.network.packet.clientbound;
 
+import p0nki.glmc4.block.Blocks;
+import p0nki.glmc4.entity.EntityTypes;
 import p0nki.glmc4.network.PacketReadBuf;
 import p0nki.glmc4.network.PacketWriteBuf;
 import p0nki.glmc4.server.ServerPlayer;
@@ -35,12 +37,16 @@ public class PacketS2CHello extends PacketS2C {
     public void read(PacketReadBuf input) {
         yourPlayer = new ServerPlayer().fromTag(CompoundTag.READER.read(input));
         allPlayers = TagUtils.fromList(ListTag.READER.read(input), ServerPlayer::new);
+        Blocks.REGISTRY.verify(input);
+        EntityTypes.REGISTRY.verify(input);
     }
 
     @Override
     public void write(PacketWriteBuf output) {
         yourPlayer.toTag().write(output);
         TagUtils.toList(allPlayers).write(output);
+        Blocks.REGISTRY.write(output);
+        EntityTypes.REGISTRY.write(output);
     }
 
     @Override

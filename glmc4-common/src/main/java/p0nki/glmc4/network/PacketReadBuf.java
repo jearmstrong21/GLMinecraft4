@@ -31,6 +31,10 @@ public class PacketReadBuf {
         return buffer.getChar();
     }
 
+    public boolean readBoolean() {
+        return readByte() == 1;
+    }
+
     public String readString() {
         int length = readInt();
         StringBuilder str = new StringBuilder();

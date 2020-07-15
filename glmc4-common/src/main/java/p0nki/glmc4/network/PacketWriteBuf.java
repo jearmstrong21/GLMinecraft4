@@ -40,6 +40,10 @@ public class PacketWriteBuf {
         }
     }
 
+    public void writeBoolean(boolean value) {
+        writeByte((byte) (value ? 1 : 0));
+    }
+
     public void writeByte(byte value) {
         bytes.add(value);
         if (bytes.size() >= ClientConnection.MAX_PACKET_SIZE) {

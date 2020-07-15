@@ -6,7 +6,7 @@ import p0nki.glmc4.utils.Identifier;
 
 public class Blocks {
 
-    public final static Registry<Block> REGISTRY = new Registry<>("Block");
+    public final static Registry<Block> REGISTRY = new Registry<>();
 
     public final static AirBlock AIR = new AirBlock();
     public final static CactusBlock CACTUS = new CactusBlock();

@@ -9,13 +9,16 @@ import java.util.UUID;
 public class Entity implements TagEquivalent<Entity, CompoundTag> {
 
     private Vector3f position;
-    private Vector3f size;
     private UUID uuid;
+    private final EntityType<?> type;
 
-    public Entity(Vector3f position, Vector3f size, UUID uuid) {
-        this.position = position;
-        this.size = size;
-        this.uuid = uuid;
+    public Entity(EntityType<?> type, CompoundTag tag) {
+        this.type = type;
+        fromTag(tag);
+    }
+
+    public EntityType<?> getType() {
+        return type;
     }
 
     public Vector3f getPosition() {
@@ -23,7 +26,7 @@ public class Entity implements TagEquivalent<Entity, CompoundTag> {
     }
 
     public Vector3f getSize() {
-        return size;
+        return type.getSize();
     }
 
     public UUID getUuid() {
@@ -33,8 +36,9 @@ public class Entity implements TagEquivalent<Entity, CompoundTag> {
     @Override
     public Entity fromTag(CompoundTag tag) {
         position = tag.get3f("position");
-        size = tag.get3f("size");
         uuid = tag.getUUID("uuid");
+        if (!EntityTypes.REGISTRY.get(type).getKey().equals(tag.getIdentifier("type")))
+            throw new IllegalStateException(tag.getString("type"));
         return this;
     }
 
@@ -42,8 +46,8 @@ public class Entity implements TagEquivalent<Entity, CompoundTag> {
     public CompoundTag toTag() {
         return new CompoundTag()
                 .insert("position", position)
-                .insert("size", size)
                 .insert("uuid", uuid)
+                .insert("type", EntityTypes.REGISTRY.get(type).getKey())
                 ;
     }
 }
