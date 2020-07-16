@@ -3,7 +3,11 @@ package p0nki.glmc4.client.gl;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
-import p0nki.glmc4.client.assets.ResourceLocation;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import static org.lwjgl.opengl.GL33.*;
 
@@ -11,9 +15,9 @@ public class Shader {
 
     private final int shader;
 
-    public Shader(String name) {
+    public Shader(String name) throws IOException, URISyntaxException {
         int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertexShader, new ResourceLocation("shader/" + name + ".vert").loadText());
+        glShaderSource(vertexShader, Files.readString(Paths.get(Paths.get(ClassLoader.getSystemClassLoader().getResource("shader").toURI()).toString(), name + ".vert")));
         glCompileShader(vertexShader);
         if (glGetShaderi(vertexShader, GL_COMPILE_STATUS) == GL_FALSE) {
             System.err.println("Error compiling vertex shader\n" + glGetShaderInfoLog(vertexShader));
@@ -21,7 +25,7 @@ public class Shader {
         }
 
         int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragmentShader, new ResourceLocation("shader/" + name + ".frag").loadText());
+        glShaderSource(fragmentShader, Files.readString(Paths.get(Paths.get(ClassLoader.getSystemClassLoader().getResource("shader").toURI()).toString(), name + ".frag")));
         glCompileShader(fragmentShader);
         if (glGetShaderi(fragmentShader, GL_COMPILE_STATUS) == GL_FALSE) {
             System.err.println("Error compiling fragment shader\n" + glGetShaderInfoLog(fragmentShader));
@@ -35,6 +39,14 @@ public class Shader {
         if (glGetProgrami(shader, GL_LINK_STATUS) == GL_FALSE) {
             System.err.println("Error linking shader\n" + glGetProgramInfoLog(shader));
             throw new UnsupportedOperationException();
+        }
+    }
+
+    public static Shader create(String name) {
+        try {
+            return new Shader(name);
+        } catch (IOException | URISyntaxException exception) {
+            throw new AssertionError(exception);
         }
     }
 

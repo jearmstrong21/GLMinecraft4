@@ -28,11 +28,28 @@ import p0nki.glmc4.utils.MathUtils;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class GLMC4Client {
+
+    public static Path RESOURCES;
+    public static Path SHADERS;
+//    (String... join) {
+//        return Path.of(ClassLoader.getSystemClassLoader().getResource("./))
+//    }
+
+//    static {
+//        try {
+//            SHADERS = Path.of(ClassLoader.getSystemClassLoader().getResource(SHADERS).toURI());
+//        } catch (URISyntaxException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
+//
+//    public static final Path RUN = Path.of("run");
 
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Marker SOCKET = MarkerManager.getMarker("SOCKET");
@@ -114,7 +131,7 @@ public class GLMC4Client {
     }
 
     private static void initialize() {
-        shader = new Shader("chunk");
+        shader = Shader.create("chunk");
         texture = new Texture(new LocalLocation("atlas/block.png"));
         LOGGER.info(RENDER, "Client initialized");
         EntityRenderers.REGISTRY.getEntries().forEach(entry -> entry.getValue().initialize());
@@ -123,10 +140,10 @@ public class GLMC4Client {
     private static void frame(int frameCount) {
         float t = MCWindow.time();
         Matrix4f perspective = new Matrix4f().perspective((float) Math.toRadians(80), 1.0F, 0.001F, 300);
-        float camHeight = 20;
-        float camRadius = 10;
+        float camHeight = 30;
+        float camRadius = 15;
         Matrix4f view = new Matrix4f().lookAt(
-                new Vector3f((float) (camRadius * Math.cos(t)), camHeight, (float) (camHeight * Math.sin(t)))
+                new Vector3f((float) (camRadius * Math.cos(t)), camHeight, (float) (camRadius * Math.sin(t)))
                 , new Vector3f(0, 0, 0), new Vector3f(0, 1, 0));
         WorldRenderContext context = new WorldRenderContext(perspective, view);
         shader.use();
