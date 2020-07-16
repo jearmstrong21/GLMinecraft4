@@ -10,6 +10,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,7 +29,7 @@ public class TextureAssembler {
 
     private TextureAssembler(Identifier identifier) {
         long start = System.currentTimeMillis();
-        identifiers = listFiles(new Identifier(identifier.getNamespace(), ""), new ResourceLocation(identifier.getPath()).asFile().getAbsolutePath());
+        identifiers = listFiles(new Identifier(identifier.getNamespace(), ""), new ResourceLocation(identifier.getPath()).asFile().toPath());
         images = new HashMap<>();
         for (Identifier s : identifiers.keySet()) {
             images.put(s, read(s));
@@ -49,17 +51,18 @@ public class TextureAssembler {
                 image.setRGB(x, y, data[x][y]);
             }
         }
+        Path path = Paths.get("run", "atlas");
         //noinspection ResultOfMethodCallIgnored
-        new LocalLocation("atlas/").asFile().mkdirs();
+        path.toFile().mkdirs();
         try {
-            ImageIO.write(image, "png", new LocalLocation("atlas/" + identifier.getPath() + ".png").asFile());
+            ImageIO.write(image, "png", Paths.get(path.toString(), identifier.getPath() + ".png").toFile());
         } catch (IOException e) {
             throw new AssertionError(e);
         }
         long end = System.currentTimeMillis();
         PrintWriter writer;
         try {
-            writer = new PrintWriter(new LocalLocation("atlas/" + identifier.getPath() + ".txt").asFile());
+            writer = new PrintWriter(Paths.get(path.toString(), identifier.getPath() + ".txt").toFile());
         } catch (FileNotFoundException e) {
             throw new AssertionError(e);
         }
@@ -73,22 +76,26 @@ public class TextureAssembler {
         LOGGER.info(identifier, "Created texture atlas of size {}x{} in {}ms", width, height, end - start);
     }
 
-    private static Map<Identifier, File> listFiles(Identifier identifier, String directory) {
-        File file = new File(directory);
+    private static Map<Identifier, File> listFiles(Identifier identifier, Path path) {
+        File file = path.toFile();
         String[] sub = file.list();
         if (sub == null) return new HashMap<>();
         Map<Identifier, File> map = new HashMap<>();
         for (String s : sub) {
-            File f = new File(directory + "/" + s);
+            Path subPath = Paths.get(path.toString(), s);
             String identifierString = s;
             if (identifierString.indexOf(".") > 0) {
                 identifierString = identifierString.substring(0, identifierString.indexOf("."));
             }
             Identifier nextIdentifier = new Identifier(identifier.getNamespace(), identifier.getPath() + "_" + identifierString);
-            if (identifier.getPath().equals(""))
+            if (identifier.getPath().equals("")) {
                 nextIdentifier = new Identifier(identifier.getNamespace(), identifierString);
-            if (f.isFile()) map.put(nextIdentifier, f);
-            else map.putAll(listFiles(nextIdentifier, directory + "/" + s));
+            }
+            if (subPath.toFile().isFile()) {
+                map.put(nextIdentifier, subPath.toFile());
+            } else {
+                map.putAll(listFiles(nextIdentifier, subPath));
+            }
         }
         return map;
     }
