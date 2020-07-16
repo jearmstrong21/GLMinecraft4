@@ -10,6 +10,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -28,56 +31,65 @@ public class TextureAssembler {
     private int pixelCount = 0;
 
     private TextureAssembler(Identifier identifier) {
-        long start = System.currentTimeMillis();
-        LOGGER.trace(identifier.toString());
-        LOGGER.trace(ClassLoader.getSystemClassLoader().getResource(identifier.getPath()));
-        LOGGER.trace(Path.of(ClassLoader.getSystemClassLoader().getResource(identifier.getPath()).getPath()));
-        identifiers = listFiles(new Identifier(identifier.getNamespace(), ""), Path.of(ClassLoader.getSystemClassLoader().getResource(identifier.getPath()).getPath()));
-        LOGGER.trace("{} identifiers found", identifiers.size());
-        images = new HashMap<>();
-        for (Identifier s : identifiers.keySet()) {
-            images.put(s, read(s));
-        }
-        int[][] data = new int[width][height];
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                data[x][y] = -1;
-            }
-        }
-        identifiers.keySet().stream().sorted((o1, o2) -> {
-            int i = Integer.compare(images.get(o2).area(), images.get(o1).area());
-            if (i == 0) return o1.toString().compareTo(o2.toString());
-            else return i;
-        }).forEach(key -> place(data, key));
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                image.setRGB(x, y, data[x][y]);
-            }
-        }
-        Path path = Paths.get("run", "atlas");
-        //noinspection ResultOfMethodCallIgnored
-        path.toFile().mkdirs();
         try {
-            ImageIO.write(image, "png", Paths.get(path.toString(), identifier.getPath() + ".png").toFile());
-        } catch (IOException e) {
-            throw new AssertionError(e);
+            long start = System.currentTimeMillis();
+            URL url = ClassLoader.getSystemClassLoader().getResource(identifier.getPath());
+            LOGGER.trace(identifier.toString());
+            LOGGER.trace(url);
+            LOGGER.trace(url.getPath());
+            LOGGER.trace(url.getFile());
+            URI uri = url.toURI();
+            LOGGER.trace(uri.getPath());
+            LOGGER.trace(Path.of(uri));
+            identifiers = listFiles(new Identifier(identifier.getNamespace(), ""), Path.of(ClassLoader.getSystemClassLoader().getResource(identifier.getPath()).getPath()));
+            LOGGER.trace("{} identifiers found", identifiers.size());
+            images = new HashMap<>();
+            for (Identifier s : identifiers.keySet()) {
+                images.put(s, read(s));
+            }
+            int[][] data = new int[width][height];
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    data[x][y] = -1;
+                }
+            }
+            identifiers.keySet().stream().sorted((o1, o2) -> {
+                int i = Integer.compare(images.get(o2).area(), images.get(o1).area());
+                if (i == 0) return o1.toString().compareTo(o2.toString());
+                else return i;
+            }).forEach(key -> place(data, key));
+            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    image.setRGB(x, y, data[x][y]);
+                }
+            }
+            Path path = Paths.get("run", "atlas");
+            //noinspection ResultOfMethodCallIgnored
+            path.toFile().mkdirs();
+            try {
+                ImageIO.write(image, "png", Paths.get(path.toString(), identifier.getPath() + ".png").toFile());
+            } catch (IOException e) {
+                throw new AssertionError(e);
+            }
+            long end = System.currentTimeMillis();
+            PrintWriter writer;
+            try {
+                writer = new PrintWriter(Paths.get(path.toString(), identifier.getPath() + ".txt").toFile());
+            } catch (FileNotFoundException e) {
+                throw new AssertionError(e);
+            }
+            writer.println(String.format("IMAGES WRITTEN: %s", identifiers.size()));
+            writer.println(String.format("DIMENSIONS: %sx%s", width, height));
+            writer.println(String.format("PIXELS USED: %s/%s", pixelCount, width * height));
+            writer.println(String.format("TIME: %sms", end - start));
+            writer.println("-------------");
+            images.forEach((key, value) -> writer.println(String.format("%-64s %-9s %s", key, value.w + "x" + value.h, value.path)));
+            writer.close();
+            LOGGER.info(identifier, "Created texture atlas of size {}x{} in {}ms", width, height, end - start);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
         }
-        long end = System.currentTimeMillis();
-        PrintWriter writer;
-        try {
-            writer = new PrintWriter(Paths.get(path.toString(), identifier.getPath() + ".txt").toFile());
-        } catch (FileNotFoundException e) {
-            throw new AssertionError(e);
-        }
-        writer.println(String.format("IMAGES WRITTEN: %s", identifiers.size()));
-        writer.println(String.format("DIMENSIONS: %sx%s", width, height));
-        writer.println(String.format("PIXELS USED: %s/%s", pixelCount, width * height));
-        writer.println(String.format("TIME: %sms", end - start));
-        writer.println("-------------");
-        images.forEach((key, value) -> writer.println(String.format("%-64s %-9s %s", key, value.w + "x" + value.h, value.path)));
-        writer.close();
-        LOGGER.info(identifier, "Created texture atlas of size {}x{} in {}ms", width, height, end - start);
     }
 
     private static Map<Identifier, File> listFiles(Identifier identifier, Path path) {
