@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class TextureAssembler {
 
@@ -157,6 +158,11 @@ public class TextureAssembler {
 
     public AtlasPosition getTexture(Identifier identifier) {
         Image img = images.get(identifier);
+        if (img == null) {
+            LOGGER.fatal("Invalid identifier {} for atlas", identifier);
+            LOGGER.fatal("Current identifiers: {}", identifiers.keySet().stream().map(Identifier::toString).collect(Collectors.joining(", ")));
+            throw new AssertionError();
+        }
         return new AtlasPosition(img.x, img.y, img.w, img.h, width, height);
     }
 
