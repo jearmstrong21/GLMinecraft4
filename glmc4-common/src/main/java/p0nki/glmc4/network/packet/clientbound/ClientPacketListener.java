@@ -20,4 +20,6 @@ public interface ClientPacketListener extends PacketListener<ClientPacketListene
 
     void onEntitySpawn(PacketS2CEntitySpawn packet);
 
+    void onEntityDespawn(PacketS2CEntityDespawn packet);
+
 }

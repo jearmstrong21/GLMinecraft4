@@ -107,7 +107,7 @@ public class ClientConnection<L extends PacketListener<L>> {
                 }
             }
             if (MinecraftServer.INSTANCE != null)
-                MinecraftServer.INSTANCE.removeConnection(player.getId());
+                MinecraftServer.INSTANCE.removeConnection(player.getUuid());
             if (packetListener instanceof ClientPacketListener) packetListener.onDisconnected(String.valueOf(dcReason));
             isLoopRunning = false;
         }, "Connection-Read-" + CONNECTION_COUNTER);

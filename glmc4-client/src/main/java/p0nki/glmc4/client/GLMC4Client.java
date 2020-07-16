@@ -63,16 +63,21 @@ public class GLMC4Client {
     }
 
     public static void updateEntity(UUID uuid, CompoundTag newData) {
-        for (Entity e : entities) {
-            if (e.getUuid().equals(uuid)) {
-                e.fromTag(newData);
-                return;
-            }
-        }
+        entities.stream().filter(entity -> entity.getUuid().equals(uuid)).forEach(entity -> entity.fromTag(newData));
     }
 
     public static void spawnEntity(Entity entity) {
         entities.add(entity);
+    }
+
+    public static void despawnEntity(UUID uuid) {
+        for (Entity e : entities) {
+            if (e.getUuid().equals(uuid)) {
+                entities.remove(e);
+                return;
+            }
+        }
+        throw new AssertionError("Cannot despawn entity " + uuid);
     }
 
     private static void runSocket() {

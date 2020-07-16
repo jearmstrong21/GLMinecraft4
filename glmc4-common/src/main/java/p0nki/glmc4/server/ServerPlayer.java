@@ -3,27 +3,29 @@ package p0nki.glmc4.server;
 import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.tag.TagEquivalent;
 
+import java.util.UUID;
+
 public class ServerPlayer implements TagEquivalent<ServerPlayer, CompoundTag> {
 
-    private String id;
+    private UUID uuid;
     private String name;
 
     public ServerPlayer() {
 
     }
 
-    public ServerPlayer(String id, String name) {
-        this.id = id;
+    public ServerPlayer(UUID uuid, String name) {
+        this.uuid = uuid;
         this.name = name;
     }
 
     @Override
     public String toString() {
-        return String.format("ServerPlayer[id=%s:name=%s]", id, name);
+        return String.format("ServerPlayer[uuid=%s:name=%s]", uuid, name);
     }
 
-    public String getId() {
-        return id;
+    public UUID getUuid() {
+        return uuid;
     }
 
     public String getName() {
@@ -32,12 +34,12 @@ public class ServerPlayer implements TagEquivalent<ServerPlayer, CompoundTag> {
 
     @Override
     public CompoundTag toTag() {
-        return new CompoundTag().insert("id", id).insert("name", name);
+        return new CompoundTag().insert("uuid", uuid).insert("name", name);
     }
 
     @Override
     public ServerPlayer fromTag(CompoundTag tag) {
-        id = tag.getString("id");
+        uuid = tag.getUUID("uuid");
         name = tag.getString("name");
         return this;
     }

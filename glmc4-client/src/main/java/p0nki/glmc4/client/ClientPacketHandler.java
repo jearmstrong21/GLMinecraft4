@@ -4,11 +4,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
+import p0nki.glmc4.entity.Entity;
 import p0nki.glmc4.network.ClientConnection;
 import p0nki.glmc4.network.packet.clientbound.*;
 import p0nki.glmc4.network.packet.serverbound.PacketC2SPingResponse;
 import p0nki.glmc4.server.ServerPlayer;
 
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class ClientPacketHandler implements ClientPacketListener {
@@ -16,6 +18,7 @@ public class ClientPacketHandler implements ClientPacketListener {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Marker CHAT = MarkerManager.getMarker("CHAT");
     private static final Marker PLAYERS = MarkerManager.getMarker("PLAYERS");
+    private static final Marker ENTITIES = MarkerManager.getMarker("ENTITIES");
 
     private final ClientConnection<ClientPacketListener> connection;
 
@@ -33,7 +36,7 @@ public class ClientPacketHandler implements ClientPacketListener {
     }
 
     public void onPlayerLeave(PacketS2CPlayerLeave packet) {
-        LOGGER.info(PLAYERS, "Player left: {}", packet.getId());
+        LOGGER.info(PLAYERS, "Player left: {}", packet.getUuid());
     }
 
     public void onChunkLoad(PacketS2CChunkLoad packet) {
@@ -45,6 +48,7 @@ public class ClientPacketHandler implements ClientPacketListener {
         LOGGER.info(PLAYERS, "Your player is {}", packet.getYourPlayer().toString());
         LOGGER.info(PLAYERS, "Currently logged in players: {}", packet.getAllPlayers().stream().map(ServerPlayer::toString).collect(Collectors.joining(", ")));
         GLMC4Client.loadInitialEntities(packet.getAllEntities());
+        LOGGER.info(ENTITIES, "Loaded initial {} entities: {}", packet.getAllEntities().size(), packet.getAllEntities().stream().map(Entity::getUuid).map(UUID::toString).collect(Collectors.joining(", ")));
     }
 
     public void onPlayerJoin(PacketS2CPlayerJoin packet) {
@@ -64,11 +68,19 @@ public class ClientPacketHandler implements ClientPacketListener {
     @Override
     public void onEntityUpdate(PacketS2CEntityUpdate packet) {
         GLMC4Client.updateEntity(packet.getUuid(), packet.getNewData());
+//        LOGGER.info(ENTITIES, "Entity {} updated", packet.getUuid());
     }
 
     @Override
     public void onEntitySpawn(PacketS2CEntitySpawn packet) {
         GLMC4Client.spawnEntity(packet.getEntity());
+        LOGGER.info(ENTITIES, "Entity {} spawned", packet.getEntity().getUuid());
+    }
+
+    @Override
+    public void onEntityDespawn(PacketS2CEntityDespawn packet) {
+        GLMC4Client.despawnEntity(packet.getUuid());
+        LOGGER.info(ENTITIES, "Entity {} despawned", packet.getUuid());
     }
 
     @Override

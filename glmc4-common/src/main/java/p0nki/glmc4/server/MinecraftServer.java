@@ -23,9 +23,9 @@ public class MinecraftServer {
     public static MinecraftServer INSTANCE = null;
 
     private final List<Entity> entities = new ArrayList<>();
-    private final Map<String, ClientConnection<ServerPacketListener>> connections = new HashMap<>();
+    private final Map<UUID, ClientConnection<ServerPacketListener>> connections = new HashMap<>();
     private final List<ServerPlayer> players = new ArrayList<>();
-    private final Set<String> playerIdsToRemove = new HashSet<>();
+    private final Set<UUID> playerUuidsToRemove = new HashSet<>();
 
     private final Random random = new Random(System.currentTimeMillis());
 
@@ -36,32 +36,30 @@ public class MinecraftServer {
             @Override
             public void run() {
                 connections.values().forEach(connection -> {
-                    if (connection.getPacketListener().isDead()) playerIdsToRemove.add(connection.getPlayer().getId());
+                    if (connection.getPacketListener().isDead())
+                        playerUuidsToRemove.add(connection.getPlayer().getUuid());
                     else connection.getPacketListener().writePing();
                 });
-                playerIdsToRemove.forEach(id -> {
+                playerUuidsToRemove.forEach(id -> {
                     if (!connections.containsKey(id)) return;
                     writeGlobalChatMessage("SERVER LEAVE", connections.get(id).getPlayer().toString());
-                    writeAll(new PacketS2CPlayerLeave(connections.get(id).getPlayer().getId()));
+                    writeAll(new PacketS2CPlayerLeave(connections.get(id).getPlayer().getUuid()));
+                    writeAll(new PacketS2CEntityDespawn(connections.get(id).getPlayer().getUuid()));
                     connections.get(id).getPacketListener().onDisconnected("Disconnected");
                     connections.get(id).close();
                     connections.remove(id);
                     for (int i = 0; i < players.size(); i++) {
-                        if (players.get(i).getId().equals(id)) {
+                        if (players.get(i).getUuid().equals(id)) {
                             players.remove(i);
                             return;
                         }
                     }
                     throw new UnsupportedOperationException("Cannot remove player that does not exist");
                 });
-                playerIdsToRemove.clear();
+                playerUuidsToRemove.clear();
                 tick();
             }
         };
-//        TestEntity testEntity = new TestEntity(new Vector3f(-0.5F, 5, -0.5F), UUID.randomUUID(), new Vector3f(1));
-//        entities.add(testEntity);
-//        PlayerEntity playerEntity = new PlayerEntity(new Vector3f(-0.5F, 5, -0.5F), UUID.randomUUID());
-//        entities.add(playerEntity);
         new Timer().schedule(pingPlayers, 0, 100);
     }
 
@@ -87,22 +85,22 @@ public class MinecraftServer {
     }
 
     public void joinPlayer(ClientConnection<ServerPacketListener> connection) {
-        ServerPlayer player = new ServerPlayer(UUID.randomUUID().toString(), Words.generateUnique());
+        ServerPlayer player = new ServerPlayer(UUID.randomUUID(), Words.generateUnique());
         connection.setPlayer(player);
         writeGlobalChatMessage("SERVER JOIN", connection.getPlayer().toString());
         writeAll(new PacketS2CPlayerJoin(player));
         players.add(player);
-        connections.put(connection.getPlayer().getId(), connection);
-        PlayerEntity playerEntity = new PlayerEntity(new Vector3f(10 * (float) Math.random() - 5, 15, 10 * (float) Math.random() - 5), UUID.randomUUID(), player);
-        entities.add(playerEntity);
+        connections.put(connection.getPlayer().getUuid(), connection);
+        PlayerEntity playerEntity = new PlayerEntity(new Vector3f(10 * (float) Math.random() - 5, 15, 10 * (float) Math.random() - 5), player.getUuid(), player);
+        spawnEntity(playerEntity);
     }
 
     public List<ServerPlayer> getPlayers() {
         return players;
     }
 
-    public void removeConnection(String id) {
-        playerIdsToRemove.add(id);
+    public void removeConnection(UUID uuid) {
+        playerUuidsToRemove.add(uuid);
     }
 
     private void writeAll(Packet<ClientPacketListener> packet) {

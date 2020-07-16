@@ -8,16 +8,16 @@ import p0nki.glmc4.network.packet.PacketTypes;
 
 import java.util.UUID;
 
-public class PacketS2CPlayerLeave extends Packet<ClientPacketListener> {
+public class PacketS2CEntityDespawn extends Packet<ClientPacketListener> {
 
     private UUID uuid;
 
-    public PacketS2CPlayerLeave() {
-        super(PacketDirection.SERVER_TO_CLIENT, PacketTypes.S2C_PLAYER_LEAVE);
+    public PacketS2CEntityDespawn() {
+        super(PacketDirection.SERVER_TO_CLIENT, PacketTypes.S2C_ENTITY_DESPAWN);
     }
 
-    public PacketS2CPlayerLeave(UUID uuid) {
-        super(PacketDirection.SERVER_TO_CLIENT, PacketTypes.S2C_PLAYER_LEAVE);
+    public PacketS2CEntityDespawn(UUID uuid) {
+        super(PacketDirection.SERVER_TO_CLIENT, PacketTypes.S2C_ENTITY_DESPAWN);
         this.uuid = uuid;
     }
 
@@ -37,7 +37,6 @@ public class PacketS2CPlayerLeave extends Packet<ClientPacketListener> {
 
     @Override
     public void apply(ClientPacketListener listener) {
-        listener.onPlayerLeave(this);
+        listener.onEntityDespawn(this);
     }
-
 }
