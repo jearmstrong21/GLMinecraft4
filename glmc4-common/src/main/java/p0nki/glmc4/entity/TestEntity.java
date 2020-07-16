@@ -15,15 +15,9 @@ public class TestEntity extends Entity {
         this.color = color;
     }
 
-    private transient int ticksSinceColorChange = 0;
-
     @Override
     public void tick(Random random) {
-        ticksSinceColorChange++;
-        if (ticksSinceColorChange > 5) {
-            color = new Vector3f(random.nextFloat(), random.nextFloat(), random.nextFloat());
-            ticksSinceColorChange = 0;
-        }
+        color = new Vector3f(random.nextFloat(), random.nextFloat(), random.nextFloat()).mul(5);
     }
 
     public Vector3f getColor() {

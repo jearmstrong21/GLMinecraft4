@@ -34,14 +34,14 @@ public class TextureAssembler {
         try {
             long start = System.currentTimeMillis();
             URL url = ClassLoader.getSystemClassLoader().getResource(identifier.getPath());
-            LOGGER.trace(identifier.toString());
-            LOGGER.trace(url);
-            LOGGER.trace(url.getPath());
-            LOGGER.trace(url.getFile());
+//            LOGGER.trace(identifier.toString());
+//            LOGGER.trace(url);
+//            LOGGER.trace(url.getPath());
+//            LOGGER.trace(url.getFile());
             URI uri = url.toURI();
-            LOGGER.trace(uri.getPath());
-            LOGGER.trace(Path.of(uri));
-            identifiers = listFiles(new Identifier(identifier.getNamespace(), ""), Path.of(ClassLoader.getSystemClassLoader().getResource(identifier.getPath()).getPath()));
+//            LOGGER.trace(uri.getPath());
+//            LOGGER.trace(Path.of(uri));
+            identifiers = listFiles(new Identifier(identifier.getNamespace(), ""), Path.of(uri));
             LOGGER.trace("{} identifiers found", identifiers.size());
             images = new HashMap<>();
             for (Identifier s : identifiers.keySet()) {
