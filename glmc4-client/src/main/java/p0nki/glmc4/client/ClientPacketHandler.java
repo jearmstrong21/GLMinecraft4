@@ -67,6 +67,11 @@ public class ClientPacketHandler implements ClientPacketListener {
     }
 
     @Override
+    public void onEntitySpawn(PacketS2CEntitySpawn packet) {
+        GLMC4Client.spawnEntity(packet.getEntity());
+    }
+
+    @Override
     public ClientConnection<ClientPacketListener> getConnection() {
         return connection;
     }

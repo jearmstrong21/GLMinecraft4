@@ -38,7 +38,7 @@ public class GLMC4Client {
 
     public static String resourcePath(String name) {
         try {
-            return Paths.get(ClassLoader.getSystemClassLoader().getResource(name).toURI()).toString();
+            return Paths.get(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource(name)).toURI()).toString();
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -69,6 +69,10 @@ public class GLMC4Client {
                 return;
             }
         }
+    }
+
+    public static void spawnEntity(Entity entity) {
+        entities.add(entity);
     }
 
     private static void runSocket() {

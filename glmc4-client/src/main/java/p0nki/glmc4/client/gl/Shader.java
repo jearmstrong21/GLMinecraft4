@@ -6,7 +6,6 @@ import org.lwjgl.BufferUtils;
 import p0nki.glmc4.client.GLMC4Client;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -16,7 +15,7 @@ public class Shader {
 
     private final int shader;
 
-    public Shader(String name) throws IOException, URISyntaxException {
+    public Shader(String name) throws IOException {
         int vertexShader = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vertexShader, Files.readString(Paths.get(GLMC4Client.resourcePath("shader"), name + ".vert")));
         glCompileShader(vertexShader);
@@ -46,7 +45,7 @@ public class Shader {
     public static Shader create(String name) {
         try {
             return new Shader(name);
-        } catch (IOException | URISyntaxException exception) {
+        } catch (IOException exception) {
             throw new AssertionError(exception);
         }
     }

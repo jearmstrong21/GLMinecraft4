@@ -10,8 +10,9 @@ public class PlayerEntity extends Entity {
 
     private ServerPlayer serverPlayer;
 
-    public PlayerEntity(Vector3f position, UUID uuid) {
+    public PlayerEntity(Vector3f position, UUID uuid, ServerPlayer serverPlayer) {
         super(EntityTypes.PLAYER, position, uuid);
+        this.serverPlayer = serverPlayer;
     }
 
     public PlayerEntity(CompoundTag tag) {

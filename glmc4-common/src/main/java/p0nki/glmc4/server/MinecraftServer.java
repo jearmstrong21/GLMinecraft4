@@ -6,7 +6,7 @@ import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import org.joml.Vector3f;
 import p0nki.glmc4.entity.Entity;
-import p0nki.glmc4.entity.TestEntity;
+import p0nki.glmc4.entity.PlayerEntity;
 import p0nki.glmc4.network.ClientConnection;
 import p0nki.glmc4.network.packet.Packet;
 import p0nki.glmc4.network.packet.clientbound.*;
@@ -58,9 +58,16 @@ public class MinecraftServer {
                 tick();
             }
         };
-        TestEntity testEntity = new TestEntity(new Vector3f(-0.5F, 5, -0.5F), UUID.randomUUID(), new Vector3f(1));
-        entities.add(testEntity);
+//        TestEntity testEntity = new TestEntity(new Vector3f(-0.5F, 5, -0.5F), UUID.randomUUID(), new Vector3f(1));
+//        entities.add(testEntity);
+//        PlayerEntity playerEntity = new PlayerEntity(new Vector3f(-0.5F, 5, -0.5F), UUID.randomUUID());
+//        entities.add(playerEntity);
         new Timer().schedule(pingPlayers, 0, 100);
+    }
+
+    public void spawnEntity(Entity entity) {
+        entities.add(entity);
+        writeAll(new PacketS2CEntitySpawn(entity));
     }
 
     private void tick() {
@@ -86,6 +93,8 @@ public class MinecraftServer {
         writeAll(new PacketS2CPlayerJoin(player));
         players.add(player);
         connections.put(connection.getPlayer().getId(), connection);
+        PlayerEntity playerEntity = new PlayerEntity(new Vector3f(10 * (float) Math.random() - 5, 15, 10 * (float) Math.random() - 5), UUID.randomUUID(), player);
+        entities.add(playerEntity);
     }
 
     public List<ServerPlayer> getPlayers() {
