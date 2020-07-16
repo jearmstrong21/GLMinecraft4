@@ -9,7 +9,6 @@ import org.joml.Vector3f;
 import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.block.Chunk;
-import p0nki.glmc4.client.assets.LocalLocation;
 import p0nki.glmc4.client.gl.*;
 import p0nki.glmc4.client.render.block.BlockRenderContext;
 import p0nki.glmc4.client.render.block.BlockRenderer;
@@ -28,28 +27,22 @@ import p0nki.glmc4.utils.MathUtils;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class GLMC4Client {
 
-    public static Path RESOURCES;
-    public static Path SHADERS;
-//    (String... join) {
-//        return Path.of(ClassLoader.getSystemClassLoader().getResource("./))
-//    }
-
-//    static {
-//        try {
-//            SHADERS = Path.of(ClassLoader.getSystemClassLoader().getResource(SHADERS).toURI());
-//        } catch (URISyntaxException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
-//
-//    public static final Path RUN = Path.of("run");
+    public static String resourcePath(String name) {
+        try {
+            return Paths.get(ClassLoader.getSystemClassLoader().getResource(name).toURI()).toString();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Marker SOCKET = MarkerManager.getMarker("SOCKET");
@@ -132,7 +125,7 @@ public class GLMC4Client {
 
     private static void initialize() {
         shader = Shader.create("chunk");
-        texture = new Texture(new LocalLocation("atlas/block.png"));
+        texture = new Texture(Path.of("run", "atlas", "block.png"));
         LOGGER.info(RENDER, "Client initialized");
         EntityRenderers.REGISTRY.getEntries().forEach(entry -> entry.getValue().initialize());
     }

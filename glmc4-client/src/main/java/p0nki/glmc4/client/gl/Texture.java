@@ -1,9 +1,9 @@
 package p0nki.glmc4.client.gl;
 
 import org.joml.Vector2i;
-import p0nki.glmc4.client.assets.Location;
 
 import java.nio.ByteBuffer;
+import java.nio.file.Path;
 
 import static org.lwjgl.opengl.GL33.*;
 import static org.lwjgl.stb.STBImage.stbi_load;
@@ -15,7 +15,7 @@ public class Texture {
     private final int width;
     private final int height;
 
-    public Texture(Location location) {
+    public Texture(Path path) {
         id = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, id);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -24,9 +24,9 @@ public class Texture {
         int[] w = new int[1];
         int[] h = new int[1];
         int[] comps = new int[1];
-        ByteBuffer data = stbi_load(location.asFile().getAbsolutePath(), w, h, comps, 0);
+        ByteBuffer data = stbi_load(path.toString(), w, h, comps, 0);
         if (data == null) {
-            throw new AssertionError("Failed to load image: " + location.asFile().getAbsolutePath());
+            throw new AssertionError("Failed to load image: " + path.toString());
         }
         int format = GL_RGB;
         if (comps[0] == 4) format = GL_RGBA;

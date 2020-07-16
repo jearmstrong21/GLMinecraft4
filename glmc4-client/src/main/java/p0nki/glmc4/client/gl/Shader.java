@@ -3,6 +3,7 @@ package p0nki.glmc4.client.gl;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
+import p0nki.glmc4.client.GLMC4Client;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -17,7 +18,7 @@ public class Shader {
 
     public Shader(String name) throws IOException, URISyntaxException {
         int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertexShader, Files.readString(Paths.get(Paths.get(ClassLoader.getSystemClassLoader().getResource("shader").toURI()).toString(), name + ".vert")));
+        glShaderSource(vertexShader, Files.readString(Paths.get(GLMC4Client.resourcePath("shader"), name + ".vert")));
         glCompileShader(vertexShader);
         if (glGetShaderi(vertexShader, GL_COMPILE_STATUS) == GL_FALSE) {
             System.err.println("Error compiling vertex shader\n" + glGetShaderInfoLog(vertexShader));
@@ -25,7 +26,7 @@ public class Shader {
         }
 
         int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragmentShader, Files.readString(Paths.get(Paths.get(ClassLoader.getSystemClassLoader().getResource("shader").toURI()).toString(), name + ".frag")));
+        glShaderSource(fragmentShader, Files.readString(Paths.get(GLMC4Client.resourcePath("shader"), name + ".frag")));
         glCompileShader(fragmentShader);
         if (glGetShaderi(fragmentShader, GL_COMPILE_STATUS) == GL_FALSE) {
             System.err.println("Error compiling fragment shader\n" + glGetShaderInfoLog(fragmentShader));

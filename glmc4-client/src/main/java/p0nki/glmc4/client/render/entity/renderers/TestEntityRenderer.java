@@ -3,13 +3,15 @@ package p0nki.glmc4.client.render.entity.renderers;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joml.Matrix4f;
-import p0nki.glmc4.client.assets.ResourceLocation;
+import p0nki.glmc4.client.GLMC4Client;
 import p0nki.glmc4.client.gl.Mesh;
 import p0nki.glmc4.client.gl.Shader;
 import p0nki.glmc4.client.gl.Texture;
 import p0nki.glmc4.client.gl.WorldRenderContext;
 import p0nki.glmc4.client.render.entity.EntityRenderer;
 import p0nki.glmc4.entity.TestEntity;
+
+import java.nio.file.Path;
 
 public class TestEntityRenderer extends EntityRenderer<TestEntity> {
 
@@ -22,7 +24,7 @@ public class TestEntityRenderer extends EntityRenderer<TestEntity> {
 
     @Override
     public void initialize() {
-        texture = new Texture(new ResourceLocation("entity/cow.png"));
+        texture = new Texture(Path.of(GLMC4Client.resourcePath("entity"), "cow.png"));
         shader = Shader.create("test");
 
         head = new Mesh(createCube(0, 14, 8, 8, 6, 64, 32).mult4(0, new Matrix4f().scale(8, 8, 6).scale(2.0F / 8.0F)));
