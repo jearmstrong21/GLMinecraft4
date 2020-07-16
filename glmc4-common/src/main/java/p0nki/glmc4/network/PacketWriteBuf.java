@@ -5,6 +5,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class PacketWriteBuf {
 
@@ -13,8 +14,13 @@ public class PacketWriteBuf {
     public PacketWriteBuf() {
     }
 
-    public void write(ByteBufEquivalent value) {
+    public void writeEquivalent(ByteBufEquivalent value) {
         value.write(this);
+    }
+
+    public void writeUuid(UUID uuid) {
+        writeLong(uuid.getMostSignificantBits());
+        writeLong(uuid.getLeastSignificantBits());
     }
 
     public void writeFloat(float value) {

@@ -9,10 +9,7 @@ import p0nki.glmc4.entity.Entity;
 import p0nki.glmc4.entity.TestEntity;
 import p0nki.glmc4.network.ClientConnection;
 import p0nki.glmc4.network.packet.Packet;
-import p0nki.glmc4.network.packet.clientbound.ClientPacketListener;
-import p0nki.glmc4.network.packet.clientbound.PacketS2CChatMessage;
-import p0nki.glmc4.network.packet.clientbound.PacketS2CPlayerJoin;
-import p0nki.glmc4.network.packet.clientbound.PacketS2CPlayerLeave;
+import p0nki.glmc4.network.packet.clientbound.*;
 import p0nki.glmc4.network.packet.serverbound.ServerPacketListener;
 import p0nki.glmc4.utils.Words;
 
@@ -29,6 +26,8 @@ public class MinecraftServer {
     private final Map<String, ClientConnection<ServerPacketListener>> connections = new HashMap<>();
     private final List<ServerPlayer> players = new ArrayList<>();
     private final Set<String> playerIdsToRemove = new HashSet<>();
+
+    private final Random random = new Random(System.currentTimeMillis());
 
     public MinecraftServer() {
         if (INSTANCE != null) throw new UnsupportedOperationException();
@@ -56,12 +55,19 @@ public class MinecraftServer {
                     throw new UnsupportedOperationException("Cannot remove player that does not exist");
                 });
                 playerIdsToRemove.clear();
+                tick();
             }
         };
-//        TestEntity testEntity = new TestEntity(new Vector3f(0, 0, 0), UUID.randomUUID(), new Vector3f(0.25F, 0.3F, 0.6F));
-        TestEntity testEntity = new TestEntity(new Vector3f(0, 0, 0), UUID.randomUUID(), new Vector3f(1));
+        TestEntity testEntity = new TestEntity(new Vector3f(-0.5F, 5, -0.5F), UUID.randomUUID(), new Vector3f(1));
         entities.add(testEntity);
         new Timer().schedule(pingPlayers, 0, 100);
+    }
+
+    private void tick() {
+        for (Entity entity : entities) {
+            entity.tick(random);
+            writeAll(new PacketS2CEntityUpdate(entity.getUuid(), entity.toTag()));
+        }
     }
 
     public void writeGlobalChatMessage(String source, String message) {

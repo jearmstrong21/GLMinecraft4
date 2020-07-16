@@ -3,6 +3,7 @@ package p0nki.glmc4.entity;
 import org.joml.Vector3f;
 import p0nki.glmc4.tag.CompoundTag;
 
+import java.util.Random;
 import java.util.UUID;
 
 public class TestEntity extends Entity {
@@ -12,6 +13,17 @@ public class TestEntity extends Entity {
     public TestEntity(Vector3f position, UUID uuid, Vector3f color) {
         super(EntityTypes.TEST, position, uuid);
         this.color = color;
+    }
+
+    private transient int ticksSinceColorChange = 0;
+
+    @Override
+    public void tick(Random random) {
+        ticksSinceColorChange++;
+        if (ticksSinceColorChange > 5) {
+            color = new Vector3f(random.nextFloat(), random.nextFloat(), random.nextFloat());
+            ticksSinceColorChange = 0;
+        }
     }
 
     public Vector3f getColor() {

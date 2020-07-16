@@ -62,6 +62,11 @@ public class ClientPacketHandler implements ClientPacketListener {
     }
 
     @Override
+    public void onEntityUpdate(PacketS2CEntityUpdate packet) {
+        GLMC4Client.updateEntity(packet.getUuid(), packet.getNewData());
+    }
+
+    @Override
     public ClientConnection<ClientPacketListener> getConnection() {
         return connection;
     }

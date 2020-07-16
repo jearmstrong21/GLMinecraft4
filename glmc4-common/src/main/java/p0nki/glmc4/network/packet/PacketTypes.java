@@ -16,6 +16,7 @@ public class PacketTypes {
     public static final PacketType<PacketS2CPingRequest> S2C_PING_REQUEST = new PacketType<>(PacketS2CPingRequest::new);
     public static final PacketType<PacketS2CPlayerJoin> S2C_PLAYER_JOIN = new PacketType<>(PacketS2CPlayerJoin::new);
     public static final PacketType<PacketS2CPlayerLeave> S2C_PLAYER_LEAVE = new PacketType<>(PacketS2CPlayerLeave::new);
+    public static final PacketType<PacketS2CEntityUpdate> S2C_ENTITY_UPDATE = new PacketType<>(PacketS2CEntityUpdate::new);
 
     public static final PacketType<PacketC2SPingResponse> C2S_PING_RESPONSE = new PacketType<>(PacketC2SPingResponse::new);
 
@@ -27,6 +28,7 @@ public class PacketTypes {
         REGISTRY.register(new Identifier("minecraft:s2c_ping_request"), S2C_PING_REQUEST);
         REGISTRY.register(new Identifier("minecraft:s2c_player_join"), S2C_PLAYER_JOIN);
         REGISTRY.register(new Identifier("minecraft:s2c_player_leave"), S2C_PLAYER_LEAVE);
+        REGISTRY.register(new Identifier("minecraft:s2c_entity_update"), S2C_ENTITY_UPDATE);
 
         REGISTRY.register(new Identifier("minecraft:c2s_ping_response"), C2S_PING_RESPONSE);
 

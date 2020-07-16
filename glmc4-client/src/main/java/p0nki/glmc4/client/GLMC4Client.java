@@ -22,6 +22,7 @@ import p0nki.glmc4.entity.EntityTypes;
 import p0nki.glmc4.network.ClientConnection;
 import p0nki.glmc4.network.packet.PacketDirection;
 import p0nki.glmc4.network.packet.clientbound.ClientPacketListener;
+import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.utils.Identifier;
 import p0nki.glmc4.utils.MathUtils;
 
@@ -49,6 +50,15 @@ public class GLMC4Client {
 
     public static void loadInitialEntities(List<Entity> entities) {
         GLMC4Client.entities = entities;
+    }
+
+    public static void updateEntity(UUID uuid, CompoundTag newData) {
+        for (Entity e : entities) {
+            if (e.getUuid().equals(uuid)) {
+                e.fromTag(newData);
+                return;
+            }
+        }
     }
 
     private static void runSocket() {
@@ -113,7 +123,7 @@ public class GLMC4Client {
     private static void frame(int frameCount) {
         float t = MCWindow.time();
         Matrix4f perspective = new Matrix4f().perspective((float) Math.toRadians(80), 1.0F, 0.001F, 300);
-        float camHeight = 4;
+        float camHeight = 20;
         float camRadius = 10;
         Matrix4f view = new Matrix4f().lookAt(
                 new Vector3f((float) (camRadius * Math.cos(t)), camHeight, (float) (camHeight * Math.sin(t)))
@@ -134,7 +144,7 @@ public class GLMC4Client {
         for (Map.Entry<Long, Mesh> chunk : meshes.entrySet()) {
             shader.setFloat("x", 16 * MathUtils.unpackFirst(chunk.getKey()));
             shader.setFloat("z", 16 * MathUtils.unpackSecond(chunk.getKey()));
-//            chunk.getValue().render();
+            chunk.getValue().render();
         }
 
         for (Entity entity : entities) {

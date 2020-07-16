@@ -47,6 +47,7 @@ public class TestEntityRenderer extends EntityRenderer<TestEntity> {
 
     @Override
     protected void renderType(WorldRenderContext context, TestEntity entity) {
+//        LOGGER.trace("Rendering test entity at {} {} {}", entity.getPosition().x, entity.getPosition().y, entity.getPosition().z);
         shader.use();
         shader.set(context);
         shader.setMat4f("model", new Matrix4f().translate(entity.getPosition()));

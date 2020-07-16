@@ -1,6 +1,7 @@
 package p0nki.glmc4.network;
 
 import java.nio.ByteBuffer;
+import java.util.UUID;
 
 public class PacketReadBuf {
 
@@ -13,6 +14,10 @@ public class PacketReadBuf {
     public <T extends ByteBufEquivalent> T read(T value) {
         value.read(this);
         return value;
+    }
+
+    public UUID readUuid() {
+        return new UUID(readLong(), readLong());
     }
 
     public float readFloat() {

@@ -16,4 +16,6 @@ public interface ClientPacketListener extends PacketListener<ClientPacketListene
 
     void onChatMessage(PacketS2CChatMessage packet);
 
+    void onEntityUpdate(PacketS2CEntityUpdate packet);
+
 }

@@ -39,7 +39,7 @@ public class PacketS2CChunkLoad extends Packet<ClientPacketListener> {
     public void write(PacketWriteBuf output) {
         output.writeInt(x);
         output.writeInt(z);
-        output.write(chunk);
+        output.writeEquivalent(chunk);
     }
 
     @Override

@@ -4,9 +4,10 @@ import org.joml.Vector3f;
 import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.tag.TagEquivalent;
 
+import java.util.Random;
 import java.util.UUID;
 
-public class Entity implements TagEquivalent<Entity, CompoundTag> {
+public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
 
     private Vector3f position;
     private UUID uuid;
@@ -21,6 +22,10 @@ public class Entity implements TagEquivalent<Entity, CompoundTag> {
     public Entity(EntityType<?> type, CompoundTag tag) {
         this.type = type;
         fromTag(tag);
+    }
+
+    public void tick(Random random) {
+
     }
 
     public EntityType<?> getType() {
