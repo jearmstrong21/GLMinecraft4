@@ -29,7 +29,11 @@ public class TextureAssembler {
 
     private TextureAssembler(Identifier identifier) {
         long start = System.currentTimeMillis();
+        LOGGER.trace(identifier.toString());
+        LOGGER.trace(ClassLoader.getSystemClassLoader().getResource(identifier.getPath()));
+        LOGGER.trace(Path.of(ClassLoader.getSystemClassLoader().getResource(identifier.getPath()).getPath()));
         identifiers = listFiles(new Identifier(identifier.getNamespace(), ""), Path.of(ClassLoader.getSystemClassLoader().getResource(identifier.getPath()).getPath()));
+        LOGGER.trace("{} identifiers found", identifiers.size());
         images = new HashMap<>();
         for (Identifier s : identifiers.keySet()) {
             images.put(s, read(s));
