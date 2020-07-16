@@ -10,9 +10,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -33,15 +31,7 @@ public class TextureAssembler {
     private TextureAssembler(Identifier identifier) {
         try {
             long start = System.currentTimeMillis();
-            URL url = ClassLoader.getSystemClassLoader().getResource(identifier.getPath());
-//            LOGGER.trace(identifier.toString());
-//            LOGGER.trace(url);
-//            LOGGER.trace(url.getPath());
-//            LOGGER.trace(url.getFile());
-            URI uri = url.toURI();
-//            LOGGER.trace(uri.getPath());
-//            LOGGER.trace(Path.of(uri));
-            identifiers = listFiles(new Identifier(identifier.getNamespace(), ""), Path.of(uri));
+            identifiers = listFiles(new Identifier(identifier.getNamespace(), ""), Path.of(ClassLoader.getSystemClassLoader().getResource(identifier.getPath()).toURI()));
             LOGGER.trace("{} identifiers found", identifiers.size());
             images = new HashMap<>();
             for (Identifier s : identifiers.keySet()) {
