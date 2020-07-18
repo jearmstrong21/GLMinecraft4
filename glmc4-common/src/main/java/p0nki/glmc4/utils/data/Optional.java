@@ -1,4 +1,4 @@
-package p0nki.glmc4.utils;
+package p0nki.glmc4.utils.data;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -34,6 +34,10 @@ public class Optional<T> {
     public T get() {
         assertPresent();
         return value;
+    }
+
+    public T orElse(T defaultValue) {
+        return hasValue ? value : defaultValue;
     }
 
     public <R> Optional<R> map(Function<T, Optional<R>> function) {

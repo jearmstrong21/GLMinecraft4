@@ -3,6 +3,7 @@ package p0nki.glmc4.entity;
 import org.joml.Vector3f;
 import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.tag.TagEquivalent;
+import p0nki.glmc4.utils.TagUtils;
 
 import java.util.Random;
 import java.util.UUID;
@@ -49,16 +50,16 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
         position = tag.get3f("position");
         uuid = tag.getUUID("uuid");
         if (!EntityTypes.REGISTRY.get(type).getKey().equals(tag.getIdentifier("type")))
-            throw new IllegalStateException(tag.getString("type"));
+            throw new IllegalStateException(tag.getString("type").asString());
         return this;
     }
 
     @Override
     public CompoundTag toTag() {
-        return new CompoundTag()
-                .insert("position", position)
-                .insert("uuid", uuid)
-                .insert("type", EntityTypes.REGISTRY.get(type).getKey())
+        return CompoundTag.empty()
+                .insert("position", TagUtils.of(position))
+                .insert("uuid", TagUtils.of(uuid))
+                .insert("type", EntityTypes.REGISTRY.get(type).getKey().toTag())
                 ;
     }
 }

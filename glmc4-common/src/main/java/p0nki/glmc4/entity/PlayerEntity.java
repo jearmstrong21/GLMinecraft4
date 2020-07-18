@@ -27,7 +27,7 @@ public class PlayerEntity extends Entity {
 
     @Override
     public CompoundTag toTag() {
-        return super.toTag().insert("serverPlayer", serverPlayer);
+        return super.toTag().insert("serverPlayer", serverPlayer.toTag());
     }
 
     public ServerPlayer getServerPlayer() {

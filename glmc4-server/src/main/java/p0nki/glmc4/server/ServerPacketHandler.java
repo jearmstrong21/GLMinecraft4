@@ -12,6 +12,7 @@ import p0nki.glmc4.network.packet.clientbound.PacketS2CChunkLoad;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CHello;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CPingRequest;
 import p0nki.glmc4.network.packet.serverbound.PacketC2SPingResponse;
+import p0nki.glmc4.network.packet.serverbound.PacketC2SPlayerMovement;
 import p0nki.glmc4.network.packet.serverbound.ServerPacketListener;
 import p0nki.glmc4.utils.MathUtils;
 
@@ -79,12 +80,16 @@ public class ServerPacketHandler implements ServerPacketListener {
                 connection.write(new PacketS2CChunkLoad(x, z, generate(x, z)));
             }
         }
-//        connection.write(new PacketS2CChunkLoad(0, 0, generate(0, 0)));
     }
 
     @Override
     public void onDisconnected(String reason) {
         LOGGER.info("Disconnected {}", reason);
+    }
+
+    @Override
+    public void onPlayerMovement(PacketC2SPlayerMovement packet) {
+
     }
 
     @Override

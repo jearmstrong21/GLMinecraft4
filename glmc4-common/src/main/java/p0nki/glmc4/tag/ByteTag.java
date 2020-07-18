@@ -2,18 +2,18 @@ package p0nki.glmc4.tag;
 
 import p0nki.glmc4.network.PacketWriteBuf;
 
-public class ByteTag implements Tag<ByteTag> {
+public class ByteTag extends AbstractNumberTag {
 
-    public static final TagReader<ByteTag> READER = input -> new ByteTag(input.readByte());
+    public static final TagReader<ByteTag> READER = input -> of(input.readByte());
 
     private final byte value;
 
-    public ByteTag(byte value) {
+    private ByteTag(byte value) {
         this.value = value;
     }
 
-    public byte get() {
-        return value;
+    public static ByteTag of(byte value) {
+        return new ByteTag(value);
     }
 
     @Override
@@ -29,5 +29,35 @@ public class ByteTag implements Tag<ByteTag> {
     @Override
     public byte type() {
         return BYTE;
+    }
+
+    @Override
+    public byte byteValue() {
+        return value;
+    }
+
+    @Override
+    public short shortValue() {
+        return value;
+    }
+
+    @Override
+    public int intValue() {
+        return value;
+    }
+
+    @Override
+    public long longValue() {
+        return value;
+    }
+
+    @Override
+    public float floatValue() {
+        return value;
+    }
+
+    @Override
+    public double doubleValue() {
+        return value;
     }
 }

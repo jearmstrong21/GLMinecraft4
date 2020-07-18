@@ -1,7 +1,9 @@
 package p0nki.glmc4.server;
 
 import p0nki.glmc4.tag.CompoundTag;
+import p0nki.glmc4.tag.StringTag;
 import p0nki.glmc4.tag.TagEquivalent;
+import p0nki.glmc4.utils.TagUtils;
 
 import java.util.UUID;
 
@@ -34,13 +36,13 @@ public class ServerPlayer implements TagEquivalent<ServerPlayer, CompoundTag> {
 
     @Override
     public CompoundTag toTag() {
-        return new CompoundTag().insert("uuid", uuid).insert("name", name);
+        return CompoundTag.empty().insert("uuid", TagUtils.of(uuid)).insert("name", StringTag.of(name));
     }
 
     @Override
     public ServerPlayer fromTag(CompoundTag tag) {
         uuid = tag.getUUID("uuid");
-        name = tag.getString("name");
+        name = tag.getString("name").asString();
         return this;
     }
 }

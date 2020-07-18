@@ -56,7 +56,7 @@ public class PacketS2CHello extends Packet<ClientPacketListener> {
 
         ListTag entitiesTag = ListTag.READER.read(input);
         allEntities = new ArrayList<>();
-        for (Tag<?> tag : entitiesTag) {
+        for (Tag tag : entitiesTag) {
             allEntities.add(EntityTypes.from((CompoundTag) tag));
         }
 
@@ -73,7 +73,7 @@ public class PacketS2CHello extends Packet<ClientPacketListener> {
 
         TagUtils.toList(allPlayers).write(output);
 
-        ListTag entitiesTag = new ListTag();
+        ListTag entitiesTag = ListTag.of();
         for (Entity entity : allEntities) {
             entitiesTag.add(entity.toTag());
         }

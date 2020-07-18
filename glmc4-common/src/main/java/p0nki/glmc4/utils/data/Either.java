@@ -1,4 +1,4 @@
-package p0nki.glmc4.utils;
+package p0nki.glmc4.utils.data;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -25,12 +25,20 @@ public abstract class Either<L, R> {
 
     public abstract Optional<R> right();
 
-    public <T> Either<T, R> mapLeft(Function<L, T> function) {
+    public <L2> Either<L2, R> mapLeft(Function<L, L2> function) {
         return map(t -> left(function.apply(t)), Either::right);
     }
 
-    public <T> Either<L, T> mapRight(Function<R, T> function) {
+    public <R2> Either<L, R2> mapRight(Function<R, R2> function) {
         return map(Either::left, t -> right(function.apply(t)));
+    }
+
+    public <L2> Either<L2, R> flatMapLeft(Function<L, Either<L2, R>> function) {
+        return map(function, Either::right);
+    }
+
+    public <R2> Either<L, R2> flatMapRight(Function<R, Either<L, R2>> function) {
+        return map(Either::left, function);
     }
 
     public Either<R, L> swap() {

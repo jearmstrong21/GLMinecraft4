@@ -5,7 +5,7 @@ import p0nki.glmc4.network.PacketWriteBuf;
 
 import java.util.AbstractList;
 
-public class LongArrayTag extends AbstractList<Long> implements Tag<LongArrayTag> {
+public class LongArrayTag extends AbstractList<LongTag> implements Tag {
 
     public static final TagReader<LongArrayTag> READER = input -> {
         int length = input.readInt();
@@ -16,17 +16,17 @@ public class LongArrayTag extends AbstractList<Long> implements Tag<LongArrayTag
 
     private long[] values;
 
-    public LongArrayTag() {
-        values = new long[0];
-    }
-
-    public LongArrayTag(long[] values) {
+    private LongArrayTag(long[] values) {
         this.values = values;
     }
 
+    public static LongArrayTag of(long... values) {
+        return new LongArrayTag(values);
+    }
+
     @Override
-    public Long get(int index) {
-        return values[index];
+    public LongTag get(int index) {
+        return LongTag.of(values[index]);
     }
 
     @Override
@@ -35,22 +35,22 @@ public class LongArrayTag extends AbstractList<Long> implements Tag<LongArrayTag
     }
 
     @Override
-    public Long set(int index, Long element) {
+    public LongTag set(int index, LongTag element) {
         long original = values[index];
-        values[index] = element;
-        return original;
+        values[index] = element.longValue();
+        return LongTag.of(original);
     }
 
     @Override
-    public void add(int index, Long element) {
-        values = ArrayUtils.add(values, index, element);
+    public void add(int index, LongTag element) {
+        values = ArrayUtils.add(values, index, element.longValue());
     }
 
     @Override
-    public Long remove(int index) {
+    public LongTag remove(int index) {
         long original = values[index];
         values = ArrayUtils.remove(values, index);
-        return original;
+        return LongTag.of(original);
     }
 
     @Override

@@ -2,6 +2,7 @@ package p0nki.glmc4.network.packet;
 
 import p0nki.glmc4.network.packet.clientbound.*;
 import p0nki.glmc4.network.packet.serverbound.PacketC2SPingResponse;
+import p0nki.glmc4.network.packet.serverbound.PacketC2SPlayerMovement;
 import p0nki.glmc4.registry.Registry;
 import p0nki.glmc4.utils.Identifier;
 
@@ -21,6 +22,7 @@ public class PacketTypes {
     public static final PacketType<PacketS2CEntityDespawn> S2C_ENTITY_DESPAWN = new PacketType<>(PacketS2CEntityDespawn::new);
 
     public static final PacketType<PacketC2SPingResponse> C2S_PING_RESPONSE = new PacketType<>(PacketC2SPingResponse::new);
+    public static final PacketType<PacketC2SPlayerMovement> C2S_PLAYER_MOVEMENT = new PacketType<>(PacketC2SPlayerMovement::new);
 
     public static void initialize() {
         REGISTRY.register(new Identifier("minecraft:s2c_hello"), S2C_HELLO);
@@ -35,6 +37,7 @@ public class PacketTypes {
         REGISTRY.register(new Identifier("minecraft:s2c_entity_despawn"), S2C_ENTITY_DESPAWN);
 
         REGISTRY.register(new Identifier("minecraft:c2s_ping_response"), C2S_PING_RESPONSE);
+        REGISTRY.register(new Identifier("minecraft:c2s_player_movement"), C2S_PLAYER_MOVEMENT);
 
         if (REGISTRY.get(S2C_HELLO).getIndex() != 0) {
             throw new RuntimeException("HELLO packet somehow is not at index zero");

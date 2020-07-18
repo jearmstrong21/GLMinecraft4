@@ -11,7 +11,7 @@ public class PacketReadBuf {
         buffer = ByteBuffer.wrap(bytes);
     }
 
-    public <T extends ByteBufEquivalent> T read(T value) {
+    public <T extends ByteBufEquivalent> T readEquivalent(T value) {
         value.read(this);
         return value;
     }
@@ -20,8 +20,12 @@ public class PacketReadBuf {
         return new UUID(readLong(), readLong());
     }
 
-    public float readFloat() {
-        return buffer.getFloat();
+    public byte readByte() {
+        return buffer.get();
+    }
+
+    public short readShort() {
+        return buffer.getShort();
     }
 
     public int readInt() {
@@ -30,6 +34,14 @@ public class PacketReadBuf {
 
     public long readLong() {
         return buffer.getLong();
+    }
+
+    public float readFloat() {
+        return buffer.getFloat();
+    }
+
+    public double readDouble() {
+        return buffer.getDouble();
     }
 
     public char readChar() {
@@ -47,10 +59,6 @@ public class PacketReadBuf {
             str.append(readChar());
         }
         return str.toString();
-    }
-
-    public byte readByte() {
-        return buffer.get();
     }
 
     public byte[] readBytes(int count) {

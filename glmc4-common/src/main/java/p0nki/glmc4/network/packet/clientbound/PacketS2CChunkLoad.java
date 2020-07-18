@@ -32,7 +32,7 @@ public class PacketS2CChunkLoad extends Packet<ClientPacketListener> {
     public void read(PacketReadBuf input) {
         x = input.readInt();
         z = input.readInt();
-        chunk = input.read(new Chunk());
+        chunk = input.readEquivalent(new Chunk());
     }
 
     @Override

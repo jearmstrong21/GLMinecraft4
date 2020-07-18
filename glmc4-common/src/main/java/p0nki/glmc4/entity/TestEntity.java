@@ -2,6 +2,7 @@ package p0nki.glmc4.entity;
 
 import org.joml.Vector3f;
 import p0nki.glmc4.tag.CompoundTag;
+import p0nki.glmc4.utils.TagUtils;
 
 import java.util.Random;
 import java.util.UUID;
@@ -36,6 +37,6 @@ public class TestEntity extends Entity {
 
     @Override
     public CompoundTag toTag() {
-        return super.toTag().insert("color", color);
+        return super.toTag().insert("color", TagUtils.of(color));
     }
 }

@@ -79,8 +79,8 @@ public class Identifier extends MarkerManager.Log4jMarker implements TagEquivale
 
     @Override
     public Identifier fromTag(StringTag tag) {
-        assertValidIdentifier(tag.get());
-        String[] split = tag.get().split(":");
+        assertValidIdentifier(tag.asString());
+        String[] split = tag.asString().split(":");
         assertValidPortion(split[0]);
         assertValidPortion(split[1]);
         namespace = split[0];
@@ -90,6 +90,6 @@ public class Identifier extends MarkerManager.Log4jMarker implements TagEquivale
 
     @Override
     public StringTag toTag() {
-        return new StringTag(toString());
+        return StringTag.of(toString());
     }
 }

@@ -23,8 +23,15 @@ public class PacketWriteBuf {
         writeLong(uuid.getLeastSignificantBits());
     }
 
-    public void writeFloat(float value) {
-        writeBytes(ByteBuffer.allocate(Float.BYTES).putFloat(value).array());
+    public void writeByte(byte value) {
+        bytes.add(value);
+        if (bytes.size() >= ClientConnection.MAX_PACKET_SIZE) {
+            throw new PacketByteBufOverflow();
+        }
+    }
+
+    public void writeShort(short value) {
+        writeBytes(ByteBuffer.allocate(Short.BYTES).putShort(value).array());
     }
 
     public void writeInt(int value) {
@@ -35,25 +42,26 @@ public class PacketWriteBuf {
         writeBytes(ByteBuffer.allocate(Long.BYTES).putLong(value).array());
     }
 
-    public void writeChar(char value) {
-        writeBytes(ByteBuffer.allocate(Character.BYTES).putChar(value).array());
+    public void writeFloat(float value) {
+        writeBytes(ByteBuffer.allocate(Float.BYTES).putFloat(value).array());
     }
 
-    public void writeString(String value) {
-        writeInt(value.length());
-        for (int i = 0; i < value.length(); i++) {
-            writeChar(value.charAt(i));
-        }
+    public void writeDouble(double value) {
+        writeBytes(ByteBuffer.allocate(Double.BYTES).putDouble(value).array());
+    }
+
+    public void writeChar(char value) {
+        writeBytes(ByteBuffer.allocate(Character.BYTES).putChar(value).array());
     }
 
     public void writeBoolean(boolean value) {
         writeByte((byte) (value ? 1 : 0));
     }
 
-    public void writeByte(byte value) {
-        bytes.add(value);
-        if (bytes.size() >= ClientConnection.MAX_PACKET_SIZE) {
-            throw new PacketByteBufOverflow();
+    public void writeString(String value) {
+        writeInt(value.length());
+        for (int i = 0; i < value.length(); i++) {
+            writeChar(value.charAt(i));
         }
     }
 

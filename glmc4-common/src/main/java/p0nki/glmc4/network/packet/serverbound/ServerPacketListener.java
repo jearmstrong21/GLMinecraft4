@@ -10,4 +10,6 @@ public interface ServerPacketListener extends PacketListener<ServerPacketListene
 
     void onPingResponse(PacketC2SPingResponse packet);
 
+    void onPlayerMovement(PacketC2SPlayerMovement packet);
+
 }

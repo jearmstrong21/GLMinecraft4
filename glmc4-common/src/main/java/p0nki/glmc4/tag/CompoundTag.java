@@ -9,72 +9,81 @@ import p0nki.glmc4.utils.TagUtils;
 import javax.annotation.Nonnull;
 import java.util.*;
 
-public class CompoundTag extends AbstractMap<String, Tag<?>> implements Tag<CompoundTag>, ToTag<CompoundTag> {
+public class CompoundTag extends AbstractMap<String, Tag> implements Tag {
 
     public static final TagReader<CompoundTag> READER = input -> {
         int size = input.readInt();
-        Map<String, Tag<?>> values = new HashMap<>();
+        Map<String, Tag> values = new HashMap<>();
         for (int i = 0; i < size; i++) {
             values.put(input.readString(), DataStreamUtils.readTag(input));
         }
         return new CompoundTag(values);
     };
+    private final Map<String, Tag> values;
 
-    private final Map<String, Tag<?>> values;
-
-    public CompoundTag() {
-        values = new HashMap<>();
-    }
-
-    public CompoundTag(Map<String, Tag<?>> values) {
+    private CompoundTag(Map<String, Tag> values) {
         this.values = new HashMap<>(values);
     }
 
-    public CompoundTag insert(String key, Object value) {
-        values.put(key, Tag.of(value));
+    public static CompoundTag empty() {
+        return new CompoundTag(new HashMap<>());
+    }
+
+    public static CompoundTag of(Map<String, Tag> values) {
+        return new CompoundTag(values);
+    }
+
+    public CompoundTag insert(String key, Tag value) {
+        put(key, value);
         return this;
     }
 
-    public CompoundTag insert(String key, Vector3f value) {
-        values.put(key, TagUtils.of(value));
-        return this;
+    public ByteTag getByte(String key) {
+        return (ByteTag) values.get(key);
     }
 
-    public CompoundTag insert(String key, UUID value) {
-        values.put(key, TagUtils.of(value));
-        return this;
+    public ShortTag getShort(String key) {
+        return (ShortTag) values.get(key);
+    }
+
+    public IntTag getInt(String key) {
+        return (IntTag) values.get(key);
+    }
+
+    public LongTag getLong(String key) {
+        return (LongTag) values.get(key);
+    }
+
+    public FloatTag getFloat(String key) {
+        return (FloatTag) values.get(key);
+    }
+
+    public DoubleTag getDouble(String key) {
+        return (DoubleTag) values.get(key);
     }
 
     public ByteArrayTag getByteArray(String key) {
         return (ByteArrayTag) values.get(key);
     }
 
-    public byte getByte(String key) {
-        return ((ByteTag) values.get(key)).get();
-    }
-
-    public CompoundTag getCompound(String key) {
-        return (CompoundTag) values.get(key);
-    }
-
     public IntArrayTag getIntArray(String key) {
         return (IntArrayTag) values.get(key);
-    }
-
-    public int getInt(String key) {
-        return ((IntTag) values.get(key)).get();
-    }
-
-    public ListTag getList(String key) {
-        return (ListTag) values.get(key);
     }
 
     public LongArrayTag getLongArray(String key) {
         return (LongArrayTag) values.get(key);
     }
 
-    public long getLong(String key) {
-        return ((LongTag) values.get(key)).get();
+    public StringTag getString(String key) {
+        return ((StringTag) values.get(key));
+    }
+
+    public CompoundTag getCompound(String key) {
+        return (CompoundTag) values.get(key);
+    }
+
+    public ListTag getList(String key) {
+        return (ListTag) values.get(key);
     }
 
     public Vector3f get3f(String key) {
@@ -86,30 +95,27 @@ public class CompoundTag extends AbstractMap<String, Tag<?>> implements Tag<Comp
     }
 
     public Identifier getIdentifier(String key) {
-        return new Identifier(getString(key));
+        return new Identifier(getString(key).asString());
     }
 
-    public String getString(String key) {
-        return ((StringTag) values.get(key)).get();
-    }
 
     @Override
-    public Tag<?> put(String key, Tag<?> value) {
-        Tag<?> original = values.getOrDefault(key, null);
+    public Tag put(String key, Tag value) {
+        Tag original = values.getOrDefault(key, null);
         values.put(key, value);
         return original;
     }
 
     @Override
     @Nonnull
-    public Set<Entry<String, Tag<?>>> entrySet() {
+    public Set<Entry<String, Tag>> entrySet() {
         return values.entrySet();
     }
 
     @Override
     public void write(PacketWriteBuf output) {
         output.writeInt(values.size());
-        for (Entry<String, Tag<?>> entry : values.entrySet()) {
+        for (Entry<String, Tag> entry : values.entrySet()) {
             output.writeString(entry.getKey());
             DataStreamUtils.writeTag(output, entry.getValue());
         }

@@ -13,7 +13,7 @@ public class DataStreamUtils {
     }
 
     @Nullable
-    public static Tag<?> readTag(PacketReadBuf input) {
+    public static Tag readTag(PacketReadBuf input) {
         byte type = input.readByte();
         if (Tag.isTagId(type)) {
             return Tag.getReader(type).read(input);
@@ -22,7 +22,7 @@ public class DataStreamUtils {
         }
     }
 
-    public static void writeTag(PacketWriteBuf output, Tag<?> tag) {
+    public static void writeTag(PacketWriteBuf output, Tag tag) {
         output.writeByte(tag.type()); // TODO MAKE THIS A WRITE_BYTE
         tag.write(output);
     }

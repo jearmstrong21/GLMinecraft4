@@ -3,44 +3,42 @@ package p0nki.glmc4.tag;
 import org.apache.commons.lang3.ArrayUtils;
 import p0nki.glmc4.network.PacketWriteBuf;
 
-import java.util.AbstractList;
+public class ByteArrayTag extends AbstractListTag<ByteTag> {
 
-public class ByteArrayTag extends AbstractList<Byte> implements Tag<ByteArrayTag> {
-
-    public static final TagReader<ByteArrayTag> READER = input -> new ByteArrayTag(input.readBytes(input.readInt()));
+    public static final TagReader<ByteArrayTag> READER = input -> of(input.readBytes(input.readInt()));
 
     private byte[] values;
 
-    public ByteArrayTag() {
-        values = new byte[0];
-    }
-
-    public ByteArrayTag(byte[] values) {
+    private ByteArrayTag(byte[] values) {
         this.values = values;
     }
 
-    @Override
-    public Byte get(int index) {
-        return values[index];
+    public static ByteArrayTag of(byte... values) {
+        return new ByteArrayTag(values);
     }
 
     @Override
-    public Byte set(int index, Byte element) {
-        byte original = values[index];
-        values[index] = element;
-        return original;
+    public ByteTag set(int index, ByteTag element) {
+        byte b = values[index];
+        values[index] = element.byteValue();
+        return ByteTag.of(b);
     }
 
     @Override
-    public void add(int index, Byte element) {
-        values = ArrayUtils.add(values, index, element);
+    public void add(int index, ByteTag element) {
+        values = ArrayUtils.add(values, index, element.byteValue());
     }
 
     @Override
-    public Byte remove(int index) {
-        byte original = values[index];
+    public ByteTag remove(int index) {
+        byte b = values[index];
         values = ArrayUtils.remove(values, index);
-        return original;
+        return ByteTag.of(b);
+    }
+
+    @Override
+    public ByteTag get(int index) {
+        return ByteTag.of(values[index]);
     }
 
     @Override

@@ -3,9 +3,7 @@ package p0nki.glmc4.tag;
 import org.apache.commons.lang3.ArrayUtils;
 import p0nki.glmc4.network.PacketWriteBuf;
 
-import java.util.AbstractList;
-
-public class IntArrayTag extends AbstractList<Integer> implements Tag<IntArrayTag> {
+public class IntArrayTag extends AbstractListTag<IntTag> {
 
     public static final TagReader<IntArrayTag> READER = input -> {
         int length = input.readInt();
@@ -16,36 +14,36 @@ public class IntArrayTag extends AbstractList<Integer> implements Tag<IntArrayTa
 
     private int[] values;
 
-    public IntArrayTag() {
-        values = new int[0];
-    }
-
-    public IntArrayTag(int[] values) {
+    private IntArrayTag(int[] values) {
         this.values = values;
     }
 
-    @Override
-    public Integer get(int index) {
-        return values[index];
+    public static IntArrayTag of(int... values) {
+        return new IntArrayTag(values);
     }
 
     @Override
-    public Integer set(int index, Integer element) {
+    public IntTag get(int index) {
+        return IntTag.of(values[index]);
+    }
+
+    @Override
+    public IntTag set(int index, IntTag element) {
         int original = values[index];
-        values[index] = element;
-        return original;
+        values[index] = element.intValue();
+        return IntTag.of(original);
     }
 
     @Override
-    public Integer remove(int index) {
+    public IntTag remove(int index) {
         int original = values[index];
         values = ArrayUtils.remove(values, index);
-        return original;
+        return IntTag.of(original);
     }
 
     @Override
-    public void add(int index, Integer element) {
-        values = ArrayUtils.add(values, index, element);
+    public void add(int index, IntTag element) {
+        values = ArrayUtils.add(values, index, element.intValue());
     }
 
     @Override
