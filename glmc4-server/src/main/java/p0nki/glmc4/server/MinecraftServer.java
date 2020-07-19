@@ -50,12 +50,14 @@ public class MinecraftServer {
     public void onJoin(ServerPacketListener listener) {
         if (listeners.containsValue(listener)) throw new IllegalArgumentException("Cannot join listener twice");
         ServerPlayer player = new ServerPlayer(UUID.randomUUID(), Words.generateUnique());
+        PlayerEntity playerEntity = new PlayerEntity(new Vector3f((float) Math.random() * 10 - 5, 15, (float) Math.random() * 10 - 5), player);
         listener.setPlayer(player);
+        listener.setPlayerEntity(playerEntity);
         listener.getConnection().write(new PacketS2CHello(player, new ArrayList<>(players.values()), new ArrayList<>(entities.values())));
         players.put(player.getUuid(), player);
         listeners.put(player.getUuid(), listener);
         writeAll(new PacketS2CPlayerJoin(player));
-        spawnEntity(new PlayerEntity(new Vector3f((float) Math.random() * 10 - 5, 15, (float) Math.random() * 10 - 5), player));
+        spawnEntity(playerEntity);
         for (int x = -3; x <= 3; x++) {
             for (int z = -3; z <= 3; z++) {
                 listener.getConnection().write(new PacketS2CChunkLoad(x, z, Chunk.generate(x, z)));

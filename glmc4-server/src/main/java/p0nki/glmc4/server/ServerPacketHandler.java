@@ -26,7 +26,11 @@ public class ServerPacketHandler extends ServerPacketListener {
 
     @Override
     public void onPlayerMovement(PacketC2SPlayerMovement packet) {
-
+        float movement = 0.05F;
+        if (packet.isForward()) getPlayerEntity().getPosition().z -= movement;
+        if (packet.isBack()) getPlayerEntity().getPosition().z += movement;
+        if (packet.isLeft()) getPlayerEntity().getPosition().x -= movement;
+        if (packet.isRight()) getPlayerEntity().getPosition().x += movement;
     }
 
     @Override

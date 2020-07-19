@@ -27,8 +27,7 @@ public class PlayerEntity extends Entity {
 
     @Override
     public void tick(Random random) {
-        getPosition().x += random.nextFloat() * 0.5 - 0.25;
-        getPosition().z += random.nextFloat() * 0.5 - 0.25;
+
     }
 
     @Override

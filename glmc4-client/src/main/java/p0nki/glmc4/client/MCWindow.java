@@ -106,6 +106,10 @@ public class MCWindow {
         return h[0];
     }
 
+    public static boolean getKey(char ch) {
+        return glfwGetKey(ptr, ch) == GLFW_PRESS;
+    }
+
     public static float time() {
         return (float) glfwGetTime();
     }

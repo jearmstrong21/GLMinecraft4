@@ -23,6 +23,22 @@ public class PacketC2SPlayerMovement extends Packet<ServerPacketListener> {
         this.right = right;
     }
 
+    public boolean isForward() {
+        return forward;
+    }
+
+    public boolean isBack() {
+        return back;
+    }
+
+    public boolean isLeft() {
+        return left;
+    }
+
+    public boolean isRight() {
+        return right;
+    }
+
     @Override
     public void read(PacketByteBuf buf) {
         forward = buf.readBoolean();

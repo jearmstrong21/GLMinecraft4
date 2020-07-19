@@ -27,6 +27,7 @@ import p0nki.glmc4.entity.EntityType;
 import p0nki.glmc4.entity.EntityTypes;
 import p0nki.glmc4.network.NetworkHandler;
 import p0nki.glmc4.network.PacketCodec;
+import p0nki.glmc4.network.packet.clientbound.ClientPacketListener;
 import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.utils.Identifier;
 import p0nki.glmc4.utils.MathUtils;
@@ -55,6 +56,7 @@ public class GLMC4Client {
     private static final Map<Long, Mesh> meshes = new HashMap<>();
     private final static Set<Identifier> warnedIdentifiers = new HashSet<>();
     private final static Lock chunkLock = new ReentrantLock();
+    private static ClientPacketListener packetListener;
 
     public static TextRenderer textRenderer;
 
@@ -156,6 +158,8 @@ public class GLMC4Client {
             renderer.render(context, entity);
         }
         textRenderer.renderString(-1, 1 - 0.075F, 0.075F, String.format("GLMinecraft4\nFPS: %s", MCWindow.getFps()));
+
+        packetListener.tick();
     }
 
     private static void runClient() {
@@ -177,6 +181,7 @@ public class GLMC4Client {
 
     private static void runNetty() {
         EventLoopGroup workerGroup = new NioEventLoopGroup();
+        packetListener = new ClientPacketHandler();
         Bootstrap bootstrap = new Bootstrap()
                 .group(workerGroup)
                 .channel(NioSocketChannel.class)
@@ -184,7 +189,7 @@ public class GLMC4Client {
                 .handler(new ChannelInitializer<>() {
                     @Override
                     protected void initChannel(Channel ch) {
-                        ch.pipeline().addLast(new PacketCodec(), new NetworkHandler<>(new ClientPacketHandler()));
+                        ch.pipeline().addLast(new PacketCodec(), new NetworkHandler<>(packetListener));
                     }
                 });
         bootstrap.connect("localhost", 8080);

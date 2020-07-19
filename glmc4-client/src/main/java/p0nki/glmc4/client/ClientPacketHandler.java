@@ -2,6 +2,7 @@ package p0nki.glmc4.client;
 
 import p0nki.glmc4.network.packet.clientbound.*;
 import p0nki.glmc4.network.packet.serverbound.PacketC2SPingResponse;
+import p0nki.glmc4.network.packet.serverbound.PacketC2SPlayerMovement;
 
 public class ClientPacketHandler extends ClientPacketListener {
     @Override
@@ -57,7 +58,7 @@ public class ClientPacketHandler extends ClientPacketListener {
 
     @Override
     public void tick() {
-
+        getConnection().write(new PacketC2SPlayerMovement(MCWindow.getKey('W'), MCWindow.getKey('S'), MCWindow.getKey('A'), MCWindow.getKey('D')));
     }
 
     @Override
