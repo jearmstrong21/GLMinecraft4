@@ -38,6 +38,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 public class GLMC4Client {
 
@@ -63,27 +64,22 @@ public class GLMC4Client {
     private static Shader shader;
     private static Texture texture;
 
-    private static List<Entity> entities = new ArrayList<>();
+    private static Map<UUID, Entity> entities = new HashMap<>();
 
     public static void loadInitialEntities(List<Entity> entities) {
-        GLMC4Client.entities = entities;
+        GLMC4Client.entities = entities.stream().collect(Collectors.toMap(Entity::getUuid, entity -> entity));
     }
 
     public static void updateEntity(UUID uuid, CompoundTag newData) {
-        entities.stream().filter(entity -> entity.getUuid().equals(uuid)).forEach(entity -> entity.fromTag(newData));
+        entities.get(uuid).fromTag(newData);
     }
 
     public static void spawnEntity(Entity entity) {
-        entities.add(entity);
+        entities.put(entity.getUuid(), entity);
     }
 
     public static void despawnEntity(UUID uuid) {
-        for (Entity e : entities) {
-            if (e.getUuid().equals(uuid)) {
-                entities.remove(e);
-                return;
-            }
-        }
+        entities.remove(uuid);
     }
 
     public static void onLoadChunk(int x, int z, Chunk chunk) {
@@ -151,7 +147,7 @@ public class GLMC4Client {
             chunk.getValue().render();
         }
 
-        for (Entity entity : entities) {
+        for (Entity entity : entities.values()) {
             EntityType<?> type = entity.getType();
             Identifier identifier = EntityTypes.REGISTRY.get(type).getKey();
             EntityRenderer<?> renderer = EntityRenderers.REGISTRY.get(identifier).getValue();
