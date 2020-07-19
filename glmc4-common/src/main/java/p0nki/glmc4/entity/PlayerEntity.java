@@ -4,6 +4,8 @@ import org.joml.Vector3f;
 import p0nki.glmc4.server.ServerPlayer;
 import p0nki.glmc4.tag.CompoundTag;
 
+import java.util.Random;
+
 public class PlayerEntity extends Entity {
 
     private ServerPlayer serverPlayer;
@@ -21,6 +23,12 @@ public class PlayerEntity extends Entity {
     public Entity fromTag(CompoundTag tag) {
         serverPlayer = new ServerPlayer().fromTag(tag.getCompound("serverPlayer"));
         return super.fromTag(tag);
+    }
+
+    @Override
+    public void tick(Random random) {
+        getPosition().x += random.nextFloat() * 0.5 - 0.25;
+        getPosition().z += random.nextFloat() * 0.5 - 0.25;
     }
 
     @Override
