@@ -22,4 +22,6 @@ public abstract class ClientPacketListener extends PacketListener<ClientPacketLi
 
     public abstract void onEntityDespawn(PacketS2CEntityDespawn packet);
 
+    public abstract void onDisconnectReason(PacketS2CDisconnectReason packet);
+
 }

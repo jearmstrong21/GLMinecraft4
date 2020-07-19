@@ -1,16 +1,16 @@
-package p0nki.glmc4.client;
+package p0nki.glmc4.network;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import p0nki.glmc4.network.packet.NetworkConnection;
 import p0nki.glmc4.network.packet.Packet;
-import p0nki.glmc4.network.packet.clientbound.ClientPacketListener;
+import p0nki.glmc4.network.packet.PacketListener;
 
-public class ClientNetworkHandler extends SimpleChannelInboundHandler<Packet<ClientPacketListener>> {
+public class NetworkHandler<L extends PacketListener<L>> extends SimpleChannelInboundHandler<Packet<L>> {
 
-    private final ClientPacketListener packetListener;
+    private final L packetListener;
 
-    public ClientNetworkHandler(ClientPacketListener packetListener) {
+    public NetworkHandler(L packetListener) {
         this.packetListener = packetListener;
     }
 
@@ -22,11 +22,11 @@ public class ClientNetworkHandler extends SimpleChannelInboundHandler<Packet<Cli
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) {
-        packetListener.onDisconnected("No disconnect reason supported");
+        packetListener.onDisconnected("No reason currently supported");
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Packet<ClientPacketListener> msg) {
+    protected void channelRead0(ChannelHandlerContext ctx, Packet<L> msg) {
         msg.apply(packetListener);
     }
 }

@@ -8,6 +8,7 @@ import io.netty.util.ResourceLeakDetector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import p0nki.glmc4.CommonBoostrap;
+import p0nki.glmc4.network.NetworkHandler;
 import p0nki.glmc4.network.PacketCodec;
 
 public class GLMC4Server {
@@ -16,6 +17,7 @@ public class GLMC4Server {
 
     public static void main(String[] args) {
         CommonBoostrap.initialize();
+        MinecraftServer.INSTANCE = new MinecraftServer();
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
@@ -26,7 +28,7 @@ public class GLMC4Server {
                     .childHandler(new ChannelInitializer<>() {
                         @Override
                         protected void initChannel(Channel ch) {
-                            ch.pipeline().addLast(new PacketCodec(), new ServerNetworkHandler(new ServerPacketHandler()));
+                            ch.pipeline().addLast(new PacketCodec(), new NetworkHandler<>(new ServerPacketHandler()));
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 128)

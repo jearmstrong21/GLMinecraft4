@@ -20,6 +20,7 @@ public class PacketTypes {
     public static final PacketType<PacketS2CEntityUpdate> S2C_ENTITY_UPDATE = new PacketType<>(PacketS2CEntityUpdate::new);
     public static final PacketType<PacketS2CEntitySpawn> S2C_ENTITY_SPAWN = new PacketType<>(PacketS2CEntitySpawn::new);
     public static final PacketType<PacketS2CEntityDespawn> S2C_ENTITY_DESPAWN = new PacketType<>(PacketS2CEntityDespawn::new);
+    public static final PacketType<PacketS2CDisconnectReason> S2C_DISCONNECT_REASON = new PacketType<>(PacketS2CDisconnectReason::new);
 
     public static final PacketType<PacketC2SPingResponse> C2S_PING_RESPONSE = new PacketType<>(PacketC2SPingResponse::new);
     public static final PacketType<PacketC2SPlayerMovement> C2S_PLAYER_MOVEMENT = new PacketType<>(PacketC2SPlayerMovement::new);
@@ -35,6 +36,7 @@ public class PacketTypes {
         REGISTRY.register(new Identifier("minecraft:s2c_entity_update"), S2C_ENTITY_UPDATE);
         REGISTRY.register(new Identifier("minecraft:s2c_entity_spawn"), S2C_ENTITY_SPAWN);
         REGISTRY.register(new Identifier("minecraft:s2c_entity_despawn"), S2C_ENTITY_DESPAWN);
+        REGISTRY.register(new Identifier("minecraft:s2c_disconnect_reason"), S2C_DISCONNECT_REASON);
 
         REGISTRY.register(new Identifier("minecraft:c2s_ping_response"), C2S_PING_RESPONSE);
         REGISTRY.register(new Identifier("minecraft:c2s_player_movement"), C2S_PLAYER_MOVEMENT);

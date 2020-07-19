@@ -18,4 +18,8 @@ public final class NetworkConnection<L extends PacketListener<L>> {
         ctx.close();
     }
 
+    public boolean isDead() {
+        return ctx.isRemoved();
+    }
+
 }

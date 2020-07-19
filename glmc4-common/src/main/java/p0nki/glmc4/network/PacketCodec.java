@@ -43,4 +43,9 @@ public class PacketCodec extends ByteToMessageCodec<Packet<?>> {
         out.add(packet);
     }
 
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        System.out.println("Exception caught");
+        ctx.close();
+    }
 }

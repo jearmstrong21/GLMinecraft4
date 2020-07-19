@@ -1,0 +1,68 @@
+package p0nki.glmc4.server;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
+import p0nki.glmc4.block.Chunk;
+import p0nki.glmc4.network.packet.Packet;
+import p0nki.glmc4.network.packet.clientbound.*;
+import p0nki.glmc4.network.packet.serverbound.ServerPacketListener;
+import p0nki.glmc4.utils.Words;
+
+import java.util.*;
+
+public class MinecraftServer {
+
+    public static MinecraftServer INSTANCE;
+
+    private static Logger LOGGER = LogManager.getLogger();
+    private static Marker GAMELOOP = MarkerManager.getMarker("GAMELOOP");
+
+    private final Map<UUID, ServerPlayer> players = new HashMap<>();
+    private final Map<UUID, ServerPacketListener> listeners = new HashMap<>();
+
+    public MinecraftServer() {
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                tick();
+            }
+        }, 0, 100);
+    }
+
+    public void writeAll(Packet<ClientPacketListener> packet) {
+        if (packet instanceof PacketS2CChatMessage) {
+            LOGGER.info(GAMELOOP, "<{}> {}", ((PacketS2CChatMessage) packet).getSource(), ((PacketS2CChatMessage) packet).getMessage());
+        } else if (packet instanceof PacketS2CPlayerJoin) {
+            LOGGER.info(GAMELOOP, "Player {} with name {} joined!", ((PacketS2CPlayerJoin) packet).getPlayer().getUuid(), ((PacketS2CPlayerJoin) packet).getPlayer().getName());
+        } else if (packet instanceof PacketS2CPlayerLeave) {
+            LOGGER.info(GAMELOOP, "Player {} with name {} left!", players.get(((PacketS2CPlayerLeave) packet).getUuid()).getUuid(), players.get(((PacketS2CPlayerLeave) packet).getUuid()).getName());
+        }
+        listeners.values().forEach(listener -> listener.getConnection().write(packet));
+    }
+
+    public void onJoin(ServerPacketListener listener) {
+        ServerPlayer player = new ServerPlayer(UUID.randomUUID(), Words.generateUnique());
+        listener.setPlayer(player);
+        players.put(player.getUuid(), player);
+        listeners.put(player.getUuid(), listener);
+        writeAll(new PacketS2CPlayerJoin(player));
+        for (int x = -3; x <= 3; x++) {
+            for (int z = -3; z <= 3; z++) {
+                listener.getConnection().write(new PacketS2CChunkLoad(x, z, Chunk.generate(x, z)));
+            }
+        }
+    }
+
+    public void onLeave(UUID uuid) {
+        writeAll(new PacketS2CPlayerLeave(uuid));
+        players.remove(uuid);
+        listeners.remove(uuid);
+    }
+
+    private void tick() {
+        listeners.values().forEach(ServerPacketListener::tick);
+    }
+
+}

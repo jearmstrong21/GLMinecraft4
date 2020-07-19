@@ -1,12 +1,11 @@
 package p0nki.glmc4.client;
 
 import p0nki.glmc4.network.packet.clientbound.*;
-import p0nki.glmc4.network.packet.serverbound.PacketC2SPingResponse;
 
 public class ClientPacketHandler extends ClientPacketListener {
     @Override
     public void onPingRequest(PacketS2CPingRequest packet) {
-        getConnection().write(new PacketC2SPingResponse());
+//        getConnection().write(new PacketC2SPingResponse());
     }
 
     @Override
@@ -67,5 +66,10 @@ public class ClientPacketHandler extends ClientPacketListener {
     public void onDisconnected(String reason) {
         System.out.println("Disconnected");
         System.exit(0);
+    }
+
+    @Override
+    public void onDisconnectReason(PacketS2CDisconnectReason packet) {
+        System.out.println("DISCONNECT REASON " + packet.getReason());
     }
 }

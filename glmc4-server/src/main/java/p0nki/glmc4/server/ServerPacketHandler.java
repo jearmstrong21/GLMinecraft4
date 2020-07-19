@@ -2,9 +2,8 @@ package p0nki.glmc4.server;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import p0nki.glmc4.block.Chunk;
-import p0nki.glmc4.network.packet.clientbound.PacketS2CChatMessage;
-import p0nki.glmc4.network.packet.clientbound.PacketS2CChunkLoad;
+import p0nki.glmc4.network.packet.clientbound.PacketS2CDisconnectReason;
+import p0nki.glmc4.network.packet.clientbound.PacketS2CPingRequest;
 import p0nki.glmc4.network.packet.serverbound.PacketC2SPingResponse;
 import p0nki.glmc4.network.packet.serverbound.PacketC2SPlayerMovement;
 import p0nki.glmc4.network.packet.serverbound.ServerPacketListener;
@@ -13,9 +12,16 @@ public class ServerPacketHandler extends ServerPacketListener {
 
     private final static Logger LOGGER = LogManager.getLogger();
 
+    private final static long TIMEOUT = 500;
+    private final static int TIMEOUT_COUNT = 20;
+
+    private int timeoutTicks = 0;
+    private long lastPingResponse = -1;
+
     @Override
     public void onPingResponse(PacketC2SPingResponse packet) {
-
+        lastPingResponse = System.currentTimeMillis();
+        timeoutTicks = 0;
     }
 
     @Override
@@ -25,22 +31,24 @@ public class ServerPacketHandler extends ServerPacketListener {
 
     @Override
     public void onConnected() {
-        LOGGER.info("Connected");
-        getConnection().write(new PacketS2CChatMessage("SERVER", "Welcome to the server! Enjoy your stay"));
-        for (int x = -4; x <= 4; x++) {
-            for (int z = -4; z <= 4; z++) {
-                getConnection().write(new PacketS2CChunkLoad(x, z, Chunk.generate(x, z)));
-            }
-        }
+        MinecraftServer.INSTANCE.onJoin(this);
+        lastPingResponse = System.currentTimeMillis();
     }
 
     @Override
     public void tick() {
-        LOGGER.info("Tick");
+        getConnection().write(new PacketS2CPingRequest());
+        if (System.currentTimeMillis() - lastPingResponse > TIMEOUT) {
+            timeoutTicks++;
+        }
+        if (timeoutTicks >= TIMEOUT_COUNT) {
+            getConnection().write(new PacketS2CDisconnectReason("Timed out"));
+            getConnection().close();
+        }
     }
 
     @Override
     public void onDisconnected(String reason) {
-        LOGGER.info("Disconnected");
+        MinecraftServer.INSTANCE.onLeave(getPlayer().getUuid());
     }
 }

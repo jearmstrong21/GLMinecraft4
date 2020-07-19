@@ -1,7 +1,10 @@
 package p0nki.glmc4.client;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.apache.logging.log4j.LogManager;
@@ -22,6 +25,7 @@ import p0nki.glmc4.client.render.entity.EntityRenderers;
 import p0nki.glmc4.entity.Entity;
 import p0nki.glmc4.entity.EntityType;
 import p0nki.glmc4.entity.EntityTypes;
+import p0nki.glmc4.network.NetworkHandler;
 import p0nki.glmc4.network.PacketCodec;
 import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.utils.Identifier;
@@ -151,10 +155,6 @@ public class GLMC4Client {
         }
     }
 
-    private static Thread nettyThread;
-    private static EventLoopGroup workerGroup;
-    private static ChannelFuture nettyCloseFuture;
-
     private static void runClient() {
         try {
             MCWindow.setInitializeCallback(GLMC4Client::initializeClient);
@@ -169,43 +169,32 @@ public class GLMC4Client {
     private static void endClient() {
         LOGGER.info(RENDER, "Rendering thread ended.");
         System.exit(0);
-//        try {
-//            nettyCloseFuture.await();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//        LOGGER.info(SOCKET, "Netty closed");
-//        workerGroup.shutdownGracefully();
-//        LOGGER.info(SOCKET, "WorkerGroup shutdown");
-//        nettyThread.interrupt();
-//        LOGGER.info(SOCKET, "Netty thread interrupted");
     }
 
     private static void runNetty() {
-        workerGroup = new NioEventLoopGroup();
-        try {
-            Bootstrap bootstrap = new Bootstrap()
-                    .group(workerGroup)
-                    .channel(NioSocketChannel.class)
-                    .option(ChannelOption.SO_KEEPALIVE, true)
-                    .handler(new ChannelInitializer<>() {
-                        @Override
-                        protected void initChannel(Channel ch) {
-                            ch.pipeline().addLast(new PacketCodec(), new ClientNetworkHandler(new ClientPacketHandler()));
-                        }
-                    });
-            nettyCloseFuture = bootstrap.connect("localhost", 8080).sync();
-//            future.channel().closeFuture().sync();
-            LOGGER.info(SOCKET, "Connected to localhost:8080");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        EventLoopGroup workerGroup = new NioEventLoopGroup();
+        Bootstrap bootstrap = new Bootstrap()
+                .group(workerGroup)
+                .channel(NioSocketChannel.class)
+                .option(ChannelOption.SO_KEEPALIVE, true)
+                .handler(new ChannelInitializer<>() {
+                    @Override
+                    protected void initChannel(Channel ch) {
+                        ch.pipeline().addLast(new PacketCodec(), new NetworkHandler<>(new ClientPacketHandler()));
+                    }
+                });
+//        try {
+        bootstrap.connect("localhost", 8080);
+//                    .await();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+        LOGGER.info(SOCKET, "Connected to localhost:8080");
     }
 
     public static void main(String[] args) {
         ClientBootstrap.initialize();
-        nettyThread = new Thread(GLMC4Client::runNetty, "Netty Main Thread");
-        nettyThread.start();
+        new Thread(GLMC4Client::runNetty, "Netty Main Thread").start();
         runClient();
     }
 
