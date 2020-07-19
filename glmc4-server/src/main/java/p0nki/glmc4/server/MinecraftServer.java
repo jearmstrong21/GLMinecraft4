@@ -4,7 +4,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
+import org.joml.Vector3f;
 import p0nki.glmc4.block.Chunk;
+import p0nki.glmc4.entity.Entity;
+import p0nki.glmc4.entity.PlayerEntity;
 import p0nki.glmc4.network.packet.Packet;
 import p0nki.glmc4.network.packet.clientbound.*;
 import p0nki.glmc4.network.packet.serverbound.ServerPacketListener;
@@ -19,8 +22,10 @@ public class MinecraftServer {
     private static Logger LOGGER = LogManager.getLogger();
     private static Marker GAMELOOP = MarkerManager.getMarker("GAMELOOP");
 
+
     private final Map<UUID, ServerPlayer> players = new HashMap<>();
     private final Map<UUID, ServerPacketListener> listeners = new HashMap<>();
+    private final Map<UUID, Entity> entities = new HashMap<>();
 
     public MinecraftServer() {
         new Timer().schedule(new TimerTask() {
@@ -43,11 +48,14 @@ public class MinecraftServer {
     }
 
     public void onJoin(ServerPacketListener listener) {
+        if (listeners.containsValue(listener)) throw new IllegalArgumentException("Cannot join listener twice");
         ServerPlayer player = new ServerPlayer(UUID.randomUUID(), Words.generateUnique());
         listener.setPlayer(player);
+        listener.getConnection().write(new PacketS2CHello(player, new ArrayList<>(players.values()), new ArrayList<>(entities.values())));
         players.put(player.getUuid(), player);
         listeners.put(player.getUuid(), listener);
         writeAll(new PacketS2CPlayerJoin(player));
+        spawnEntity(new PlayerEntity(new Vector3f((float) Math.random() * 10 - 5, 15, (float) Math.random() * 10 - 5), player));
         for (int x = -3; x <= 3; x++) {
             for (int z = -3; z <= 3; z++) {
                 listener.getConnection().write(new PacketS2CChunkLoad(x, z, Chunk.generate(x, z)));
@@ -56,13 +64,33 @@ public class MinecraftServer {
     }
 
     public void onLeave(UUID uuid) {
+        if (!players.containsKey(uuid)) throw new IllegalArgumentException("Cannot disconnect offline player");
         writeAll(new PacketS2CPlayerLeave(uuid));
+        despawnEntity(uuid);
         players.remove(uuid);
         listeners.remove(uuid);
     }
 
+    public void spawnEntity(Entity entity) {
+        if (entities.containsKey(entity.getUuid()))
+            throw new IllegalArgumentException("Cannot spawn already existing entity");
+        entities.put(entity.getUuid(), entity);
+        writeAll(new PacketS2CEntitySpawn(entity));
+    }
+
+    public void despawnEntity(UUID uuid) {
+        if (!entities.containsKey(uuid)) throw new IllegalArgumentException("Cannot despawn nonexistent entity");
+        entities.remove(uuid);
+        writeAll(new PacketS2CEntityDespawn(uuid));
+    }
+
     private void tick() {
         listeners.values().forEach(ServerPacketListener::tick);
+        Random random = new Random(System.currentTimeMillis());
+        entities.values().forEach(entity -> {
+            entity.tick(random);
+            writeAll(new PacketS2CEntityUpdate(entity));
+        });
     }
 
 }

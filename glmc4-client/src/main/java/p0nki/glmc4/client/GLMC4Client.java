@@ -56,6 +56,8 @@ public class GLMC4Client {
     private final static Set<Identifier> warnedIdentifiers = new HashSet<>();
     private final static Lock chunkLock = new ReentrantLock();
 
+    public static TextRenderer textRenderer;
+
     private static Shader shader;
     private static Texture texture;
 
@@ -80,7 +82,6 @@ public class GLMC4Client {
                 return;
             }
         }
-        throw new AssertionError("Cannot despawn entity " + uuid);
     }
 
     public static void onLoadChunk(int x, int z, Chunk chunk) {
@@ -116,6 +117,7 @@ public class GLMC4Client {
     private static void initializeClient() {
         shader = Shader.create("chunk");
         texture = new Texture(Path.of("run", "atlas", "block.png"));
+        textRenderer = new TextRenderer();
         LOGGER.info(RENDER, "Client initialized");
         EntityRenderers.REGISTRY.getEntries().forEach(entry -> entry.getValue().initialize());
     }
@@ -153,6 +155,7 @@ public class GLMC4Client {
             EntityRenderer<?> renderer = EntityRenderers.REGISTRY.get(identifier).getValue();
             renderer.render(context, entity);
         }
+        textRenderer.renderString(-1, 1 - 0.075F, 0.075F, String.format("GLMinecraft4\nFPS: %s", MCWindow.getFps()));
     }
 
     private static void runClient() {
@@ -162,7 +165,8 @@ public class GLMC4Client {
             MCWindow.setEndCallback(GLMC4Client::endClient);
             MCWindow.start();
         } catch (Error | RuntimeException error) {
-            throw new RuntimeException("Crashes, fix or remove", error);
+            error.printStackTrace();
+            System.exit(0);
         }
     }
 
@@ -183,12 +187,7 @@ public class GLMC4Client {
                         ch.pipeline().addLast(new PacketCodec(), new NetworkHandler<>(new ClientPacketHandler()));
                     }
                 });
-//        try {
         bootstrap.connect("localhost", 8080);
-//                    .await();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
         LOGGER.info(SOCKET, "Connected to localhost:8080");
     }
 

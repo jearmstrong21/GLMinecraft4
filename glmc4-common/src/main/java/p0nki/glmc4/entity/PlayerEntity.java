@@ -4,14 +4,12 @@ import org.joml.Vector3f;
 import p0nki.glmc4.server.ServerPlayer;
 import p0nki.glmc4.tag.CompoundTag;
 
-import java.util.UUID;
-
 public class PlayerEntity extends Entity {
 
     private ServerPlayer serverPlayer;
 
-    public PlayerEntity(Vector3f position, UUID uuid, ServerPlayer serverPlayer) {
-        super(EntityTypes.PLAYER, position, uuid);
+    public PlayerEntity(Vector3f position, ServerPlayer serverPlayer) {
+        super(EntityTypes.PLAYER, position, serverPlayer.getUuid());
         this.serverPlayer = serverPlayer;
     }
 

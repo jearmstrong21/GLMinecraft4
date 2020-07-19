@@ -1,16 +1,17 @@
 package p0nki.glmc4.client;
 
 import p0nki.glmc4.network.packet.clientbound.*;
+import p0nki.glmc4.network.packet.serverbound.PacketC2SPingResponse;
 
 public class ClientPacketHandler extends ClientPacketListener {
     @Override
     public void onPingRequest(PacketS2CPingRequest packet) {
-//        getConnection().write(new PacketC2SPingResponse());
+        getConnection().write(new PacketC2SPingResponse());
     }
 
     @Override
     public void onPlayerLeave(PacketS2CPlayerLeave packet) {
-        System.out.println("PLAYER LEAVE " + packet.getUuid());
+
     }
 
     @Override
@@ -26,7 +27,7 @@ public class ClientPacketHandler extends ClientPacketListener {
 
     @Override
     public void onPlayerJoin(PacketS2CPlayerJoin packet) {
-        System.out.println("playerjoin");
+
     }
 
     @Override
@@ -36,30 +37,27 @@ public class ClientPacketHandler extends ClientPacketListener {
 
     @Override
     public void onEntityUpdate(PacketS2CEntityUpdate packet) {
-        System.out.println("entity update");
         GLMC4Client.updateEntity(packet.getUuid(), packet.getNewData());
     }
 
     @Override
     public void onEntitySpawn(PacketS2CEntitySpawn packet) {
-        System.out.println("entity spawn");
         GLMC4Client.spawnEntity(packet.getEntity());
     }
 
     @Override
     public void onEntityDespawn(PacketS2CEntityDespawn packet) {
-        System.out.println("entity despawn");
         GLMC4Client.despawnEntity(packet.getUuid());
     }
 
     @Override
     public void onConnected() {
-        System.out.println("Connected");
+
     }
 
     @Override
     public void tick() {
-        System.out.println("Ticked");
+
     }
 
     @Override

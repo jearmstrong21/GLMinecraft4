@@ -1,5 +1,6 @@
 package p0nki.glmc4.network.packet.clientbound;
 
+import p0nki.glmc4.entity.Entity;
 import p0nki.glmc4.network.PacketByteBuf;
 import p0nki.glmc4.network.packet.Packet;
 import p0nki.glmc4.network.packet.PacketTypes;
@@ -16,10 +17,10 @@ public class PacketS2CEntityUpdate extends Packet<ClientPacketListener> {
         super(PacketTypes.S2C_ENTITY_UPDATE);
     }
 
-    public PacketS2CEntityUpdate(UUID uuid, CompoundTag newData) {
+    public PacketS2CEntityUpdate(Entity entity) {
         super(PacketTypes.S2C_ENTITY_UPDATE);
-        this.uuid = uuid;
-        this.newData = newData;
+        this.uuid = entity.getUuid();
+        this.newData = entity.toTag();
     }
 
     public UUID getUuid() {
