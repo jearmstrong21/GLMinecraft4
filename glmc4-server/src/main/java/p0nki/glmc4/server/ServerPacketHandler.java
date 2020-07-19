@@ -26,8 +26,12 @@ public class ServerPacketHandler extends ServerPacketListener {
     @Override
     public void onConnected() {
         LOGGER.info("Connected");
-        getHandlerContext().writeAndFlush(new PacketS2CChatMessage("SERVER", "Welcome to the server! Enjoy your stay"));
-        getHandlerContext().writeAndFlush(new PacketS2CChunkLoad(0, 0, Chunk.generate(0, 0)));
+        getConnection().write(new PacketS2CChatMessage("SERVER", "Welcome to the server! Enjoy your stay"));
+        for (int x = -4; x <= 4; x++) {
+            for (int z = -4; z <= 4; z++) {
+                getConnection().write(new PacketS2CChunkLoad(x, z, Chunk.generate(x, z)));
+            }
+        }
     }
 
     @Override

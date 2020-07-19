@@ -27,8 +27,6 @@ import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.utils.Identifier;
 import p0nki.glmc4.utils.MathUtils;
 
-import java.io.IOException;
-import java.net.Socket;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -53,7 +51,6 @@ public class GLMC4Client {
     private static final Map<Long, Mesh> meshes = new HashMap<>();
     private final static Set<Identifier> warnedIdentifiers = new HashSet<>();
     private final static Lock chunkLock = new ReentrantLock();
-    private static Socket socket;
 
     private static Shader shader;
     private static Texture texture;
@@ -154,37 +151,9 @@ public class GLMC4Client {
         }
     }
 
-    private static void endClient() {
-        LOGGER.info(RENDER, "Rendering thread ended. A socket crash after this point is perfectly normal and expected.");
-        try {
-            socket.close();
-        } catch (IOException ioException) {
-            LOGGER.fatal(SOCKET, "Somehow closing the socket threw an exception", ioException);
-        }
-        LOGGER.info(SOCKET, "Socket closed");
-    }
-
-    private static void runSocket() {
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
-        try {
-            Bootstrap bootstrap = new Bootstrap()
-                    .group(workerGroup)
-                    .channel(NioSocketChannel.class)
-                    .option(ChannelOption.SO_KEEPALIVE, true)
-                    .handler(new ChannelInitializer<>() {
-                        @Override
-                        protected void initChannel(Channel ch) {
-                            ch.pipeline().addLast(new PacketCodec(), new ClientNetworkHandler(new ClientPacketHandler()));
-                        }
-                    });
-            ChannelFuture future = bootstrap.connect("localhost", 8080).sync();
-            future.channel().closeFuture().sync();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            workerGroup.shutdownGracefully();
-        }
-    }
+    private static Thread nettyThread;
+    private static EventLoopGroup workerGroup;
+    private static ChannelFuture nettyCloseFuture;
 
     private static void runClient() {
         try {
@@ -197,10 +166,47 @@ public class GLMC4Client {
         }
     }
 
+    private static void endClient() {
+        LOGGER.info(RENDER, "Rendering thread ended.");
+        System.exit(0);
+//        try {
+//            nettyCloseFuture.await();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//        LOGGER.info(SOCKET, "Netty closed");
+//        workerGroup.shutdownGracefully();
+//        LOGGER.info(SOCKET, "WorkerGroup shutdown");
+//        nettyThread.interrupt();
+//        LOGGER.info(SOCKET, "Netty thread interrupted");
+    }
+
+    private static void runNetty() {
+        workerGroup = new NioEventLoopGroup();
+        try {
+            Bootstrap bootstrap = new Bootstrap()
+                    .group(workerGroup)
+                    .channel(NioSocketChannel.class)
+                    .option(ChannelOption.SO_KEEPALIVE, true)
+                    .handler(new ChannelInitializer<>() {
+                        @Override
+                        protected void initChannel(Channel ch) {
+                            ch.pipeline().addLast(new PacketCodec(), new ClientNetworkHandler(new ClientPacketHandler()));
+                        }
+                    });
+            nettyCloseFuture = bootstrap.connect("localhost", 8080).sync();
+//            future.channel().closeFuture().sync();
+            LOGGER.info(SOCKET, "Connected to localhost:8080");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
         ClientBootstrap.initialize();
-        runSocket();
-//        runClient();
+        nettyThread = new Thread(GLMC4Client::runNetty, "Netty Main Thread");
+        nettyThread.start();
+        runClient();
     }
 
 }

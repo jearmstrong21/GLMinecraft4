@@ -1,10 +1,8 @@
 package p0nki.glmc4.network.packet;
 
-import io.netty.channel.ChannelHandlerContext;
-
 public abstract class PacketListener<L extends PacketListener<L>> {
 
-    private ChannelHandlerContext handlerContext = null;
+    private NetworkConnection<L> connection = null;
 
     public abstract void onConnected();
 
@@ -12,12 +10,12 @@ public abstract class PacketListener<L extends PacketListener<L>> {
 
     public abstract void onDisconnected(String reason);
 
-    public final ChannelHandlerContext getHandlerContext() {
-        return handlerContext;
+    public final NetworkConnection<L> getConnection() {
+        return connection;
     }
 
-    public void setHandlerContext(ChannelHandlerContext handlerContext) {
-        this.handlerContext = handlerContext;
+    public void setConnection(NetworkConnection<L> connection) {
+        this.connection = connection;
     }
 
 }

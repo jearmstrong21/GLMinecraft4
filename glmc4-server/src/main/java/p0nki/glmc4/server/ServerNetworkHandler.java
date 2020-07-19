@@ -2,6 +2,7 @@ package p0nki.glmc4.server;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import p0nki.glmc4.network.packet.NetworkConnection;
 import p0nki.glmc4.network.packet.Packet;
 import p0nki.glmc4.network.packet.serverbound.ServerPacketListener;
 
@@ -15,7 +16,7 @@ public class ServerNetworkHandler extends SimpleChannelInboundHandler<Packet<Ser
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) {
-        packetListener.setHandlerContext(ctx);
+        packetListener.setConnection(new NetworkConnection<>(ctx));
         packetListener.onConnected();
     }
 
