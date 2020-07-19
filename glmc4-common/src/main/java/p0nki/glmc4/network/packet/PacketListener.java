@@ -1,15 +1,23 @@
 package p0nki.glmc4.network.packet;
 
-import p0nki.glmc4.network.ClientConnection;
+import io.netty.channel.ChannelHandlerContext;
 
-public interface PacketListener<L extends PacketListener<L>> {
+public abstract class PacketListener<L extends PacketListener<L>> {
 
-    void onConnected();
+    private ChannelHandlerContext handlerContext = null;
 
-    void onDisconnected(String reason);
+    public abstract void onConnected();
 
-    ClientConnection<L> getConnection();
+    public abstract void tick();
 
-    // TODO ClientConnection getConnection() or something
+    public abstract void onDisconnected(String reason);
+
+    public final ChannelHandlerContext getHandlerContext() {
+        return handlerContext;
+    }
+
+    public void setHandlerContext(ChannelHandlerContext handlerContext) {
+        this.handlerContext = handlerContext;
+    }
 
 }

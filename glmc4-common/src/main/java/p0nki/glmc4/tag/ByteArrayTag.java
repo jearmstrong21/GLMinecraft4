@@ -1,11 +1,11 @@
 package p0nki.glmc4.tag;
 
 import org.apache.commons.lang3.ArrayUtils;
-import p0nki.glmc4.network.PacketWriteBuf;
+import p0nki.glmc4.network.PacketByteBuf;
 
 public class ByteArrayTag extends AbstractListTag<ByteTag> {
 
-    public static final TagReader<ByteArrayTag> READER = input -> of(input.readBytes(input.readInt()));
+    public static final TagReader<ByteArrayTag> READER = buf -> of(buf.readBytes(buf.readInt()).array());
 
     private byte[] values;
 
@@ -47,9 +47,9 @@ public class ByteArrayTag extends AbstractListTag<ByteTag> {
     }
 
     @Override
-    public void write(PacketWriteBuf output) {
-        output.writeInt(values.length);
-        output.writeBytes(values);
+    public void write(PacketByteBuf buf) {
+        buf.writeInt(values.length);
+        buf.writeBytes(values);
     }
 
     @Override

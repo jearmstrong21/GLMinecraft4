@@ -1,10 +1,10 @@
 package p0nki.glmc4.tag;
 
-import p0nki.glmc4.network.PacketWriteBuf;
+import p0nki.glmc4.network.PacketByteBuf;
 
 public class FloatTag extends AbstractNumberTag {
 
-    public static final TagReader<FloatTag> READER = input -> new FloatTag(input.readFloat());
+    public static final TagReader<FloatTag> READER = buf -> of(buf.readFloat());
 
     private final float value;
 
@@ -17,8 +17,8 @@ public class FloatTag extends AbstractNumberTag {
     }
 
     @Override
-    public void write(PacketWriteBuf output) {
-        output.writeFloat(value);
+    public void write(PacketByteBuf buf) {
+        buf.writeFloat(value);
     }
 
     @Override

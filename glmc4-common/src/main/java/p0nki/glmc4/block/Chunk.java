@@ -1,10 +1,12 @@
 package p0nki.glmc4.block;
 
-import p0nki.glmc4.network.ByteBufEquivalent;
-import p0nki.glmc4.network.PacketReadBuf;
-import p0nki.glmc4.network.PacketWriteBuf;
+import p0nki.glmc4.block.blocks.GrassBlock;
+import p0nki.glmc4.network.PacketByteBuf;
+import p0nki.glmc4.utils.MathUtils;
 
-public class Chunk implements ByteBufEquivalent {
+import java.util.Random;
+
+public class Chunk implements PacketByteBuf.Equivalent {
 
     private final long[][][] data;
 
@@ -12,12 +14,36 @@ public class Chunk implements ByteBufEquivalent {
         data = new long[16][256][16];
     }
 
+    public static Chunk generate(int cx, int cz) {
+        Chunk c = new Chunk();
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                int rx = x + cx * 16;
+                int rz = z + cz * 16;
+                int h = Math.abs(rx - rz) + 2;
+                for (int y = 0; y <= h; y++) {
+                    if (y < h - 4) c.set(x, y, z, Blocks.STONE.getDefaultState());
+                    else if (y < h) c.set(x, y, z, Blocks.DIRT.getDefaultState());
+                    else {
+                        Random random = new Random(MathUtils.pack(rx, rz));
+                        random.nextFloat();
+                        random.nextFloat();
+                        random.nextFloat();
+                        random.nextFloat();
+                        c.set(x, y, z, Blocks.GRASS.getDefaultState().with(GrassBlock.SNOWED, random.nextBoolean()));
+                    }
+                }
+            }
+        }
+        return c;
+    }
+
     @Override
-    public void read(PacketReadBuf input) {
+    public void read(PacketByteBuf buf) {
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 256; y++) {
                 for (int z = 0; z < 16; z++) {
-                    data[x][y][z] = input.readLong();
+                    data[x][y][z] = buf.readLong();
                 }
             }
         }
@@ -29,11 +55,11 @@ public class Chunk implements ByteBufEquivalent {
     }
 
     @Override
-    public void write(PacketWriteBuf output) {
+    public void write(PacketByteBuf buf) {
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 256; y++) {
                 for (int z = 0; z < 16; z++) {
-                    output.writeLong(data[x][y][z]);
+                    buf.writeLong(data[x][y][z]);
                 }
             }
         }

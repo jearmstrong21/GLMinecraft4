@@ -1,7 +1,7 @@
 package p0nki.glmc4.tag;
 
 import org.joml.Vector3f;
-import p0nki.glmc4.network.PacketWriteBuf;
+import p0nki.glmc4.network.PacketByteBuf;
 import p0nki.glmc4.utils.DataStreamUtils;
 import p0nki.glmc4.utils.Identifier;
 import p0nki.glmc4.utils.TagUtils;
@@ -11,11 +11,11 @@ import java.util.*;
 
 public class CompoundTag extends AbstractMap<String, Tag> implements Tag {
 
-    public static final TagReader<CompoundTag> READER = input -> {
-        int size = input.readInt();
+    public static final TagReader<CompoundTag> READER = buf -> {
+        int size = buf.readInt();
         Map<String, Tag> values = new HashMap<>();
         for (int i = 0; i < size; i++) {
-            values.put(input.readString(), DataStreamUtils.readTag(input));
+            values.put(buf.readString(), DataStreamUtils.readTag(buf));
         }
         return new CompoundTag(values);
     };
@@ -113,11 +113,11 @@ public class CompoundTag extends AbstractMap<String, Tag> implements Tag {
     }
 
     @Override
-    public void write(PacketWriteBuf output) {
-        output.writeInt(values.size());
+    public void write(PacketByteBuf buf) {
+        buf.writeInt(values.size());
         for (Entry<String, Tag> entry : values.entrySet()) {
-            output.writeString(entry.getKey());
-            DataStreamUtils.writeTag(output, entry.getValue());
+            buf.writeString(entry.getKey());
+            DataStreamUtils.writeTag(buf, entry.getValue());
         }
     }
 

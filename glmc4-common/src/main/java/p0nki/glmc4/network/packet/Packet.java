@@ -1,35 +1,25 @@
 package p0nki.glmc4.network.packet;
 
-import p0nki.glmc4.network.PacketReadBuf;
-import p0nki.glmc4.network.PacketWriteBuf;
+import p0nki.glmc4.network.PacketByteBuf;
 
-public abstract class Packet<L extends PacketListener<L>> {
+public abstract class Packet<L extends PacketListener<L>> implements PacketByteBuf.Equivalent {
 
-    private final PacketDirection direction;
     private final PacketType<?> type;
 
-    public Packet(PacketDirection direction, PacketType<?> type) {
-        this.direction = direction;
+    public Packet(PacketType<?> type) {
         this.type = type;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <L extends PacketListener<L>> void apply(Packet<?> packet, L listener) {
-        ((Packet<L>) packet).apply(listener);
     }
 
     public PacketType<?> getType() {
         return type;
     }
 
-    public abstract void read(PacketReadBuf input);
+    @Override
+    public abstract void read(PacketByteBuf buf);
 
-    public abstract void write(PacketWriteBuf output);
+    @Override
+    public abstract void write(PacketByteBuf buf);
 
     public abstract void apply(L listener);
-
-    public PacketDirection getDirection() {
-        return direction;
-    }
 
 }

@@ -3,10 +3,8 @@ package p0nki.glmc4.network.packet.clientbound;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import p0nki.glmc4.block.Chunk;
-import p0nki.glmc4.network.PacketReadBuf;
-import p0nki.glmc4.network.PacketWriteBuf;
+import p0nki.glmc4.network.PacketByteBuf;
 import p0nki.glmc4.network.packet.Packet;
-import p0nki.glmc4.network.packet.PacketDirection;
 import p0nki.glmc4.network.packet.PacketTypes;
 
 public class PacketS2CChunkLoad extends Packet<ClientPacketListener> {
@@ -18,28 +16,28 @@ public class PacketS2CChunkLoad extends Packet<ClientPacketListener> {
     private Chunk chunk;
 
     public PacketS2CChunkLoad() {
-        super(PacketDirection.SERVER_TO_CLIENT, PacketTypes.S2C_CHUNK_LOAD);
+        super(PacketTypes.S2C_CHUNK_LOAD);
     }
 
     public PacketS2CChunkLoad(int x, int z, Chunk chunk) {
-        super(PacketDirection.SERVER_TO_CLIENT, PacketTypes.S2C_CHUNK_LOAD);
+        super(PacketTypes.S2C_CHUNK_LOAD);
         this.x = x;
         this.z = z;
         this.chunk = chunk;
     }
 
     @Override
-    public void read(PacketReadBuf input) {
-        x = input.readInt();
-        z = input.readInt();
-        chunk = input.readEquivalent(new Chunk());
+    public void read(PacketByteBuf buf) {
+        x = buf.readInt();
+        z = buf.readInt();
+        chunk = buf.readEquivalent(new Chunk());
     }
 
     @Override
-    public void write(PacketWriteBuf output) {
-        output.writeInt(x);
-        output.writeInt(z);
-        output.writeEquivalent(chunk);
+    public void write(PacketByteBuf buf) {
+        buf.writeInt(x);
+        buf.writeInt(z);
+        buf.writeEquivalent(chunk);
     }
 
     @Override

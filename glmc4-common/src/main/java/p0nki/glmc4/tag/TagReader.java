@@ -1,9 +1,9 @@
 package p0nki.glmc4.tag;
 
-import p0nki.glmc4.network.PacketReadBuf;
+import p0nki.glmc4.network.PacketByteBuf;
 
 public interface TagReader<T extends Tag> {
 
-    T read(PacketReadBuf input);
+    T read(PacketByteBuf buf);
 
 }

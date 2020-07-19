@@ -6,7 +6,7 @@ import p0nki.glmc4.network.packet.PacketTypes;
 
 import java.io.PrintStream;
 
-public class Bootstrap {
+public class CommonBoostrap {
 
     public static final PrintStream STDOUT;
     public static final PrintStream STDERR;

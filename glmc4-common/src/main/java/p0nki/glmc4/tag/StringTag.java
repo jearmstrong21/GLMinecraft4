@@ -1,12 +1,12 @@
 package p0nki.glmc4.tag;
 
-import p0nki.glmc4.network.PacketWriteBuf;
+import p0nki.glmc4.network.PacketByteBuf;
 
 import javax.annotation.Nonnull;
 
 public class StringTag implements Tag, CharSequence {
 
-    public static final TagReader<StringTag> READER = input -> new StringTag(input.readString());
+    public static final TagReader<StringTag> READER = buf -> new StringTag(buf.readString());
 
     private final String value;
 
@@ -19,8 +19,8 @@ public class StringTag implements Tag, CharSequence {
     }
 
     @Override
-    public void write(PacketWriteBuf output) {
-        output.writeString(value);
+    public void write(PacketByteBuf buf) {
+        buf.writeString(value);
     }
 
     @Override

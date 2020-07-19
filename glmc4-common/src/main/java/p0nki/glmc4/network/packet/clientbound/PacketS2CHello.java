@@ -3,10 +3,8 @@ package p0nki.glmc4.network.packet.clientbound;
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.entity.Entity;
 import p0nki.glmc4.entity.EntityTypes;
-import p0nki.glmc4.network.PacketReadBuf;
-import p0nki.glmc4.network.PacketWriteBuf;
+import p0nki.glmc4.network.PacketByteBuf;
 import p0nki.glmc4.network.packet.Packet;
-import p0nki.glmc4.network.packet.PacketDirection;
 import p0nki.glmc4.network.packet.PacketTypes;
 import p0nki.glmc4.server.ServerPlayer;
 import p0nki.glmc4.tag.CompoundTag;
@@ -24,11 +22,11 @@ public class PacketS2CHello extends Packet<ClientPacketListener> {
     private List<Entity> allEntities;
 
     public PacketS2CHello() {
-        super(PacketDirection.SERVER_TO_CLIENT, PacketTypes.S2C_HELLO);
+        super(PacketTypes.S2C_HELLO);
     }
 
     public PacketS2CHello(ServerPlayer yourPlayer, List<ServerPlayer> allPlayers, List<Entity> allEntities) {
-        super(PacketDirection.SERVER_TO_CLIENT, PacketTypes.S2C_HELLO);
+        super(PacketTypes.S2C_HELLO);
         this.yourPlayer = yourPlayer;
         this.allPlayers = allPlayers;
         this.allEntities = allEntities;
@@ -47,41 +45,41 @@ public class PacketS2CHello extends Packet<ClientPacketListener> {
     }
 
     @Override
-    public void read(PacketReadBuf input) {
-        PacketTypes.REGISTRY.verify(input);
+    public void read(PacketByteBuf buf) {
+        PacketTypes.REGISTRY.verify(buf);
 
-        yourPlayer = new ServerPlayer().fromTag(CompoundTag.READER.read(input));
+        yourPlayer = new ServerPlayer().fromTag(buf.readCompoundTag());
 
-        allPlayers = TagUtils.fromList(ListTag.READER.read(input), ServerPlayer::new);
+        allPlayers = TagUtils.fromList(buf.readListTag(), ServerPlayer::new);
 
-        ListTag entitiesTag = ListTag.READER.read(input);
+        ListTag entitiesTag = buf.readListTag();
         allEntities = new ArrayList<>();
         for (Tag tag : entitiesTag) {
             allEntities.add(EntityTypes.from((CompoundTag) tag));
         }
 
-        Blocks.REGISTRY.verify(input);
+        Blocks.REGISTRY.verify(buf);
 
-        EntityTypes.REGISTRY.verify(input);
+        EntityTypes.REGISTRY.verify(buf);
     }
 
     @Override
-    public void write(PacketWriteBuf output) {
-        PacketTypes.REGISTRY.write(output);
+    public void write(PacketByteBuf buf) {
+        PacketTypes.REGISTRY.write(buf);
 
-        yourPlayer.toTag().write(output);
+        buf.writeTag(yourPlayer.toTag());
 
-        TagUtils.toList(allPlayers).write(output);
+        buf.writeTag(TagUtils.toList(allPlayers));
 
         ListTag entitiesTag = ListTag.of();
         for (Entity entity : allEntities) {
             entitiesTag.add(entity.toTag());
         }
-        entitiesTag.write(output);
+        buf.writeTag(entitiesTag);
 
-        Blocks.REGISTRY.write(output);
+        Blocks.REGISTRY.write(buf);
 
-        EntityTypes.REGISTRY.write(output);
+        EntityTypes.REGISTRY.write(buf);
     }
 
     @Override

@@ -1,10 +1,10 @@
 package p0nki.glmc4.tag;
 
-import p0nki.glmc4.network.PacketWriteBuf;
+import p0nki.glmc4.network.PacketByteBuf;
 
 public class DoubleTag extends AbstractNumberTag {
 
-    public static final TagReader<DoubleTag> READER = input -> of(input.readDouble());
+    public static final TagReader<DoubleTag> READER = buf -> of(buf.readDouble());
 
     private final double value;
 
@@ -47,8 +47,8 @@ public class DoubleTag extends AbstractNumberTag {
     }
 
     @Override
-    public void write(PacketWriteBuf output) {
-        output.writeDouble(value);
+    public void write(PacketByteBuf buf) {
+        buf.writeDouble(value);
     }
 
     @Override

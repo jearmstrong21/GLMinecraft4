@@ -1,28 +1,28 @@
 package p0nki.glmc4.tag;
 
-import p0nki.glmc4.network.PacketWriteBuf;
+import p0nki.glmc4.network.PacketByteBuf;
 
 public interface Tag extends ToTag {
 
-    int BYTE = 0;
-    int SHORT = 1;
-    int INT = 2;
-    int LONG = 3;
-    int FLOAT = 4;
-    int DOUBLE = 5;
-    int STRING = 6;
-    int BYTE_ARRAY = 7;
-    int INT_ARRAY = 8;
-    int LONG_ARRAY = 9;
-    int COMPOUND = 10;
-    int LIST = 11;
-    int EMPTY = 12;
+    byte BYTE = 0;
+    byte SHORT = 1;
+    byte INT = 2;
+    byte LONG = 3;
+    byte FLOAT = 4;
+    byte DOUBLE = 5;
+    byte STRING = 6;
+    byte BYTE_ARRAY = 7;
+    byte INT_ARRAY = 8;
+    byte LONG_ARRAY = 9;
+    byte COMPOUND = 10;
+    byte LIST = 11;
+    byte EMPTY = 12;
 
-    static boolean isTagId(int id) {
+    static boolean isTagId(byte id) {
         return id == BYTE || id == SHORT || id == INT || id == LONG || id == FLOAT || id == DOUBLE || id == STRING || id == BYTE_ARRAY || id == INT_ARRAY || id == LONG_ARRAY || id == COMPOUND || id == LIST || id == EMPTY;
     }
 
-    static TagReader<?> getReader(int id) {
+    static TagReader<?> getReader(byte id) {
         switch (id) {
             case BYTE:
                 return ByteTag.READER;
@@ -59,7 +59,7 @@ public interface Tag extends ToTag {
         return this;
     }
 
-    void write(PacketWriteBuf output);
+    void write(PacketByteBuf buf);
 
     TagReader<?> reader();
 

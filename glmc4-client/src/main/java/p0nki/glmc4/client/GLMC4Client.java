@@ -1,5 +1,9 @@
 package p0nki.glmc4.client;
 
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.*;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
@@ -18,9 +22,7 @@ import p0nki.glmc4.client.render.entity.EntityRenderers;
 import p0nki.glmc4.entity.Entity;
 import p0nki.glmc4.entity.EntityType;
 import p0nki.glmc4.entity.EntityTypes;
-import p0nki.glmc4.network.ClientConnection;
-import p0nki.glmc4.network.packet.PacketDirection;
-import p0nki.glmc4.network.packet.clientbound.ClientPacketListener;
+import p0nki.glmc4.network.PacketCodec;
 import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.utils.Identifier;
 import p0nki.glmc4.utils.MathUtils;
@@ -80,28 +82,6 @@ public class GLMC4Client {
         throw new AssertionError("Cannot despawn entity " + uuid);
     }
 
-    private static void runSocket() {
-        try {
-            socket = new Socket("localhost", 3333);
-        } catch (IOException ioException) {
-            LOGGER.fatal(SOCKET, "Connection refused", ioException);
-            System.exit(1);
-        }
-        LOGGER.info(SOCKET, "Socket connected");
-        ClientConnection<ClientPacketListener> connection;
-        try {
-            connection = new ClientConnection<>(socket, PacketDirection.SERVER_TO_CLIENT, PacketDirection.CLIENT_TO_SERVER);
-        } catch (IOException ioException) {
-            LOGGER.info(SOCKET, "Error creating connection", ioException);
-            return;
-        }
-        LOGGER.debug(SOCKET, "Connection created");
-        ClientPacketListener packetListener = new ClientPacketHandler(connection);
-        connection.setPacketListener(packetListener);
-        connection.startLoop();
-        LOGGER.info(SOCKET, "Connected to localhost:3333");
-    }
-
     public static void onLoadChunk(int x, int z, Chunk chunk) {
         chunkLock.lock();
         chunks.put(MathUtils.pack(x, z), chunk);
@@ -132,14 +112,14 @@ public class GLMC4Client {
         return data;
     }
 
-    private static void initialize() {
+    private static void initializeClient() {
         shader = Shader.create("chunk");
         texture = new Texture(Path.of("run", "atlas", "block.png"));
         LOGGER.info(RENDER, "Client initialized");
         EntityRenderers.REGISTRY.getEntries().forEach(entry -> entry.getValue().initialize());
     }
 
-    private static void frame(int frameCount) {
+    private static void tickClient(int frameCount) {
         float t = MCWindow.time();
         Matrix4f perspective = new Matrix4f().perspective((float) Math.toRadians(80), 1.0F, 0.001F, 300);
         float camHeight = 30;
@@ -174,7 +154,7 @@ public class GLMC4Client {
         }
     }
 
-    private static void end() {
+    private static void endClient() {
         LOGGER.info(RENDER, "Rendering thread ended. A socket crash after this point is perfectly normal and expected.");
         try {
             socket.close();
@@ -184,11 +164,33 @@ public class GLMC4Client {
         LOGGER.info(SOCKET, "Socket closed");
     }
 
+    private static void runSocket() {
+        EventLoopGroup workerGroup = new NioEventLoopGroup();
+        try {
+            Bootstrap bootstrap = new Bootstrap()
+                    .group(workerGroup)
+                    .channel(NioSocketChannel.class)
+                    .option(ChannelOption.SO_KEEPALIVE, true)
+                    .handler(new ChannelInitializer<>() {
+                        @Override
+                        protected void initChannel(Channel ch) {
+                            ch.pipeline().addLast(new PacketCodec(), new ClientNetworkHandler(new ClientPacketHandler()));
+                        }
+                    });
+            ChannelFuture future = bootstrap.connect("localhost", 8080).sync();
+            future.channel().closeFuture().sync();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            workerGroup.shutdownGracefully();
+        }
+    }
+
     private static void runClient() {
         try {
-            MCWindow.setInitializeCallback(GLMC4Client::initialize);
-            MCWindow.setFrameCallback(GLMC4Client::frame);
-            MCWindow.setEndCallback(GLMC4Client::end);
+            MCWindow.setInitializeCallback(GLMC4Client::initializeClient);
+            MCWindow.setFrameCallback(GLMC4Client::tickClient);
+            MCWindow.setEndCallback(GLMC4Client::endClient);
             MCWindow.start();
         } catch (Error | RuntimeException error) {
             throw new RuntimeException("Crashes, fix or remove", error);
@@ -198,7 +200,7 @@ public class GLMC4Client {
     public static void main(String[] args) {
         ClientBootstrap.initialize();
         runSocket();
-        runClient();
+//        runClient();
     }
 
 }

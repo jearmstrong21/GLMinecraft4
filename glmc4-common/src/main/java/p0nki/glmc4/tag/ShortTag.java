@@ -1,10 +1,10 @@
 package p0nki.glmc4.tag;
 
-import p0nki.glmc4.network.PacketWriteBuf;
+import p0nki.glmc4.network.PacketByteBuf;
 
 public class ShortTag extends AbstractNumberTag {
 
-    public static final TagReader<ShortTag> READER = input -> of(input.readShort());
+    public static final TagReader<ShortTag> READER = buf -> of(buf.readShort());
 
     private final short value;
 
@@ -47,8 +47,8 @@ public class ShortTag extends AbstractNumberTag {
     }
 
     @Override
-    public void write(PacketWriteBuf output) {
-
+    public void write(PacketByteBuf buf) {
+        buf.writeShort(value);
     }
 
     @Override

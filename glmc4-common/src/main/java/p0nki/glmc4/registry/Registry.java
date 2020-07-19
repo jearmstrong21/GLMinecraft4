@@ -1,7 +1,6 @@
 package p0nki.glmc4.registry;
 
-import p0nki.glmc4.network.PacketReadBuf;
-import p0nki.glmc4.network.PacketWriteBuf;
+import p0nki.glmc4.network.PacketByteBuf;
 import p0nki.glmc4.utils.Identifier;
 
 import java.util.*;
@@ -18,21 +17,21 @@ public class Registry<T> {
         entries = new ArrayList<>();
     }
 
-    public void write(PacketWriteBuf output) {
-        output.writeInt(entries.size());
+    public void write(PacketByteBuf buf) {
+        buf.writeInt(entries.size());
         for (Entry<T> entry : entries) {
-            output.writeString(entry.getKey().toString());
+            buf.writeString(entry.getKey().toString());
             if (entry.getValue() instanceof VersionedRegistrable) {
-                output.writeBoolean(true);
-                output.writeInt(((VersionedRegistrable) entry.getValue()).getVersion());
+                buf.writeBoolean(true);
+                buf.writeInt(((VersionedRegistrable) entry.getValue()).getVersion());
             } else {
-                output.writeBoolean(false);
+                buf.writeBoolean(false);
             }
         }
     }
 
-    public void verify(PacketReadBuf input) {
-        if (!check(input)) {
+    public void verify(PacketByteBuf buf) {
+        if (!check(buf)) {
             RuntimeException e = new RuntimeException("Invalid registry for server");
             e.fillInStackTrace();
             e.printStackTrace();
@@ -40,15 +39,15 @@ public class Registry<T> {
         }
     }
 
-    public boolean check(PacketReadBuf input) {
-        int size = input.readInt();
+    public boolean check(PacketByteBuf buf) {
+        int size = buf.readInt();
         if (size != entries.size()) return false;
         for (int i = 0; i < size; i++) {
-            Identifier identifier = new Identifier(input.readString());
+            Identifier identifier = new Identifier(buf.readString());
             if (!entries.get(i).getKey().equals(identifier)) return false;
-            if (input.readBoolean()) {
+            if (buf.readBoolean()) {
                 if (!(entries.get(i).getValue() instanceof VersionedRegistrable)) return false;
-                if (((VersionedRegistrable) entries.get(i).getValue()).getVersion() != input.readInt()) return false;
+                if (((VersionedRegistrable) entries.get(i).getValue()).getVersion() != buf.readInt()) return false;
             }
         }
         return true;
@@ -91,6 +90,7 @@ public class Registry<T> {
         return valueMap.containsKey(value);
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean hasIndex(int index) {
         return index >= 0 && index < entries.size();
     }

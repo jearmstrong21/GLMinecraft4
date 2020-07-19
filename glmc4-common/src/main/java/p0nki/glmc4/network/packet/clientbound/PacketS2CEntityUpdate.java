@@ -1,9 +1,7 @@
 package p0nki.glmc4.network.packet.clientbound;
 
-import p0nki.glmc4.network.PacketReadBuf;
-import p0nki.glmc4.network.PacketWriteBuf;
+import p0nki.glmc4.network.PacketByteBuf;
 import p0nki.glmc4.network.packet.Packet;
-import p0nki.glmc4.network.packet.PacketDirection;
 import p0nki.glmc4.network.packet.PacketTypes;
 import p0nki.glmc4.tag.CompoundTag;
 
@@ -15,11 +13,11 @@ public class PacketS2CEntityUpdate extends Packet<ClientPacketListener> {
     private CompoundTag newData;
 
     public PacketS2CEntityUpdate() {
-        super(PacketDirection.SERVER_TO_CLIENT, PacketTypes.S2C_ENTITY_UPDATE);
+        super(PacketTypes.S2C_ENTITY_UPDATE);
     }
 
     public PacketS2CEntityUpdate(UUID uuid, CompoundTag newData) {
-        super(PacketDirection.SERVER_TO_CLIENT, PacketTypes.S2C_ENTITY_UPDATE);
+        super(PacketTypes.S2C_ENTITY_UPDATE);
         this.uuid = uuid;
         this.newData = newData;
     }
@@ -33,15 +31,15 @@ public class PacketS2CEntityUpdate extends Packet<ClientPacketListener> {
     }
 
     @Override
-    public void read(PacketReadBuf input) {
-        uuid = input.readUuid();
-        newData = CompoundTag.READER.read(input);
+    public void read(PacketByteBuf buf) {
+        uuid = buf.readUuid();
+        newData = buf.readCompoundTag();
     }
 
     @Override
-    public void write(PacketWriteBuf output) {
-        output.writeUuid(uuid);
-        newData.write(output);
+    public void write(PacketByteBuf buf) {
+        buf.writeUuid(uuid);
+        buf.writeTag(newData);
     }
 
     @Override

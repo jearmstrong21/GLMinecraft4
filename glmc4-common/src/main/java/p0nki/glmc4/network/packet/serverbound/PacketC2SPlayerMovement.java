@@ -1,9 +1,7 @@
 package p0nki.glmc4.network.packet.serverbound;
 
-import p0nki.glmc4.network.PacketReadBuf;
-import p0nki.glmc4.network.PacketWriteBuf;
+import p0nki.glmc4.network.PacketByteBuf;
 import p0nki.glmc4.network.packet.Packet;
-import p0nki.glmc4.network.packet.PacketDirection;
 import p0nki.glmc4.network.packet.PacketTypes;
 
 public class PacketC2SPlayerMovement extends Packet<ServerPacketListener> {
@@ -14,11 +12,11 @@ public class PacketC2SPlayerMovement extends Packet<ServerPacketListener> {
     private boolean right;
 
     public PacketC2SPlayerMovement() {
-        super(PacketDirection.CLIENT_TO_SERVER, PacketTypes.C2S_PLAYER_MOVEMENT);
+        super(PacketTypes.C2S_PLAYER_MOVEMENT);
     }
 
     public PacketC2SPlayerMovement(boolean forward, boolean back, boolean left, boolean right) {
-        super(PacketDirection.CLIENT_TO_SERVER, PacketTypes.C2S_PLAYER_MOVEMENT);
+        super(PacketTypes.C2S_PLAYER_MOVEMENT);
         this.forward = forward;
         this.back = back;
         this.left = left;
@@ -26,19 +24,19 @@ public class PacketC2SPlayerMovement extends Packet<ServerPacketListener> {
     }
 
     @Override
-    public void read(PacketReadBuf input) {
-        forward = input.readBoolean();
-        back = input.readBoolean();
-        left = input.readBoolean();
-        right = input.readBoolean();
+    public void read(PacketByteBuf buf) {
+        forward = buf.readBoolean();
+        back = buf.readBoolean();
+        left = buf.readBoolean();
+        right = buf.readBoolean();
     }
 
     @Override
-    public void write(PacketWriteBuf output) {
-        output.writeBoolean(forward);
-        output.writeBoolean(back);
-        output.writeBoolean(left);
-        output.writeBoolean(right);
+    public void write(PacketByteBuf buf) {
+        buf.writeBoolean(forward);
+        buf.writeBoolean(back);
+        buf.writeBoolean(left);
+        buf.writeBoolean(right);
     }
 
     @Override

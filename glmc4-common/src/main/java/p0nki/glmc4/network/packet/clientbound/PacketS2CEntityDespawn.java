@@ -1,9 +1,7 @@
 package p0nki.glmc4.network.packet.clientbound;
 
-import p0nki.glmc4.network.PacketReadBuf;
-import p0nki.glmc4.network.PacketWriteBuf;
+import p0nki.glmc4.network.PacketByteBuf;
 import p0nki.glmc4.network.packet.Packet;
-import p0nki.glmc4.network.packet.PacketDirection;
 import p0nki.glmc4.network.packet.PacketTypes;
 
 import java.util.UUID;
@@ -13,11 +11,11 @@ public class PacketS2CEntityDespawn extends Packet<ClientPacketListener> {
     private UUID uuid;
 
     public PacketS2CEntityDespawn() {
-        super(PacketDirection.SERVER_TO_CLIENT, PacketTypes.S2C_ENTITY_DESPAWN);
+        super(PacketTypes.S2C_ENTITY_DESPAWN);
     }
 
     public PacketS2CEntityDespawn(UUID uuid) {
-        super(PacketDirection.SERVER_TO_CLIENT, PacketTypes.S2C_ENTITY_DESPAWN);
+        super(PacketTypes.S2C_ENTITY_DESPAWN);
         this.uuid = uuid;
     }
 
@@ -26,13 +24,13 @@ public class PacketS2CEntityDespawn extends Packet<ClientPacketListener> {
     }
 
     @Override
-    public void read(PacketReadBuf input) {
-        uuid = input.readUuid();
+    public void read(PacketByteBuf buf) {
+        uuid = buf.readUuid();
     }
 
     @Override
-    public void write(PacketWriteBuf output) {
-        output.writeUuid(uuid);
+    public void write(PacketByteBuf buf) {
+        buf.writeUuid(uuid);
     }
 
     @Override

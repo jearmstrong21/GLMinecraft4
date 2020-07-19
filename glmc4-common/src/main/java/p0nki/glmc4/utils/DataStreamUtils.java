@@ -1,7 +1,6 @@
 package p0nki.glmc4.utils;
 
-import p0nki.glmc4.network.PacketReadBuf;
-import p0nki.glmc4.network.PacketWriteBuf;
+import p0nki.glmc4.network.PacketByteBuf;
 import p0nki.glmc4.tag.Tag;
 
 import javax.annotation.Nullable;
@@ -13,18 +12,18 @@ public class DataStreamUtils {
     }
 
     @Nullable
-    public static Tag readTag(PacketReadBuf input) {
-        byte type = input.readByte();
+    public static Tag readTag(PacketByteBuf buf) {
+        byte type = buf.readByte();
         if (Tag.isTagId(type)) {
-            return Tag.getReader(type).read(input);
+            return Tag.getReader(type).read(buf);
         } else {
             return null;
         }
     }
 
-    public static void writeTag(PacketWriteBuf output, Tag tag) {
-        output.writeByte(tag.type()); // TODO MAKE THIS A WRITE_BYTE
-        tag.write(output);
+    public static void writeTag(PacketByteBuf buf, Tag tag) {
+        buf.writeByte(tag.type());
+        buf.writeTag(tag);
     }
 
 }

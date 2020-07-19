@@ -1,16 +1,16 @@
 package p0nki.glmc4.tag;
 
 import org.apache.commons.lang3.ArrayUtils;
-import p0nki.glmc4.network.PacketWriteBuf;
+import p0nki.glmc4.network.PacketByteBuf;
 
 import java.util.AbstractList;
 
 public class LongArrayTag extends AbstractList<LongTag> implements Tag {
 
-    public static final TagReader<LongArrayTag> READER = input -> {
-        int length = input.readInt();
+    public static final TagReader<LongArrayTag> READER = buf -> {
+        int length = buf.readInt();
         long[] values = new long[length];
-        for (int i = 0; i < length; i++) values[i] = input.readInt();
+        for (int i = 0; i < length; i++) values[i] = buf.readLong();
         return new LongArrayTag(values);
     };
 
@@ -54,9 +54,9 @@ public class LongArrayTag extends AbstractList<LongTag> implements Tag {
     }
 
     @Override
-    public void write(PacketWriteBuf output) {
-        output.writeInt(values.length);
-        for (long l : values) output.writeLong(l);
+    public void write(PacketByteBuf buf) {
+        buf.writeInt(values.length);
+        for (long l : values) buf.writeLong(l);
     }
 
     @Override

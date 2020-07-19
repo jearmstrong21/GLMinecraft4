@@ -1,7 +1,7 @@
 package p0nki.glmc4.tag;
 
 import org.apache.commons.lang3.ArrayUtils;
-import p0nki.glmc4.network.PacketWriteBuf;
+import p0nki.glmc4.network.PacketByteBuf;
 import p0nki.glmc4.utils.DataStreamUtils;
 
 import java.util.AbstractList;
@@ -10,10 +10,10 @@ import java.util.stream.Stream;
 
 public class ListTag extends AbstractList<Tag> implements Tag {
 
-    public static final TagReader<ListTag> READER = input -> {
-        int length = input.readInt();
+    public static final TagReader<ListTag> READER = buf -> {
+        int length = buf.readInt();
         Tag[] values = new Tag[length];
-        for (int i = 0; i < length; i++) values[i] = DataStreamUtils.readTag(input);
+        for (int i = 0; i < length; i++) values[i] = DataStreamUtils.readTag(buf);
         return new ListTag(values);
     };
 
@@ -22,11 +22,6 @@ public class ListTag extends AbstractList<Tag> implements Tag {
     private ListTag(Tag... values) {
         this.values = values;
     }
-
-//    public ListTag(Iterable<Tag> values) {
-//        this.values = new Tag[0];
-//        values.forEach(this::add);
-//    }
 
     public static ListTag of(Tag... values) {
         return new ListTag(values);
@@ -66,10 +61,10 @@ public class ListTag extends AbstractList<Tag> implements Tag {
     }
 
     @Override
-    public void write(PacketWriteBuf output) {
-        output.writeInt(values.length);
+    public void write(PacketByteBuf buf) {
+        buf.writeInt(values.length);
         for (Tag value : values) {
-            DataStreamUtils.writeTag(output, value);
+            DataStreamUtils.writeTag(buf, value);
         }
     }
 

@@ -1,10 +1,10 @@
 package p0nki.glmc4.tag;
 
-import p0nki.glmc4.network.PacketWriteBuf;
+import p0nki.glmc4.network.PacketByteBuf;
 
 public class LongTag extends AbstractNumberTag {
 
-    public static final TagReader<LongTag> READER = input -> new LongTag(input.readLong());
+    public static final TagReader<LongTag> READER = buf -> of(buf.readLong());
 
     private final long value;
 
@@ -17,8 +17,8 @@ public class LongTag extends AbstractNumberTag {
     }
 
     @Override
-    public void write(PacketWriteBuf output) {
-        output.writeLong(value);
+    public void write(PacketByteBuf buf) {
+        buf.writeLong(value);
     }
 
     @Override
