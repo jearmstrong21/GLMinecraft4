@@ -2,6 +2,7 @@ package p0nki.glmc4.server;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.joml.Vector3f;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CDisconnectReason;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CPingRequest;
 import p0nki.glmc4.network.packet.serverbound.PacketC2SPingResponse;
@@ -18,6 +19,11 @@ public class ServerPacketHandler extends ServerPacketListener {
     private int timeoutTicks = 0;
     private long lastPingResponse = -1;
 
+    private boolean forward = false;
+    private boolean back = false;
+    private boolean left = false;
+    private boolean right = false;
+
     @Override
     public void onPingResponse(PacketC2SPingResponse packet) {
         lastPingResponse = System.currentTimeMillis();
@@ -26,11 +32,10 @@ public class ServerPacketHandler extends ServerPacketListener {
 
     @Override
     public void onPlayerMovement(PacketC2SPlayerMovement packet) {
-        float movement = 0.05F;
-        if (packet.isForward()) getPlayerEntity().getPosition().z -= movement;
-        if (packet.isBack()) getPlayerEntity().getPosition().z += movement;
-        if (packet.isLeft()) getPlayerEntity().getPosition().x -= movement;
-        if (packet.isRight()) getPlayerEntity().getPosition().x += movement;
+        forward = packet.isForward();
+        back = packet.isBack();
+        left = packet.isLeft();
+        right = packet.isRight();
     }
 
     @Override
@@ -49,6 +54,13 @@ public class ServerPacketHandler extends ServerPacketListener {
             getConnection().write(new PacketS2CDisconnectReason("Timed out"));
             getConnection().close();
         }
+        float speed = 5.0F;
+        Vector3f velocity = new Vector3f();
+        if (forward) velocity.z -= speed;
+        if (back) velocity.z += speed;
+        if (left) velocity.x -= speed;
+        if (right) velocity.x += speed;
+        getPlayerEntity().getVelocity().set(velocity);
     }
 
     @Override

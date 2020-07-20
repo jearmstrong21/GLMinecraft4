@@ -18,6 +18,7 @@ public class TestEntity extends Entity {
 
     @Override
     public void tick(Random random) {
+        super.tick(random);
         color = new Vector3f(random.nextFloat(), random.nextFloat(), random.nextFloat()).mul(5);
     }
 

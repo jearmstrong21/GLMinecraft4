@@ -27,7 +27,7 @@ public class PlayerEntity extends Entity {
 
     @Override
     public void tick(Random random) {
-
+        super.tick(random);
     }
 
     @Override

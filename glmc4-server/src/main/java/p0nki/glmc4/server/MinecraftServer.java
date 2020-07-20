@@ -33,7 +33,7 @@ public class MinecraftServer {
             public void run() {
                 tick();
             }
-        }, 0, 100);
+        }, 0, 50);
     }
 
     public void writeAll(Packet<ClientPacketListener> packet) {
