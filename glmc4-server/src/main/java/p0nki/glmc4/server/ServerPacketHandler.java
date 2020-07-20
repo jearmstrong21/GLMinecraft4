@@ -23,6 +23,7 @@ public class ServerPacketHandler extends ServerPacketListener {
     private boolean back = false;
     private boolean left = false;
     private boolean right = false;
+    private Vector3f lookAt = new Vector3f(0, 0, -1);
 
     @Override
     public void onPingResponse(PacketC2SPingResponse packet) {
@@ -36,6 +37,7 @@ public class ServerPacketHandler extends ServerPacketListener {
         back = packet.isBack();
         left = packet.isLeft();
         right = packet.isRight();
+        lookAt = packet.getLookAt();
     }
 
     @Override
@@ -55,12 +57,13 @@ public class ServerPacketHandler extends ServerPacketListener {
             getConnection().close();
         }
         float speed = 5.0F;
-        Vector3f velocity = new Vector3f();
-        if (forward) velocity.z -= speed;
-        if (back) velocity.z += speed;
-        if (left) velocity.x -= speed;
-        if (right) velocity.x += speed;
-        getPlayerEntity().getVelocity().set(velocity);
+        Vector3f left2d = new Vector3f(lookAt).set(lookAt.z, 0, -lookAt.x).normalize();
+        getPlayerEntity().getVelocity().set(0, 0, 0);
+        if (forward) getPlayerEntity().getVelocity().add(new Vector3f(lookAt).normalize().mul(speed));
+        if (back) getPlayerEntity().getVelocity().add(new Vector3f(lookAt).normalize().mul(-speed));
+        if (left) getPlayerEntity().getVelocity().add(new Vector3f(left2d).mul(speed));
+        if (right) getPlayerEntity().getVelocity().add(new Vector3f(left2d).mul(-speed));
+        getPlayerEntity().getLookingAt().set(lookAt);
     }
 
     @Override

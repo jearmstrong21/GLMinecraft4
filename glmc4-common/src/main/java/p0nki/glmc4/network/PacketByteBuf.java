@@ -3,6 +3,7 @@ package p0nki.glmc4.network;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.util.ByteProcessor;
+import org.joml.Vector3f;
 import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.tag.ListTag;
 import p0nki.glmc4.tag.Tag;
@@ -26,6 +27,12 @@ public class PacketByteBuf extends ByteBuf {
         this.parent = parent;
     }
 
+    public void write3f(Vector3f value) {
+        writeFloat(value.x);
+        writeFloat(value.y);
+        writeFloat(value.z);
+    }
+
     public void writeTag(Tag value) {
         value.write(this);
     }
@@ -42,6 +49,10 @@ public class PacketByteBuf extends ByteBuf {
 
     public void writeEquivalent(Equivalent equivalent) {
         equivalent.write(this);
+    }
+
+    public Vector3f read3f() {
+        return new Vector3f(readFloat(), readFloat(), readFloat());
     }
 
     public CompoundTag readCompoundTag() {

@@ -59,7 +59,7 @@ public class ClientPacketHandler extends ClientPacketListener {
 
     @Override
     public void tick() {
-        getConnection().write(new PacketC2SPlayerMovement(MCWindow.getKey('W'), MCWindow.getKey('S'), MCWindow.getKey('A'), MCWindow.getKey('D')));
+        getConnection().write(new PacketC2SPlayerMovement(MCWindow.getKey('W'), MCWindow.getKey('S'), MCWindow.getKey('A'), MCWindow.getKey('D'), GLMC4Client.lookDir));
     }
 
     @Override

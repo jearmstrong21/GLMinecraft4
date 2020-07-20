@@ -10,7 +10,7 @@ import p0nki.glmc4.entity.Entity;
 
 public abstract class EntityRenderer<E extends Entity> {
 
-    public static MeshData createCube(int x, int y, int width, int height, int depth, int texWidth, int texHeight) {
+    public static MeshData createCube(int x, int y, int width, int height, int depth, int texWidth, int texHeight, boolean centerY) {
         MeshData data = new MeshData();
         data.addBuffer(3);
         data.addBuffer(2);
@@ -33,6 +33,7 @@ public abstract class EntityRenderer<E extends Entity> {
 
         for (int i = 0; i < data.getBuffer(0).size(); i += 3) {
             data.getBuffer(0).set(i, data.getBuffer(0).get(i) - 0.5F);
+            if (centerY) data.getBuffer(0).set(i + 1, data.getBuffer(0).get(i + 1) - 0.5F);
             data.getBuffer(0).set(i + 2, data.getBuffer(0).get(i + 2) - 0.5F);
         }
 
@@ -45,9 +46,7 @@ public abstract class EntityRenderer<E extends Entity> {
 
     @SuppressWarnings("unchecked") // :sunglasses:
     public final void render(WorldRenderContext context, Entity entity) {
-        Vector3f position = new Vector3f(entity.getPosition());
-        position.add(new Vector3f(entity.getVelocity()).mul((System.currentTimeMillis() - GLMC4Client.getLastUpdateTime(entity.getUuid())) / 1000.0F));
-        renderType(context, (E) entity, position);
+        renderType(context, (E) entity, GLMC4Client.extrapolateEntityPosition(entity));
         if (ClientSettings.RENDER_HITBOXES) {
             GLMC4Client.debugRenderer3D.renderCube(context, ClientSettings.HITBOX_COLOR, entity.getAABB().getPosition(), entity.getSize());
         }

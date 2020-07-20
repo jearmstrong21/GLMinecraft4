@@ -13,6 +13,7 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
 
     private Vector3f position;
     private Vector3f velocity;
+    private Vector3f facingTowards;
     private Vector3f lookingAt;
     private UUID uuid;
     private final EntityType<?> type;
@@ -21,6 +22,7 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
         this.type = type;
         this.position = position;
         this.velocity = new Vector3f(0);
+        this.facingTowards = new Vector3f(0, 0, -1);
         this.lookingAt = new Vector3f(0, 0, -1);
         this.uuid = uuid;
     }
@@ -37,7 +39,7 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
     public void tick(Random random) {
         position.add(new Vector3f(velocity).mul(0.05F));
         if (velocity.lengthSquared() > 0) {
-            lookingAt.set(new Vector3f(velocity).normalize());
+            facingTowards.set(new Vector3f(velocity).normalize());
         }
     }
 
@@ -53,7 +55,11 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
         return velocity;
     }
 
-    public final Vector3f getLookingAt() {
+    public final Vector3f getFacingTowards() {
+        return facingTowards;
+    }
+
+    public Vector3f getLookingAt() {
         return lookingAt;
     }
 
@@ -69,6 +75,7 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
     public Entity fromTag(CompoundTag tag) {
         position = tag.get3f("position");
         velocity = tag.get3f("velocity");
+        facingTowards = tag.get3f("facingTowards");
         lookingAt = tag.get3f("lookingAt");
         uuid = tag.getUUID("uuid");
         if (!EntityTypes.REGISTRY.get(type).getKey().equals(tag.getIdentifier("type")))
@@ -81,6 +88,7 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
         return CompoundTag.empty()
                 .insert("position", TagUtils.of(position))
                 .insert("velocity", TagUtils.of(velocity))
+                .insert("facingTowards", TagUtils.of(facingTowards))
                 .insert("lookingAt", TagUtils.of(lookingAt))
                 .insert("uuid", TagUtils.of(uuid))
                 .insert("type", EntityTypes.REGISTRY.get(type).getKey().toTag());

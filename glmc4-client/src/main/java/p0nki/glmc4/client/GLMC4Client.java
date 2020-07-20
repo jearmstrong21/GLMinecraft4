@@ -82,10 +82,7 @@ public class GLMC4Client {
         entities.forEach(entity -> lastReceivedEntityUpdate.put(entity.getUuid(), System.currentTimeMillis()));
     }
 
-    public static void updateEntity(UUID uuid, CompoundTag newData) {
-        entities.get(uuid).fromTag(newData);
-        lastReceivedEntityUpdate.put(uuid, System.currentTimeMillis());
-    }
+    public static Vector3f lookDir = new Vector3f(0, 0, -1);
 
     public static void spawnEntity(Entity entity) {
         entities.put(entity.getUuid(), entity);
@@ -101,6 +98,14 @@ public class GLMC4Client {
         chunkLock.lock();
         chunks.put(MathUtils.pack(x, z), chunk);
         chunkLock.unlock();
+    }
+
+    public static void updateEntity(UUID uuid, CompoundTag newData) {
+        entities.get(uuid).fromTag(newData);
+        if (uuid.equals(packetListener.getPlayer().getUuid())) {
+            lookDir = entities.get(uuid).getLookingAt();
+        }
+        lastReceivedEntityUpdate.put(uuid, System.currentTimeMillis());
     }
 
     private static MeshData mesh(Chunk chunk) {
@@ -127,7 +132,12 @@ public class GLMC4Client {
         return data;
     }
 
+    public static Vector3f extrapolateEntityPosition(Entity entity) {
+        return new Vector3f(entity.getPosition()).add(new Vector3f(entity.getVelocity()).mul(0.0F * (System.currentTimeMillis() - GLMC4Client.getLastUpdateTime(entity.getUuid())) / 1000.0F));
+    }
+
     private static void initializeClient() {
+        MCWindow.captureMouse();
         shader = Shader.create("chunk");
         texture = new Texture(Path.of("run", "atlas", "block.png"));
         textRenderer = new TextRenderer();
@@ -136,19 +146,25 @@ public class GLMC4Client {
         EntityRenderers.REGISTRY.getEntries().forEach(entry -> entry.getValue().initialize());
     }
 
+    private static void mouseMoveClient(double xpos, double ypos) {
+        xpos -= MCWindow.getWidth() / 2.0F;
+        ypos -= MCWindow.getHeight() / 2.0F;
+        float dx = MathUtils.map((float) ypos, -10, 10, -MathUtils.PI * 0.5F, MathUtils.PI * 0.5F);
+        float dy = MathUtils.map((float) xpos, -10, 10, MathUtils.PI, -MathUtils.PI);
+        dx *= 0.01F;
+        dy *= 0.01F;
+        dx = MathUtils.clamp(dx, -0.49F * MathUtils.PI, 0.49F * MathUtils.PI);
+        lookDir = new Vector3f(0, 0, 1).rotateX(dx).rotateY(dy);
+    }
+
     private static void tickClient(int frameCount) {
         if (packetListener == null) return;
         if (packetListener.getPlayer() == null) return;
         if (!entities.containsKey(packetListener.getPlayer().getUuid())) return;
         float t = 0.5F;
         Matrix4f perspective = new Matrix4f().perspective((float) Math.toRadians(80), 1.0F, 0.001F, 300);
-        float camHeight = 30;
-        float camRadius = 15;
-//        Entity thisEntity = entities.get(packetListener.getPlayer().getUuid());
-        Matrix4f view = new Matrix4f().lookAt(
-                new Vector3f((float) (camRadius * Math.cos(t)), camHeight, (float) (camRadius * Math.sin(t)))
-                , new Vector3f(0, 0, 0), new Vector3f(0, 1, 0));
-//        Matrix4f view = new Matrix4f().lookAt(thisEntity.getPosition(), new Vector3f(thisEntity.getPosition()).add(thisEntity.getLookingAt()), new Vector3f(0, 1, 0));
+        Entity thisEntity = entities.get(packetListener.getPlayer().getUuid());
+        Matrix4f view = new Matrix4f().lookAt(extrapolateEntityPosition(thisEntity), new Vector3f(thisEntity.getPosition()).add(lookDir), new Vector3f(0, 1, 0));
         WorldRenderContext context = new WorldRenderContext(perspective, view);
         shader.use();
         shader.setTexture("tex", texture, 0);
@@ -169,12 +185,12 @@ public class GLMC4Client {
         }
 
         for (Entity entity : entities.values()) {
+            if (entity.getUuid().equals(packetListener.getPlayer().getUuid())) continue;
             EntityType<?> type = entity.getType();
             Identifier identifier = EntityTypes.REGISTRY.get(type).getKey();
             EntityRenderer<?> renderer = EntityRenderers.REGISTRY.get(identifier).getValue();
             renderer.render(context, entity);
         }
-//        debugRenderer3D.renderCube(context, new Vector3f(1, 0, 0), new Vector3f(0, 15, 0), new Vector3f(1, 1, 1));
         textRenderer.renderString(-1, 1 - 0.075F, 0.075F, String.format("GLMinecraft4\nFPS: %s", MCWindow.getFps()));
 
         packetListener.tick();
@@ -183,6 +199,7 @@ public class GLMC4Client {
     private static void runClient() {
         try {
             MCWindow.setInitializeCallback(GLMC4Client::initializeClient);
+            MCWindow.setMouseMoveCallback(GLMC4Client::mouseMoveClient);
             MCWindow.setFrameCallback(GLMC4Client::tickClient);
             MCWindow.setEndCallback(GLMC4Client::endClient);
             MCWindow.start();

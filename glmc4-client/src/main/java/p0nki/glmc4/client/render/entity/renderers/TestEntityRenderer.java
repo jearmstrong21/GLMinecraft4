@@ -28,8 +28,8 @@ public class TestEntityRenderer extends EntityRenderer<TestEntity> {
         texture = new Texture(Path.of(GLMC4Client.resourcePath("entity"), "cow.png"));
         shader = Shader.create("entity");
 
-        head = new Mesh(createCube(0, 14, 8, 8, 6, 64, 32).mult4(0, new Matrix4f().scale(8, 8, 6).scale(2.0F / 8.0F)));
-        body = new Mesh(createCube(18, 32, 12, 18, 10, 64, 32).mult4(0, new Matrix4f().scale(12, 18, 10).scale(3.0F / 18.0F)));
+        head = new Mesh(createCube(0, 14, 8, 8, 6, 64, 32, false).mult4(0, new Matrix4f().scale(8, 8, 6).scale(2.0F / 8.0F)));
+        body = new Mesh(createCube(18, 32, 12, 18, 10, 64, 32, false).mult4(0, new Matrix4f().scale(12, 18, 10).scale(3.0F / 18.0F)));
     }
 
     @Override

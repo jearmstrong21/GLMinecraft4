@@ -5,9 +5,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
+import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
+import java.util.function.BiConsumer;
 import java.util.function.IntConsumer;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -20,6 +22,7 @@ public class MCWindow {
     private static long ptr;
     private static Runnable initializeCallback;
     private static IntConsumer frameCallback;
+    private static BiConsumer<Double, Double> mouseMoveCallback;
     private static Runnable endCallback;
     private static double fps;
 
@@ -31,6 +34,10 @@ public class MCWindow {
         MCWindow.initializeCallback = initializeCallback;
     }
 
+    public static void setMouseMoveCallback(BiConsumer<Double, Double> mouseMoveCallback) {
+        MCWindow.mouseMoveCallback = mouseMoveCallback;
+    }
+
     public static void setFrameCallback(IntConsumer frameCallback) {
         MCWindow.frameCallback = frameCallback;
     }
@@ -38,6 +45,7 @@ public class MCWindow {
     public static void setEndCallback(Runnable endCallback) {
         MCWindow.endCallback = endCallback;
     }
+
 
     public static void start() {
         if (!glfwInit()) {
@@ -52,6 +60,12 @@ public class MCWindow {
             LOGGER.warn(OPENGL, "CREATING FORWARD COMPAT CORE PROFILE CONTEXT FOR OPENGL. THIS IS ONLY DONE ON MAC OS. IF YOU ARE NOT ON A MAC OS THIS IS AN ISSUE AND WILL LIKELY CRASH.");
         }
         ptr = glfwCreateWindow(750, 750, "Minecraft", 0, 0);
+        glfwSetCursorPosCallback(ptr, new GLFWCursorPosCallback() {
+            @Override
+            public void invoke(long window, double xpos, double ypos) {
+                mouseMoveCallback.accept(xpos, ypos);
+            }
+        });
         glfwMakeContextCurrent(ptr);
         glfwSwapInterval(0);
         glfwShowWindow(ptr);
@@ -104,6 +118,14 @@ public class MCWindow {
         int[] h = new int[1];
         glfwGetFramebufferSize(ptr, w, h);
         return h[0];
+    }
+
+    public static void captureMouse() {
+        glfwSetInputMode(ptr, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+
+    public static void releaseMouse() {
+        glfwSetInputMode(ptr, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
 
     public static boolean getKey(char ch) {
