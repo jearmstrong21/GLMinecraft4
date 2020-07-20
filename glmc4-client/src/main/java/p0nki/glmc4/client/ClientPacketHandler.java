@@ -23,6 +23,7 @@ public class ClientPacketHandler extends ClientPacketListener {
     @Override
     public void onHello(PacketS2CHello packet) {
         System.out.println("Your player ID is " + packet.getYourPlayer());
+        setPlayer(packet.getYourPlayer());
         GLMC4Client.loadInitialEntities(packet.getAllEntities());
     }
 

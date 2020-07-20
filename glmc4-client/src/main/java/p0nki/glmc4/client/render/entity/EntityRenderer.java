@@ -41,11 +41,13 @@ public abstract class EntityRenderer<E extends Entity> {
 
     public abstract void initialize();
 
-    protected abstract void renderType(WorldRenderContext context, E entity);
+    protected abstract void renderType(WorldRenderContext context, E entity, Vector3f extrapolatedPosition);
 
     @SuppressWarnings("unchecked") // :sunglasses:
     public final void render(WorldRenderContext context, Entity entity) {
-        renderType(context, (E) entity);
+        Vector3f position = new Vector3f(entity.getPosition());
+        position.add(new Vector3f(entity.getVelocity()).mul((System.currentTimeMillis() - GLMC4Client.getLastUpdateTime(entity.getUuid())) / 1000.0F));
+        renderType(context, (E) entity, position);
         if (ClientSettings.RENDER_HITBOXES) {
             GLMC4Client.debugRenderer3D.renderCube(context, ClientSettings.HITBOX_COLOR, entity.getAABB().getPosition(), entity.getSize());
         }

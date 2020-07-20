@@ -3,6 +3,7 @@ package p0nki.glmc4.client.render.entity.renderers;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import p0nki.glmc4.client.GLMC4Client;
 import p0nki.glmc4.client.gl.Mesh;
 import p0nki.glmc4.client.gl.Shader;
@@ -32,11 +33,10 @@ public class TestEntityRenderer extends EntityRenderer<TestEntity> {
     }
 
     @Override
-    protected void renderType(WorldRenderContext context, TestEntity entity) {
-//        LOGGER.trace("Rendering test entity at {} {} {}", entity.getPosition().x, entity.getPosition().y, entity.getPosition().z);
+    protected void renderType(WorldRenderContext context, TestEntity entity, Vector3f extrapolatedPosition) {
         shader.use();
         shader.set(context);
-        shader.setMat4f("model", new Matrix4f().translate(entity.getPosition()));
+        shader.setMat4f("model", new Matrix4f().translate(extrapolatedPosition));
         shader.set3f("color", entity.getColor());
         shader.setTexture("tex", texture, 0);
         body.triangles();

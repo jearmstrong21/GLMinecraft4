@@ -49,7 +49,7 @@ public class TextRenderer {
                         }
                     }
                     charStart.put((char) (y * 16 + x), minX);
-                    charSize.put((char) (y * 16 + x), maxX - minX + 1);
+                    charSize.put((char) (y * 16 + x), maxX - minX + 2);
                 }
             }
         } catch (IOException ioException) {

@@ -32,11 +32,11 @@ public class PlayerEntityRenderer extends EntityRenderer<PlayerEntity> {
     }
 
     @Override
-    protected void renderType(WorldRenderContext context, PlayerEntity entity) {
+    protected void renderType(WorldRenderContext context, PlayerEntity entity, Vector3f extrapolatedPosition) {
         shader.use();
         shader.set(context);
         shader.setTexture("tex", texture, 0);
-        Matrix4f baseMatrix = new Matrix4f().translate(entity.getPosition());
+        Matrix4f baseMatrix = new Matrix4f().translate(extrapolatedPosition);
         baseMatrix.mul(new Matrix4f().lookAlong(entity.getLookingAt(), new Vector3f(0, 1, 0)));
         shader.setMat4f("model", new Matrix4f(baseMatrix).translate(0, 1.0F, 0));
         head.triangles();

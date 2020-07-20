@@ -73,6 +73,10 @@ public class GLMC4Client {
     public static DebugRenderer3D debugRenderer3D;
     private static Map<UUID, Entity> entities = new HashMap<>();
 
+    public static long getLastUpdateTime(UUID uuid) {
+        return lastReceivedEntityUpdate.get(uuid);
+    }
+
     public static void loadInitialEntities(List<Entity> entities) {
         GLMC4Client.entities = entities.stream().collect(Collectors.toMap(Entity::getUuid, entity -> entity));
         entities.forEach(entity -> lastReceivedEntityUpdate.put(entity.getUuid(), System.currentTimeMillis()));
@@ -133,13 +137,17 @@ public class GLMC4Client {
     }
 
     private static void tickClient(int frameCount) {
+        if (packetListener.getPlayer() == null) return;
+        if (!entities.containsKey(packetListener.getPlayer().getUuid())) return;
         float t = 0.5F;
         Matrix4f perspective = new Matrix4f().perspective((float) Math.toRadians(80), 1.0F, 0.001F, 300);
         float camHeight = 30;
         float camRadius = 15;
+//        Entity thisEntity = entities.get(packetListener.getPlayer().getUuid());
         Matrix4f view = new Matrix4f().lookAt(
                 new Vector3f((float) (camRadius * Math.cos(t)), camHeight, (float) (camRadius * Math.sin(t)))
                 , new Vector3f(0, 0, 0), new Vector3f(0, 1, 0));
+//        Matrix4f view = new Matrix4f().lookAt(thisEntity.getPosition(), new Vector3f(thisEntity.getPosition()).add(thisEntity.getLookingAt()), new Vector3f(0, 1, 0));
         WorldRenderContext context = new WorldRenderContext(perspective, view);
         shader.use();
         shader.setTexture("tex", texture, 0);
