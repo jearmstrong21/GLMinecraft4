@@ -137,6 +137,7 @@ public class GLMC4Client {
     }
 
     private static void tickClient(int frameCount) {
+        if (packetListener == null) return;
         if (packetListener.getPlayer() == null) return;
         if (!entities.containsKey(packetListener.getPlayer().getUuid())) return;
         float t = 0.5F;
