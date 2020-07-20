@@ -1,7 +1,5 @@
 package p0nki.glmc4.server;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.joml.Vector3f;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CDisconnectReason;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CPingRequest;
@@ -11,8 +9,6 @@ import p0nki.glmc4.network.packet.serverbound.ServerPacketListener;
 import p0nki.glmc4.utils.MathUtils;
 
 public class ServerPacketHandler extends ServerPacketListener {
-
-    private final static Logger LOGGER = LogManager.getLogger();
 
     private final static long TIMEOUT = 500;
     private final static int TIMEOUT_COUNT = 20;
@@ -57,6 +53,10 @@ public class ServerPacketHandler extends ServerPacketListener {
             getConnection().write(new PacketS2CDisconnectReason("Timed out"));
             getConnection().close();
         }
+        tickMovement();
+    }
+
+    private void tickMovement() {
         lookAt.normalize();
         float speed = 5.0F;
         Vector3f left2d = new Vector3f(lookAt);

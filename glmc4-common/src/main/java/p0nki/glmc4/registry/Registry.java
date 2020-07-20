@@ -21,11 +21,9 @@ public class Registry<T> {
         buf.writeInt(entries.size());
         for (Entry<T> entry : entries) {
             buf.writeString(entry.getKey().toString());
+            buf.writeBoolean(entry.getValue() instanceof VersionedRegistrable);
             if (entry.getValue() instanceof VersionedRegistrable) {
-                buf.writeBoolean(true);
                 buf.writeInt(((VersionedRegistrable) entry.getValue()).getVersion());
-            } else {
-                buf.writeBoolean(false);
             }
         }
     }
@@ -45,8 +43,11 @@ public class Registry<T> {
         for (int i = 0; i < size; i++) {
             Identifier identifier = new Identifier(buf.readString());
             if (!entries.get(i).getKey().equals(identifier)) return false;
-            if (buf.readBoolean()) {
-                if (!(entries.get(i).getValue() instanceof VersionedRegistrable)) return false;
+            boolean b = buf.readBoolean();
+            if (b != entries.get(i).getValue() instanceof VersionedRegistrable) {
+                return false;
+            }
+            if (b) {
                 if (((VersionedRegistrable) entries.get(i).getValue()).getVersion() != buf.readInt()) return false;
             }
         }
