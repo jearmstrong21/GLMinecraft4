@@ -7,7 +7,7 @@ import p0nki.glmc4.client.GLMC4Client;
 import p0nki.glmc4.client.gl.Mesh;
 import p0nki.glmc4.client.gl.Shader;
 import p0nki.glmc4.client.gl.Texture;
-import p0nki.glmc4.client.gl.WorldRenderContext;
+import p0nki.glmc4.client.render.WorldRenderContext;
 import p0nki.glmc4.client.render.entity.EntityRenderer;
 import p0nki.glmc4.entity.TestEntity;
 
@@ -39,7 +39,7 @@ public class TestEntityRenderer extends EntityRenderer<TestEntity> {
         shader.setMat4f("model", new Matrix4f().translate(entity.getPosition()));
         shader.set3f("color", entity.getColor());
         shader.setTexture("tex", texture, 0);
-        body.render();
+        body.triangles();
     }
 
 }

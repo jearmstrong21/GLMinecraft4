@@ -1,9 +1,11 @@
 package p0nki.glmc4.client.render.entity;
 
 import org.joml.Vector3f;
+import p0nki.glmc4.client.ClientSettings;
+import p0nki.glmc4.client.GLMC4Client;
 import p0nki.glmc4.client.assets.AtlasPosition;
-import p0nki.glmc4.client.gl.MeshData;
-import p0nki.glmc4.client.gl.WorldRenderContext;
+import p0nki.glmc4.client.render.MeshData;
+import p0nki.glmc4.client.render.WorldRenderContext;
 import p0nki.glmc4.entity.Entity;
 
 public abstract class EntityRenderer<E extends Entity> {
@@ -39,6 +41,9 @@ public abstract class EntityRenderer<E extends Entity> {
     @SuppressWarnings("unchecked") // :sunglasses:
     public final void render(WorldRenderContext context, Entity entity) {
         renderType(context, (E) entity);
+        if (ClientSettings.RENDER_HITBOXES) {
+            GLMC4Client.debugRenderer3D.renderCube(context, ClientSettings.HITBOX_COLOR, entity.getAABB().getPosition(), entity.getSize());
+        }
     }
 
 }

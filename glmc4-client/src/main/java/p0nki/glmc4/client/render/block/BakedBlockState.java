@@ -3,7 +3,7 @@ package p0nki.glmc4.client.render.block;
 import p0nki.glmc4.block.Block;
 import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.block.Blocks;
-import p0nki.glmc4.client.gl.MeshData;
+import p0nki.glmc4.client.render.MeshData;
 
 import java.util.HashMap;
 import java.util.Map;

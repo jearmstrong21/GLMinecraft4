@@ -4,6 +4,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import p0nki.glmc4.client.GLMC4Client;
+import p0nki.glmc4.client.render.WorldRenderContext;
 
 import java.io.IOException;
 import java.nio.file.Files;

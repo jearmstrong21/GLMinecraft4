@@ -16,7 +16,13 @@ import org.joml.Vector3f;
 import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.block.Chunk;
-import p0nki.glmc4.client.gl.*;
+import p0nki.glmc4.client.gl.Mesh;
+import p0nki.glmc4.client.gl.Shader;
+import p0nki.glmc4.client.gl.Texture;
+import p0nki.glmc4.client.render.DebugRenderer3D;
+import p0nki.glmc4.client.render.MeshData;
+import p0nki.glmc4.client.render.TextRenderer;
+import p0nki.glmc4.client.render.WorldRenderContext;
 import p0nki.glmc4.client.render.block.BlockRenderContext;
 import p0nki.glmc4.client.render.block.BlockRenderer;
 import p0nki.glmc4.client.render.block.BlockRenderers;
@@ -60,26 +66,31 @@ public class GLMC4Client {
     private static ClientPacketListener packetListener;
 
     public static TextRenderer textRenderer;
+    private static final Map<UUID, Long> lastReceivedEntityUpdate = new HashMap<>();
 
     private static Shader shader;
     private static Texture texture;
-
+    public static DebugRenderer3D debugRenderer3D;
     private static Map<UUID, Entity> entities = new HashMap<>();
 
     public static void loadInitialEntities(List<Entity> entities) {
         GLMC4Client.entities = entities.stream().collect(Collectors.toMap(Entity::getUuid, entity -> entity));
+        entities.forEach(entity -> lastReceivedEntityUpdate.put(entity.getUuid(), System.currentTimeMillis()));
     }
 
     public static void updateEntity(UUID uuid, CompoundTag newData) {
         entities.get(uuid).fromTag(newData);
+        lastReceivedEntityUpdate.put(uuid, System.currentTimeMillis());
     }
 
     public static void spawnEntity(Entity entity) {
         entities.put(entity.getUuid(), entity);
+        lastReceivedEntityUpdate.put(entity.getUuid(), System.currentTimeMillis());
     }
 
     public static void despawnEntity(UUID uuid) {
         entities.remove(uuid);
+        lastReceivedEntityUpdate.remove(uuid);
     }
 
     public static void onLoadChunk(int x, int z, Chunk chunk) {
@@ -116,12 +127,13 @@ public class GLMC4Client {
         shader = Shader.create("chunk");
         texture = new Texture(Path.of("run", "atlas", "block.png"));
         textRenderer = new TextRenderer();
+        debugRenderer3D = new DebugRenderer3D();
         LOGGER.info(RENDER, "Client initialized");
         EntityRenderers.REGISTRY.getEntries().forEach(entry -> entry.getValue().initialize());
     }
 
     private static void tickClient(int frameCount) {
-        float t = MCWindow.time();
+        float t = 0.5F;
         Matrix4f perspective = new Matrix4f().perspective((float) Math.toRadians(80), 1.0F, 0.001F, 300);
         float camHeight = 30;
         float camRadius = 15;
@@ -144,7 +156,7 @@ public class GLMC4Client {
         for (Map.Entry<Long, Mesh> chunk : meshes.entrySet()) {
             shader.setFloat("x", 16 * MathUtils.unpackFirst(chunk.getKey()));
             shader.setFloat("z", 16 * MathUtils.unpackSecond(chunk.getKey()));
-            chunk.getValue().render();
+            chunk.getValue().triangles();
         }
 
         for (Entity entity : entities.values()) {
@@ -153,6 +165,7 @@ public class GLMC4Client {
             EntityRenderer<?> renderer = EntityRenderers.REGISTRY.get(identifier).getValue();
             renderer.render(context, entity);
         }
+//        debugRenderer3D.renderCube(context, new Vector3f(1, 0, 0), new Vector3f(0, 15, 0), new Vector3f(1, 1, 1));
         textRenderer.renderString(-1, 1 - 0.075F, 0.075F, String.format("GLMinecraft4\nFPS: %s", MCWindow.getFps()));
 
         packetListener.tick();

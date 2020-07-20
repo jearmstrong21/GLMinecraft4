@@ -1,6 +1,7 @@
 package p0nki.glmc4.client.gl;
 
 import org.apache.commons.lang3.ArrayUtils;
+import p0nki.glmc4.client.render.MeshData;
 
 import static org.lwjgl.opengl.GL33.*;
 
@@ -33,10 +34,18 @@ public class Mesh {
         glBindVertexArray(0);
     }
 
-    public void render() {
+    public void triangles() {
         glBindVertexArray(vao);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         glDrawElements(GL_TRIANGLES, size, GL_UNSIGNED_INT, 0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
+
+    public void lines() {
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+        glDrawElements(GL_LINES, size, GL_UNSIGNED_INT, 0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
     }

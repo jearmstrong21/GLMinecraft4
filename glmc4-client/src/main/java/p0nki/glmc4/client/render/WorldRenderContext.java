@@ -1,4 +1,4 @@
-package p0nki.glmc4.client.gl;
+package p0nki.glmc4.client.render;
 
 import org.joml.Matrix4f;
 

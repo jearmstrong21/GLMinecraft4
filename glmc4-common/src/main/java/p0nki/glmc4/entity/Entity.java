@@ -3,6 +3,7 @@ package p0nki.glmc4.entity;
 import org.joml.Vector3f;
 import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.tag.TagEquivalent;
+import p0nki.glmc4.utils.AABB;
 import p0nki.glmc4.utils.TagUtils;
 
 import java.util.Random;
@@ -22,6 +23,10 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
         this.uuid = uuid;
     }
 
+    public final AABB getAABB() {
+        return new AABB(position.x - getSize().x / 2, position.y, position.z - getSize().z / 2, getSize().x, getSize().y, getSize().z);
+    }
+
     public Entity(EntityType<?> type, CompoundTag tag) {
         this.type = type;
         fromTag(tag);
@@ -31,23 +36,23 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
         position.add(new Vector3f(velocity).mul(0.05F));
     }
 
-    public EntityType<?> getType() {
+    public final EntityType<?> getType() {
         return type;
     }
 
-    public Vector3f getPosition() {
+    public final Vector3f getPosition() {
         return position;
     }
 
-    public Vector3f getVelocity() {
+    public final Vector3f getVelocity() {
         return velocity;
     }
 
-    public Vector3f getSize() {
+    public final Vector3f getSize() {
         return type.getSize();
     }
 
-    public UUID getUuid() {
+    public final UUID getUuid() {
         return uuid;
     }
 

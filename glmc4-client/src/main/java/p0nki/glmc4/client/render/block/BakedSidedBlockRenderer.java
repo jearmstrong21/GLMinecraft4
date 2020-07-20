@@ -2,7 +2,7 @@ package p0nki.glmc4.client.render.block;
 
 import p0nki.glmc4.block.Block;
 import p0nki.glmc4.block.BlockState;
-import p0nki.glmc4.client.gl.MeshData;
+import p0nki.glmc4.client.render.MeshData;
 
 public abstract class BakedSidedBlockRenderer extends SidedBlockRenderer {
 

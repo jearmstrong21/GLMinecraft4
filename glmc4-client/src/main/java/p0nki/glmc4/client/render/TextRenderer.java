@@ -1,6 +1,9 @@
-package p0nki.glmc4.client.gl;
+package p0nki.glmc4.client.render;
 
 import p0nki.glmc4.client.GLMC4Client;
+import p0nki.glmc4.client.gl.Mesh;
+import p0nki.glmc4.client.gl.Shader;
+import p0nki.glmc4.client.gl.Texture;
 import p0nki.glmc4.utils.ListUtils;
 
 import javax.imageio.ImageIO;
@@ -75,7 +78,7 @@ public class TextRenderer {
                 shader.setFloat("uvy", uvy / 16.0F);
                 shader.setFloat("uvw", charSize.get(c) / 160.F);
                 shader.setFloat("uvh", 1.0F / 16.0F);
-                quad.render();
+                quad.triangles();
                 x += size * charSize.get(c) / 10.0F;
             }
         }
