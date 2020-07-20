@@ -17,19 +17,19 @@ public abstract class EntityRenderer<E extends Entity> {
 
         AtlasPosition left = new AtlasPosition(x + depth + width, y - height, depth, height, texWidth, texHeight);
         AtlasPosition right = new AtlasPosition(x, y - height, depth, height, texWidth, texHeight);
-        AtlasPosition bottom = new AtlasPosition(x + depth + width, y - height - depth, depth, width, texWidth, texHeight);
-        AtlasPosition top = new AtlasPosition(x + depth, y - height - depth, depth, width, texWidth, texHeight);
+        AtlasPosition bottom = new AtlasPosition(x + depth + width, y - height - depth, width, depth, texWidth, texHeight);
+        AtlasPosition top = new AtlasPosition(x + depth, y - height - depth, width, depth, texWidth, texHeight);
         AtlasPosition front = new AtlasPosition(x + depth, y - height, width, height, texWidth, texHeight);
         AtlasPosition back = new AtlasPosition(x + depth + width + depth, y - height, width, height, texWidth, texHeight);
 
-        data.addXmiQuad(0, 1, new Vector3f(0), left);
-        data.addXplQuad(0, 1, new Vector3f(0), right);
+        data.addXmiQuad(0, 1, new Vector3f(0), right);
+        data.addXplQuad(0, 1, new Vector3f(0), left);
 
         data.addYmiQuad(0, 1, new Vector3f(0), bottom);
         data.addYplQuad(0, 1, new Vector3f(0), top);
 
-        data.addZmiQuad(0, 1, new Vector3f(0), front);
-        data.addZplQuad(0, 1, new Vector3f(0), back);
+        data.addZmiQuad(0, 1, new Vector3f(0), back);
+        data.addZplQuad(0, 1, new Vector3f(0), front);
 
         for (int i = 0; i < data.getBuffer(0).size(); i += 3) {
             data.getBuffer(0).set(i, data.getBuffer(0).get(i) - 0.5F);

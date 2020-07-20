@@ -8,6 +8,7 @@ import p0nki.glmc4.network.packet.clientbound.PacketS2CPingRequest;
 import p0nki.glmc4.network.packet.serverbound.PacketC2SPingResponse;
 import p0nki.glmc4.network.packet.serverbound.PacketC2SPlayerMovement;
 import p0nki.glmc4.network.packet.serverbound.ServerPacketListener;
+import p0nki.glmc4.utils.MathUtils;
 
 public class ServerPacketHandler extends ServerPacketListener {
 
@@ -56,11 +57,15 @@ public class ServerPacketHandler extends ServerPacketListener {
             getConnection().write(new PacketS2CDisconnectReason("Timed out"));
             getConnection().close();
         }
+        lookAt.normalize();
         float speed = 5.0F;
-        Vector3f left2d = new Vector3f(lookAt).set(lookAt.z, 0, -lookAt.x).normalize();
+        Vector3f left2d = new Vector3f(lookAt);
+        left2d.y = 0;
+        left2d.normalize();
+        left2d.rotateY(MathUtils.PI * 0.5F);
         getPlayerEntity().getVelocity().set(0, 0, 0);
-        if (forward) getPlayerEntity().getVelocity().add(new Vector3f(lookAt).normalize().mul(speed));
-        if (back) getPlayerEntity().getVelocity().add(new Vector3f(lookAt).normalize().mul(-speed));
+        if (forward) getPlayerEntity().getVelocity().add(new Vector3f(lookAt).mul(speed));
+        if (back) getPlayerEntity().getVelocity().add(new Vector3f(lookAt).mul(-speed));
         if (left) getPlayerEntity().getVelocity().add(new Vector3f(left2d).mul(speed));
         if (right) getPlayerEntity().getVelocity().add(new Vector3f(left2d).mul(-speed));
         getPlayerEntity().getLookingAt().set(lookAt);

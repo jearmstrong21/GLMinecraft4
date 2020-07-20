@@ -38,8 +38,8 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
 
     public void tick(Random random) {
         position.add(new Vector3f(velocity).mul(0.05F));
-        if (velocity.lengthSquared() > 0) {
-            facingTowards.set(new Vector3f(velocity).normalize());
+        if (velocity.x != 0 || velocity.z != 0) {
+            facingTowards.set(new Vector3f(velocity.x, 0, velocity.z).normalize());
         }
     }
 

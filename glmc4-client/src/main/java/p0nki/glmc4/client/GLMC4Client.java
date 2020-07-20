@@ -164,7 +164,8 @@ public class GLMC4Client {
         float t = 0.5F;
         Matrix4f perspective = new Matrix4f().perspective((float) Math.toRadians(80), 1.0F, 0.001F, 300);
         Entity thisEntity = entities.get(packetListener.getPlayer().getUuid());
-        Matrix4f view = new Matrix4f().lookAt(extrapolateEntityPosition(thisEntity), new Vector3f(thisEntity.getPosition()).add(lookDir), new Vector3f(0, 1, 0));
+//        Matrix4f view = new Matrix4f().lookAt(extrapolateEntityPosition(thisEntity), new Vector3f(thisEntity.getPosition()).add(lookDir), new Vector3f(0, 1, 0));
+        Matrix4f view = new Matrix4f().lookAt(extrapolateEntityPosition(thisEntity).add(0, thisEntity.getType().getEyeHeight(), 0).sub(new Vector3f(lookDir).mul(3)), new Vector3f(thisEntity.getPosition()).add(lookDir), new Vector3f(0, 1, 0));
         WorldRenderContext context = new WorldRenderContext(perspective, view);
         shader.use();
         shader.setTexture("tex", texture, 0);
@@ -185,7 +186,7 @@ public class GLMC4Client {
         }
 
         for (Entity entity : entities.values()) {
-            if (entity.getUuid().equals(packetListener.getPlayer().getUuid())) continue;
+//            if (entity.getUuid().equals(packetListener.getPlayer().getUuid())) continue;
             EntityType<?> type = entity.getType();
             Identifier identifier = EntityTypes.REGISTRY.get(type).getKey();
             EntityRenderer<?> renderer = EntityRenderers.REGISTRY.get(identifier).getValue();

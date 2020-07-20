@@ -9,8 +9,8 @@ public class EntityTypes {
 
     public static final Registry<EntityType<?>> REGISTRY = new Registry<>();
 
-    public static final EntityType<PlayerEntity> PLAYER = new EntityType<>(new Vector3f(0.6F, 1.8F, 0.6F), PlayerEntity::new);
-    public static final EntityType<TestEntity> TEST = new EntityType<>(new Vector3f(1, 1, 1), TestEntity::new);
+    public static final EntityType<PlayerEntity> PLAYER = new EntityType<>(1.75F, new Vector3f(0.6F, 1.8F, 0.6F), PlayerEntity::new);
+    public static final EntityType<TestEntity> TEST = new EntityType<>(0.5F, new Vector3f(1, 1, 1), TestEntity::new);
 
     public static Entity from(CompoundTag tag) {
         Identifier type = tag.getIdentifier("type");
