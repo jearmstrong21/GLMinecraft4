@@ -24,6 +24,10 @@ public class MeshData {
         tri = new ArrayList<>();
     }
 
+    public List<Float> getBuffer(int index) {
+        return data.get(index);
+    }
+
     public static MeshData chunk() {
         return new MeshData().addBuffer(3).addBuffer(2);
     }

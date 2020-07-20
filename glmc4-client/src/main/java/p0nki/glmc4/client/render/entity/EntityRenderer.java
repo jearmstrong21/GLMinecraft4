@@ -31,6 +31,11 @@ public abstract class EntityRenderer<E extends Entity> {
         data.addZmiQuad(0, 1, new Vector3f(0), front);
         data.addZplQuad(0, 1, new Vector3f(0), back);
 
+        for (int i = 0; i < data.getBuffer(0).size(); i += 3) {
+            data.getBuffer(0).set(i, data.getBuffer(0).get(i) - 0.5F);
+            data.getBuffer(0).set(i + 2, data.getBuffer(0).get(i + 2) - 0.5F);
+        }
+
         return data;
     }
 
