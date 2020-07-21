@@ -2,7 +2,8 @@ package p0nki.glmc4.block;
 
 import p0nki.glmc4.block.blocks.GrassBlock;
 import p0nki.glmc4.network.PacketByteBuf;
-import p0nki.glmc4.utils.MathUtils;
+import p0nki.glmc4.utils.math.BlockPos;
+import p0nki.glmc4.utils.math.MathUtils;
 
 import java.util.Random;
 
@@ -68,6 +69,10 @@ public class Chunk implements PacketByteBuf.Equivalent {
     private void checkBounds(int x, int y, int z) {
         if (x < 0 || y < 0 || z < 0 || x >= 16 || y >= 256 || z >= 16)
             throw new ArrayIndexOutOfBoundsException(String.format("Invalid chunk coordinates %d, %d, %d", x, y, z));
+    }
+
+    public BlockState get(BlockPos blockPos) {
+        return get(blockPos.getX(), blockPos.getY(), blockPos.getZ());
     }
 
     public BlockState get(int x, int y, int z) {

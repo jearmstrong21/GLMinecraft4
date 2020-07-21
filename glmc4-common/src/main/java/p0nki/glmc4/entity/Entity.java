@@ -1,10 +1,12 @@
 package p0nki.glmc4.entity;
 
 import org.joml.Vector3f;
+import p0nki.glmc4.block.Blocks;
+import p0nki.glmc4.server.MinecraftServer;
 import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.tag.TagEquivalent;
-import p0nki.glmc4.utils.AABB;
 import p0nki.glmc4.utils.TagUtils;
+import p0nki.glmc4.utils.math.AABB;
 
 import java.util.Random;
 import java.util.UUID;
@@ -28,7 +30,11 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
     }
 
     public final AABB getAABB() {
-        return new AABB(position.x - getSize().x / 2, position.y, position.z - getSize().z / 2, getSize().x, getSize().y, getSize().z);
+        return getAABB(position);
+    }
+
+    public final AABB getAABB(Vector3f testPosition) {
+        return new AABB(testPosition.x - getSize().x / 2, testPosition.y, testPosition.z - getSize().z / 2, getSize().x, getSize().y, getSize().z);
     }
 
     public Entity(EntityType<?> type, CompoundTag tag) {
@@ -37,10 +43,16 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
     }
 
     public void tick(Random random) {
-        position.add(new Vector3f(velocity).mul(0.05F));
         if (velocity.x != 0 || velocity.z != 0) {
             facingTowards.set(new Vector3f(velocity.x, 0, velocity.z).normalize());
         }
+        if (!isValidPosition(new Vector3f(position).add(new Vector3f(velocity).mul(0.05F)))) return;
+        position.add(new Vector3f(velocity).mul(0.05F));
+        velocity.y += 0.1F;
+    }
+
+    public boolean isValidPosition(Vector3f testPosition) {
+        return getAABB(testPosition).streamBlockPos().allMatch(blockPos -> MinecraftServer.INSTANCE.getServerWorld().get(blockPos).getBlock() == Blocks.AIR);
     }
 
     public final EntityType<?> getType() {

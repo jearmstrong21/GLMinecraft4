@@ -1,12 +1,14 @@
 package p0nki.glmc4.server;
 
+import org.joml.Vector2i;
 import org.joml.Vector3f;
+import p0nki.glmc4.network.packet.clientbound.PacketS2CChunkLoad;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CDisconnectReason;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CPingRequest;
 import p0nki.glmc4.network.packet.serverbound.PacketC2SPingResponse;
 import p0nki.glmc4.network.packet.serverbound.PacketC2SPlayerMovement;
 import p0nki.glmc4.network.packet.serverbound.ServerPacketListener;
-import p0nki.glmc4.utils.MathUtils;
+import p0nki.glmc4.utils.math.MathUtils;
 
 public class ServerPacketHandler extends ServerPacketListener {
 
@@ -41,6 +43,11 @@ public class ServerPacketHandler extends ServerPacketListener {
     public void onConnected() {
         MinecraftServer.INSTANCE.onJoin(this);
         lastPingResponse = System.currentTimeMillis();
+        for (int x = -3; x <= 3; x++) {
+            for (int z = -3; z <= 3; z++) {
+                getConnection().write(new PacketS2CChunkLoad(x, z, MinecraftServer.INSTANCE.getServerWorld().getChunk(new Vector2i(x, z))));
+            }
+        }
     }
 
     @Override

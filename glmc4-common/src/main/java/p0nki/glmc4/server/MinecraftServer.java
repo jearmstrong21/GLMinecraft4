@@ -5,7 +5,6 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import org.joml.Vector3f;
-import p0nki.glmc4.block.Chunk;
 import p0nki.glmc4.entity.Entity;
 import p0nki.glmc4.entity.PlayerEntity;
 import p0nki.glmc4.network.packet.Packet;
@@ -26,14 +25,20 @@ public class MinecraftServer {
     private final Map<UUID, ServerPlayer> players = new HashMap<>();
     private final Map<UUID, ServerPacketListener> listeners = new HashMap<>();
     private final Map<UUID, Entity> entities = new HashMap<>();
+    private final ServerWorld serverWorld;
 
     public MinecraftServer() {
+        serverWorld = new ServerWorld();
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
                 tick();
             }
         }, 0, 50);
+    }
+
+    public ServerWorld getServerWorld() {
+        return serverWorld;
     }
 
     public void writeAll(Packet<ClientPacketListener> packet) {
@@ -58,11 +63,6 @@ public class MinecraftServer {
         listeners.put(player.getUuid(), listener);
         writeAll(new PacketS2CPlayerJoin(player));
         spawnEntity(playerEntity);
-        for (int x = -3; x <= 3; x++) {
-            for (int z = -3; z <= 3; z++) {
-                listener.getConnection().write(new PacketS2CChunkLoad(x, z, Chunk.generate(x, z)));
-            }
-        }
     }
 
     public void onLeave(UUID uuid) {

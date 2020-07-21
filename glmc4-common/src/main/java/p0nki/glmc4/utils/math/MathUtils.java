@@ -1,4 +1,6 @@
-package p0nki.glmc4.utils;
+package p0nki.glmc4.utils.math;
+
+import org.joml.Vector2i;
 
 public class MathUtils {
 
@@ -28,12 +30,20 @@ public class MathUtils {
         return (((long) a) << 32) | (b & 0xffffffffL);
     }
 
+    public static long pack(Vector2i value) {
+        return pack(value.x, value.y);
+    }
+
     public static int unpackFirst(long l) {
         return (int) (l >> 32);
     }
 
     public static int unpackSecond(long l) {
         return (int) l;
+    }
+
+    public static Vector2i unpack(long l) {
+        return new Vector2i(unpackFirst(l), unpackSecond(l));
     }
 
 }

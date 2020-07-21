@@ -36,7 +36,7 @@ import p0nki.glmc4.network.PacketCodec;
 import p0nki.glmc4.network.packet.clientbound.ClientPacketListener;
 import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.utils.Identifier;
-import p0nki.glmc4.utils.MathUtils;
+import p0nki.glmc4.utils.math.MathUtils;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
