@@ -1,5 +1,8 @@
 package p0nki.glmc4.block;
 
+import com.structbuilders.worldgen.Biome;
+import com.structbuilders.worldgen.Biomes;
+import com.structbuilders.worldgen.Generator;
 import p0nki.glmc4.block.blocks.GrassBlock;
 import p0nki.glmc4.network.PacketByteBuf;
 import p0nki.glmc4.utils.math.BlockPos;
@@ -8,8 +11,8 @@ import p0nki.glmc4.utils.math.MathUtils;
 import java.util.Random;
 
 public class Chunk implements PacketByteBuf.Equivalent {
-
     private final long[][][] data;
+    public static final long seed = System.currentTimeMillis();
 
     public Chunk() {
         data = new long[16][256][16];
@@ -17,23 +20,12 @@ public class Chunk implements PacketByteBuf.Equivalent {
 
     public static Chunk generate(int cx, int cz) {
         Chunk c = new Chunk();
+        var biomes = Generator.generate(seed, 16, 16, cx, cz);
+
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
-                int rx = x + cx * 16;
-                int rz = z + cz * 16;
-                int h = Math.abs(rx - rz) + 2;
-                for (int y = 0; y <= h; y++) {
-                    if (y < h - 4) c.set(x, y, z, Blocks.STONE.getDefaultState());
-                    else if (y < h) c.set(x, y, z, Blocks.DIRT.getDefaultState());
-                    else {
-                        Random random = new Random(MathUtils.pack(rx, rz));
-                        random.nextFloat();
-                        random.nextFloat();
-                        random.nextFloat();
-                        random.nextFloat();
-                        c.set(x, y, z, Blocks.GRASS.getDefaultState().with(GrassBlock.SNOWED, random.nextBoolean()));
-                    }
-                }
+                Biome b = Biomes.BIOMES.get(biomes[x][z]);
+                c.set(x, 1, z, b.topBlock.getDefaultState());
             }
         }
         return c;
