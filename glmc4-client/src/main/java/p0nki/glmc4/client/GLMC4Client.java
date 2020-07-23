@@ -133,7 +133,8 @@ public class GLMC4Client {
     }
 
     public static Vector3f extrapolateEntityPosition(Entity entity) {
-        return new Vector3f(entity.getPosition()).add(new Vector3f(entity.getVelocity()).mul(0.0F * (System.currentTimeMillis() - GLMC4Client.getLastUpdateTime(entity.getUuid())) / 1000.0F));
+        return new Vector3f(entity.getPosition());
+//        return new Vector3f(entity.getPosition()).add(new Vector3f(entity.getVelocity()).mul(0.0F * (System.currentTimeMillis() - GLMC4Client.getLastUpdateTime(entity.getUuid())) / 1000.0F));
     }
 
     private static void initializeClient() {
@@ -192,7 +193,7 @@ public class GLMC4Client {
             EntityRenderer<?> renderer = EntityRenderers.REGISTRY.get(identifier).getValue();
             renderer.render(context, entity);
         }
-        textRenderer.renderString(-1, 1 - 0.075F, 0.075F, String.format("GLMinecraft4\nFPS: %s", MCWindow.getFps()));
+        textRenderer.renderString(-1, 1 - 0.075F, 0.075F, String.format("GLMinecraft4\nFPS: %s\n Looking: %s", MCWindow.getFps(), lookDir));
 
         packetListener.tick();
     }

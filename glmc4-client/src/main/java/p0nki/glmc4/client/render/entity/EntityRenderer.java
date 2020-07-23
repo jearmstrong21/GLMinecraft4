@@ -48,7 +48,10 @@ public abstract class EntityRenderer<E extends Entity> {
     public final void render(WorldRenderContext context, Entity entity) {
         renderType(context, (E) entity, GLMC4Client.extrapolateEntityPosition(entity));
         if (ClientSettings.RENDER_HITBOXES) {
-            GLMC4Client.debugRenderer3D.renderCube(context, ClientSettings.HITBOX_COLOR, entity.getAABB().getPosition(), entity.getSize());
+            GLMC4Client.debugRenderer3D.renderCube(context, ClientSettings.HITBOX_COLOR, entity.getAABB().getV0(), entity.getSize());
+            entity.getAABB().listBlockPos().forEach(blockPos -> GLMC4Client.debugRenderer3D.renderCube(context,
+                    new Vector3f(0, 0, 1),
+                    new Vector3f(blockPos.getX(), blockPos.getY(), blockPos.getZ()), new Vector3f(1)));
         }
     }
 

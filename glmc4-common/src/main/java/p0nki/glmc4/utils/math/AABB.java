@@ -2,39 +2,45 @@ package p0nki.glmc4.utils.math;
 
 import org.joml.Vector3f;
 
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AABB {
 
-    private final Vector3f position;
-    private final Vector3f size;
+    private final Vector3f v0;
+    private final Vector3f v1;
 
     public AABB(Vector3f position, Vector3f size) {
-        this.position = new Vector3f(position);
-        this.size = new Vector3f(size);
+        this.v0 = new Vector3f(position);
+        this.v1 = new Vector3f(size);
     }
 
-    public AABB(float x, float y, float z, float w, float h, float d) {
-        this(new Vector3f(x, y, z), new Vector3f(w, h, d));
+    public AABB(float x0, float y0, float z0, float x1, float y1, float z1) {
+        v0 = new Vector3f(x0, y0, z0);
+        v1 = new Vector3f(x1, y1, z1);
     }
 
-    public Stream<BlockPos> streamBlockPos() {
-        Stream.Builder<BlockPos> builder = Stream.builder();
-        for (int x = (int) position.x; x < position.x + size.x; x++) {
-            for (int y = (int) position.y; y < position.y + size.y; y++) {
-                for (int z = (int) position.z; z < position.z + size.z; z++) {
-                    builder.accept(new BlockPos(x, y, z));
+    public List<BlockPos> listBlockPos() {
+        List<BlockPos> list = new ArrayList<>();
+        for (int x = (int) v0.x; x <= (int) v1.x; x++) {
+            for (int y = (int) v0.y; y <= (int) v1.y; y++) {
+                for (int z = (int) v0.z; z <= (int) v1.z; z++) {
+                    list.add(new BlockPos(x, y, z));
                 }
             }
         }
-        return builder.build();
+        return list;
     }
 
-    public Vector3f getPosition() {
-        return position;
+    public Vector3f getV0() {
+        return v0;
+    }
+
+    public Vector3f getV1() {
+        return v1;
     }
 
     public Vector3f getSize() {
-        return size;
+        return new Vector3f(v1.x - v0.x, v1.y - v0.y, v1.z - v0.z);
     }
 }

@@ -47,7 +47,7 @@ public class PlayerEntityRenderer extends EntityRenderer<PlayerEntity> {
         shader.setTexture("tex", texture, 0);
 
         MatrixStack stack = new MatrixStack(model -> shader.setMat4f("model", model));
-        stack.translate(extrapolatedPosition);
+        stack.translate(entity.getPosition());
 
         stack.push();
         stack.lookAt(entity.getFacingTowards());

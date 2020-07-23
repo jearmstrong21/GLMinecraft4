@@ -7,7 +7,9 @@ import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.tag.TagEquivalent;
 import p0nki.glmc4.utils.TagUtils;
 import p0nki.glmc4.utils.math.AABB;
+import p0nki.glmc4.utils.math.BlockPos;
 
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -34,7 +36,16 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
     }
 
     public final AABB getAABB(Vector3f testPosition) {
-        return new AABB(testPosition.x - getSize().x / 2, testPosition.y, testPosition.z - getSize().z / 2, getSize().x, getSize().y, getSize().z);
+        Vector3f size = getSize();
+        return new AABB(
+                testPosition.x - size.x / 2, testPosition.y, testPosition.z - size.z / 2,
+                testPosition.x + size.x / 2, testPosition.y + size.y, testPosition.z + size.z / 2
+        );
+//        return new AABB(
+//                testPosition.x - getSize().x / 2, testPosition.y, testPosition.z - getSize().z / 2,
+//                testPosition.x + getSize().x / 2, testPosition.y + getSize().y, testPosition.z + getSize().z / 2
+//        );
+//        return new AABB(testPosition.x, testPosition.y, testPosition.z, testPosition.x + getSize().x, testPosition.y + getSize().y, testPosition.z + getSize().z);
     }
 
     public Entity(EntityType<?> type, CompoundTag tag) {
@@ -52,7 +63,13 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
     }
 
     public boolean isValidPosition(Vector3f testPosition) {
-        return getAABB(testPosition).streamBlockPos().allMatch(blockPos -> MinecraftServer.INSTANCE.getServerWorld().get(blockPos).getBlock() == Blocks.AIR);
+        List<BlockPos> blockPosList = getAABB(testPosition).listBlockPos();
+        for (BlockPos p : blockPosList) {
+            if (MinecraftServer.INSTANCE.getServerWorld().get(p).getBlock() != Blocks.AIR) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public final EntityType<?> getType() {
