@@ -181,8 +181,6 @@ public class GLMC4Client {
         for (Map.Entry<Vector2i, Mesh> chunk : meshes.entrySet()) {
             int x = 16 * chunk.getKey().x;
             int z = 16 * chunk.getKey().y;
-//            if (x <= 0) x -= 1;
-//            if (z <= 0) z -= 1;
             shader.setFloat("x", x);
             shader.setFloat("z", z);
             chunk.getValue().triangles();

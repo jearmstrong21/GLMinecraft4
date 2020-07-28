@@ -63,6 +63,23 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
 //        }
         position.add(new Vector3f(verifyMotion(velocity, 0.05F)).mul(0.05F));
 //        velocity.y += 0.1F;
+
+        StringBuilder str = new StringBuilder();
+        final int x0 = (int) position.x;
+        final int y0 = (int) position.y;
+        final int z0 = (int) position.z;
+        final int x1 = (int) (position.x + getSize().x);
+        final int y1 = (int) (position.y + getSize().y);
+        final int z1 = (int) (position.z + getSize().z);
+        for (int x = x0; x <= x1; x++) {
+            for (int y = y0; y <= y1; y++) {
+                for (int z = z0; z <= z1; z++) {
+                    str.append(x).append(" ").append(y).append(" ").append(z).append(" ").append(MinecraftServer.INSTANCE.getServerWorld().get(new Vector3i(x, y, z))).append("\n");
+                }
+            }
+        }
+        str.append(position);
+        System.out.println(str);
     }
 
     public final boolean isValidPosition(Vector3f testPosition) {

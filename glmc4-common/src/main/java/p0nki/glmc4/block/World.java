@@ -21,24 +21,6 @@ public interface World {
         return new Vector2i(cx, cz);
     }
 
-//
-//    static int getCoordinateInChunk(int worldCoordinate) {
-//        worldCoordinate %= 16;
-//        return worldCoordinate < 0 ? worldCoordinate + 16 : worldCoordinate;
-//    }
-//
-//    static Vector3i getCoordinateInChunk(Vector3i chunkCoordinate) {
-//        return new Vector3i(getCoordinateInChunk(chunkCoordinate.x), chunkCoordinate.y, getCoordinateInChunk(chunkCoordinate.z));
-//    }
-//
-//    static int getChunkCoordinate(int worldCoordinate) {
-//        return (worldCoordinate - getCoordinateInChunk(worldCoordinate)) / 16;
-//    }
-//
-//    static Vector2i getChunkCoordinate(Vector3i blockPos) {
-//        return new Vector2i(getChunkCoordinate(blockPos.x), getChunkCoordinate(blockPos.z));
-//    }
-
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     boolean isChunkLoaded(Vector2i chunkCoordinate);
 
