@@ -2,14 +2,13 @@ package p0nki.glmc4.entity;
 
 import org.joml.Vector3f;
 import org.joml.Vector3i;
+import p0nki.glmc4.block.Block;
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.server.MinecraftServer;
 import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.tag.TagEquivalent;
 import p0nki.glmc4.utils.TagUtils;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -29,22 +28,6 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
         this.facingTowards = new Vector3f(0, 0, -1);
         this.lookingAt = new Vector3f(0, 0, -1);
         this.uuid = uuid;
-    }
-
-    public static List<Vector3i> listBlockPos(Vector3f position, Vector3f size) {
-        List<Vector3i> list = new ArrayList<>();
-        for (int x = (int) position.x; x <= (int) (position.x + size.x); x++) {
-            for (int y = (int) position.y; y <= (int) (position.y + size.y); y++) {
-                for (int z = (int) position.z; z <= (int) (position.z + size.z); z++) {
-                    list.add(new Vector3i(x, y, z));
-                }
-            }
-        }
-        return list;
-    }
-
-    public List<Vector3i> listBlockPos() {
-        return listBlockPos(position, getSize());
     }
 
     public Entity(EntityType<?> type, CompoundTag tag) {
@@ -83,10 +66,24 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
     }
 
     public final boolean isValidPosition(Vector3f testPosition) {
-        List<Vector3i> blockPosList = listBlockPos(testPosition, getSize());
-        for (Vector3i p : blockPosList) {
-            if (MinecraftServer.INSTANCE.getServerWorld().get(p).getBlock() != Blocks.AIR) {
-                return false;
+        final int x0 = (int) testPosition.x;
+        final int y0 = (int) testPosition.y;
+        final int z0 = (int) testPosition.z;
+        final int x1 = (int) (testPosition.x + getSize().x);
+        final int y1 = (int) (testPosition.y + getSize().y);
+        final int z1 = (int) (testPosition.z + getSize().z);
+        for (int x = x0; x <= x1; x++) {
+            for (int y = y0; y <= y1; y++) {
+                for (int z = z0; z <= z1; z++) {
+//                    boolean dx = x < 0;
+//                    boolean dz = z < 0;
+//                    if (dx) x--;
+//                    if (dz) z--;
+                    Block block = MinecraftServer.INSTANCE.getServerWorld().get(new Vector3i(x, y, z)).getBlock();
+//                    if (dx) x++;
+//                    if (dz) z++;
+                    if (block != Blocks.AIR) return false;
+                }
             }
         }
         return true;

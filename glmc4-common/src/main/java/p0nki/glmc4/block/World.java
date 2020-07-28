@@ -14,8 +14,11 @@ public interface World {
     }
 
     static Vector2i getChunkCoordinate(Vector2i worldPos) {
-        Vector2i c = getCoordinateInChunk(worldPos);
-        return new Vector2i((worldPos.x - c.x) / 16, (worldPos.y - c.y) / 16);
+        int cx = worldPos.x / 16;
+        int cz = worldPos.y / 16;
+        if (worldPos.x < 0) cx--;
+        if (worldPos.y < 0) cz--;
+        return new Vector2i(cx, cz);
     }
 
 //
