@@ -1,57 +1,65 @@
 package p0nki.glmc4.block;
 
 import p0nki.glmc4.state.Property;
-import p0nki.glmc4.utils.math.MathUtils;
+
+import javax.annotation.CheckReturnValue;
 
 public class BlockState {
 
-    private final int id;
-    private int meta;
+    private final long value;
 
     public BlockState(long value) {
-        this.id = MathUtils.unpackFirst(value);
-        this.meta = MathUtils.unpackSecond(value);
+        this.value = value;
     }
 
     private BlockState(int id, int meta) {
-        this.id = id;
-        this.meta = meta;
+        this.value = (((long) id) << 32) | (meta & 0xffffffffL);
     }
 
+    @CheckReturnValue
+    public int getId() {
+        return (int) (value >> 32);
+    }
+
+    @CheckReturnValue
     public int getMeta() {
-        return meta;
+        return (int) value;
     }
 
+    @CheckReturnValue
     public BlockState copy() {
-        return new BlockState(id, meta);
+        return new BlockState(value);
     }
 
+    @CheckReturnValue
     public <T> BlockState with(Property<T> property, T value) {
-        meta = getBlock().getSchema().set(meta, property, value);
-        return this;
+        return new BlockState(getId(), getBlock().getSchema().set(getMeta(), property, value));
     }
 
+    @CheckReturnValue
     public <T> T get(Property<T> property) {
-        return getBlock().getSchema().get(meta, property);
+        return getBlock().getSchema().get(getMeta(), property);
     }
 
     @SuppressWarnings("unchecked")
+    @CheckReturnValue
     public BlockState withUnsafe(@SuppressWarnings("rawtypes") Property property, Object value) {
-        meta = getBlock().getSchema().set(meta, property, value);
-        return this;
+        return new BlockState(getId(), getBlock().getSchema().set(getMeta(), property, value));
     }
 
     @Override
     public String toString() {
-        return Blocks.REGISTRY.get(id).getKey() + Blocks.REGISTRY.get(id).getValue().getSchema().toString(meta);
+        return Blocks.REGISTRY.get(getId()).getKey() + Blocks.REGISTRY.get(getId()).getValue().getSchema().toString(getMeta());
     }
 
+    @CheckReturnValue
     public Block getBlock() {
-        return Blocks.REGISTRY.get(id).getValue();
+        return Blocks.REGISTRY.get(getId()).getValue();
     }
 
+    @CheckReturnValue
     public long toLong() {
-        return MathUtils.pack(id, meta);
+        return value;
     }
 
 }

@@ -30,7 +30,7 @@ public abstract class Block implements AfterRegisterCallback {
         schema.forEach(objects -> {
             BlockState state = getDefaultState();
             for (int i = 0; i < objects.size(); i++) {
-                state.withUnsafe(schema.getProperties().get(i), objects.get(i));
+                state = state.withUnsafe(schema.getProperties().get(i), objects.get(i));
             }
             states.add(state);
         });

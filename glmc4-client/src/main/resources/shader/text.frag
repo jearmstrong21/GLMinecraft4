@@ -9,7 +9,7 @@ uniform sampler2D tex;
 void main(){
     //    fc=vec4(1, 0, 1, 1);
     bool b=texture(tex, uv).x>0.5;
-    if (b)fc=vec4(0, 0, 0, 1);
+    if (b)fc=vec4(vec3(1), 1);
     else discard;
     //    fc=vec4(uv, 0, 1);
 }

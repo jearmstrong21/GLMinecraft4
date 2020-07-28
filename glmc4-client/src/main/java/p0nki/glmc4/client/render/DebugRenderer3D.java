@@ -8,10 +8,10 @@ import p0nki.glmc4.utils.ListUtils;
 
 import java.util.List;
 
-public class DebugRenderer3D {
+public final class DebugRenderer3D {
 
-    private Shader shader;
-    private Mesh cube;
+    private final Shader shader;
+    private final Mesh cube;
 
     public DebugRenderer3D() {
         shader = Shader.create("debug3d");

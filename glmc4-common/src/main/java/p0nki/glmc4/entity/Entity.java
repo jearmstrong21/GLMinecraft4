@@ -1,14 +1,14 @@
 package p0nki.glmc4.entity;
 
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.server.MinecraftServer;
 import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.tag.TagEquivalent;
 import p0nki.glmc4.utils.TagUtils;
-import p0nki.glmc4.utils.math.AABB;
-import p0nki.glmc4.utils.math.BlockPos;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -31,21 +31,20 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
         this.uuid = uuid;
     }
 
-    public final AABB getAABB() {
-        return getAABB(position);
+    public static List<Vector3i> listBlockPos(Vector3f position, Vector3f size) {
+        List<Vector3i> list = new ArrayList<>();
+        for (int x = (int) position.x; x <= (int) (position.x + size.x); x++) {
+            for (int y = (int) position.y; y <= (int) (position.y + size.y); y++) {
+                for (int z = (int) position.z; z <= (int) (position.z + size.z); z++) {
+                    list.add(new Vector3i(x, y, z));
+                }
+            }
+        }
+        return list;
     }
 
-    public final AABB getAABB(Vector3f testPosition) {
-        Vector3f size = getSize();
-        return new AABB(
-                testPosition.x - size.x / 2, testPosition.y, testPosition.z - size.z / 2,
-                testPosition.x + size.x / 2, testPosition.y + size.y, testPosition.z + size.z / 2
-        );
-//        return new AABB(
-//                testPosition.x - getSize().x / 2, testPosition.y, testPosition.z - getSize().z / 2,
-//                testPosition.x + getSize().x / 2, testPosition.y + getSize().y, testPosition.z + getSize().z / 2
-//        );
-//        return new AABB(testPosition.x, testPosition.y, testPosition.z, testPosition.x + getSize().x, testPosition.y + getSize().y, testPosition.z + getSize().z);
+    public List<Vector3i> listBlockPos() {
+        return listBlockPos(position, getSize());
     }
 
     public Entity(EntityType<?> type, CompoundTag tag) {
@@ -53,18 +52,39 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
         fromTag(tag);
     }
 
+    private Vector3f verifyMotion(Vector3f dir, float dt) {
+        if (dir.x == 0 && dir.y == 0 && dir.z == 0) return dir;
+        Vector3f res = new Vector3f(dir);
+        if (!isValidPosition(new Vector3f(position).add(dir.x * dt, 0, 0))) {
+            res.x = 0;
+        }
+        if (!isValidPosition(new Vector3f(position).add(0, 0, dir.z * dt))) {
+            res.z = 0;
+        }
+        if (!isValidPosition(new Vector3f(position).add(0, dir.y * dt, 0))) {
+            res.y = 0;
+        }
+        return res;
+    }
+
     public void tick(Random random) {
         if (velocity.x != 0 || velocity.z != 0) {
             facingTowards.set(new Vector3f(velocity.x, 0, velocity.z).normalize());
         }
-        if (!isValidPosition(new Vector3f(position).add(new Vector3f(velocity).mul(0.05F)))) return;
-        position.add(new Vector3f(velocity).mul(0.05F));
-        velocity.y += 0.1F;
+//        if (!isValidPosition(new Vector3f(position).add(new Vector3f(velocity).mul(0.05F)))) return;
+//        position.add(new Vector3f(velocity).mul(0.05F));
+//        final int I = 20;
+//        for (int i = 0; i < I; i++) {
+//            Vector3f effectiveMotion = verifyMotion(velocity, 0.05F / I);
+//            position.add(new Vector3f(effectiveMotion).mul(0.05F / I));
+//        }
+        position.add(new Vector3f(verifyMotion(velocity, 0.05F)).mul(0.05F));
+//        velocity.y += 0.1F;
     }
 
-    public boolean isValidPosition(Vector3f testPosition) {
-        List<BlockPos> blockPosList = getAABB(testPosition).listBlockPos();
-        for (BlockPos p : blockPosList) {
+    public final boolean isValidPosition(Vector3f testPosition) {
+        List<Vector3i> blockPosList = listBlockPos(testPosition, getSize());
+        for (Vector3i p : blockPosList) {
             if (MinecraftServer.INSTANCE.getServerWorld().get(p).getBlock() != Blocks.AIR) {
                 return false;
             }
@@ -80,6 +100,10 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
         return position;
     }
 
+    public final Vector3f getEyePosition() {
+        return new Vector3f(position.x + getSize().x / 2, position.y + type.getEyeHeight(), position.z + getSize().z / 2);
+    }
+
     public final Vector3f getVelocity() {
         return velocity;
     }
@@ -88,7 +112,7 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
         return facingTowards;
     }
 
-    public Vector3f getLookingAt() {
+    public final Vector3f getLookingAt() {
         return lookingAt;
     }
 

@@ -3,7 +3,6 @@ package p0nki.glmc4.client.render.entity.renderers;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
 import p0nki.glmc4.client.GLMC4Client;
 import p0nki.glmc4.client.gl.Mesh;
 import p0nki.glmc4.client.gl.Shader;
@@ -41,13 +40,14 @@ public class PlayerEntityRenderer extends EntityRenderer<PlayerEntity> {
     }
 
     @Override
-    protected void renderType(WorldRenderContext context, PlayerEntity entity, Vector3f extrapolatedPosition) {
+    protected void renderType(WorldRenderContext context, PlayerEntity entity) {
         shader.use();
         shader.set(context);
         shader.setTexture("tex", texture, 0);
 
         MatrixStack stack = new MatrixStack(model -> shader.setMat4f("model", model));
         stack.translate(entity.getPosition());
+        stack.translate(entity.getSize().x / 2, 0, entity.getSize().z / 2);
 
         stack.push();
         stack.lookAt(entity.getFacingTowards());

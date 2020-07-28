@@ -12,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import org.joml.Matrix4f;
+import org.joml.Vector2i;
 import org.joml.Vector3f;
 import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.block.Blocks;
@@ -59,8 +60,8 @@ public class GLMC4Client {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Marker SOCKET = MarkerManager.getMarker("SOCKET");
     private static final Marker RENDER = MarkerManager.getMarker("RENDER");
-    private static final Map<Long, Chunk> chunks = new HashMap<>();
-    private static final Map<Long, Mesh> meshes = new HashMap<>();
+    private static final Map<Vector2i, Chunk> chunks = new HashMap<>();
+    private static final Map<Vector2i, Mesh> meshes = new HashMap<>();
     private final static Set<Identifier> warnedIdentifiers = new HashSet<>();
     private final static Lock chunkLock = new ReentrantLock();
     private static ClientPacketListener packetListener;
@@ -96,7 +97,7 @@ public class GLMC4Client {
 
     public static void onLoadChunk(int x, int z, Chunk chunk) {
         chunkLock.lock();
-        chunks.put(MathUtils.pack(x, z), chunk);
+        chunks.put(new Vector2i(x, z), chunk);
         chunkLock.unlock();
     }
 
@@ -132,11 +133,6 @@ public class GLMC4Client {
         return data;
     }
 
-    public static Vector3f extrapolateEntityPosition(Entity entity) {
-        return new Vector3f(entity.getPosition());
-//        return new Vector3f(entity.getPosition()).add(new Vector3f(entity.getVelocity()).mul(0.0F * (System.currentTimeMillis() - GLMC4Client.getLastUpdateTime(entity.getUuid())) / 1000.0F));
-    }
-
     private static void initializeClient() {
         MCWindow.captureMouse();
         shader = Shader.create("chunk");
@@ -162,17 +158,19 @@ public class GLMC4Client {
         if (packetListener == null) return;
         if (packetListener.getPlayer() == null) return;
         if (!entities.containsKey(packetListener.getPlayer().getUuid())) return;
-        float t = 0.5F;
         Matrix4f perspective = new Matrix4f().perspective((float) Math.toRadians(80), 1.0F, 0.001F, 300);
         Entity thisEntity = entities.get(packetListener.getPlayer().getUuid());
-//        Matrix4f view = new Matrix4f().lookAt(extrapolateEntityPosition(thisEntity), new Vector3f(thisEntity.getPosition()).add(lookDir), new Vector3f(0, 1, 0));
-        Matrix4f view = new Matrix4f().lookAt(extrapolateEntityPosition(thisEntity).add(0, thisEntity.getType().getEyeHeight(), 0).sub(new Vector3f(lookDir).mul(3)), new Vector3f(thisEntity.getPosition()).add(lookDir), new Vector3f(0, 1, 0));
+        Matrix4f view = new Matrix4f().lookAt(
+                new Vector3f(thisEntity.getEyePosition()).sub(new Vector3f(thisEntity.getLookingAt()).mul(7)),
+                new Vector3f(thisEntity.getEyePosition()),
+                new Vector3f(0, 1, 0)
+        );
         WorldRenderContext context = new WorldRenderContext(perspective, view);
         shader.use();
         shader.setTexture("tex", texture, 0);
         shader.set(context);
         if (chunkLock.tryLock()) {
-            for (Map.Entry<Long, Chunk> chunk : chunks.entrySet()) {
+            for (Map.Entry<Vector2i, Chunk> chunk : chunks.entrySet()) {
                 meshes.put(chunk.getKey(), new Mesh(mesh(chunk.getValue())));
             }
             chunks.clear();
@@ -180,9 +178,13 @@ public class GLMC4Client {
         } else {
             LOGGER.trace(RENDER, "Unable to obtain chunk lock. Will attempt next frame");
         }
-        for (Map.Entry<Long, Mesh> chunk : meshes.entrySet()) {
-            shader.setFloat("x", 16 * MathUtils.unpackFirst(chunk.getKey()));
-            shader.setFloat("z", 16 * MathUtils.unpackSecond(chunk.getKey()));
+        for (Map.Entry<Vector2i, Mesh> chunk : meshes.entrySet()) {
+            int x = 16 * chunk.getKey().x;
+            int z = 16 * chunk.getKey().y;
+//            if (x <= 0) x -= 1;
+//            if (z <= 0) z -= 1;
+            shader.setFloat("x", x);
+            shader.setFloat("z", z);
             chunk.getValue().triangles();
         }
 
@@ -193,7 +195,7 @@ public class GLMC4Client {
             EntityRenderer<?> renderer = EntityRenderers.REGISTRY.get(identifier).getValue();
             renderer.render(context, entity);
         }
-        textRenderer.renderString(-1, 1 - 0.075F, 0.075F, String.format("GLMinecraft4\nFPS: %s\n Looking: %s", MCWindow.getFps(), lookDir));
+        textRenderer.renderString(-1, 1 - 0.075F, 0.075F, String.format("GLMinecraft4\nFPS: %s\nPosition: %s\nLooking: %s", MCWindow.getFps(), thisEntity.getPosition(), lookDir));
 
         packetListener.tick();
     }

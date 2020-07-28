@@ -55,7 +55,7 @@ public class MinecraftServer {
     public void onJoin(ServerPacketListener listener) {
         if (listeners.containsValue(listener)) throw new IllegalArgumentException("Cannot join listener twice");
         ServerPlayer player = new ServerPlayer(UUID.randomUUID(), Words.generateUnique());
-        PlayerEntity playerEntity = new PlayerEntity(new Vector3f((float) Math.random() * 10 - 5, 15, (float) Math.random() * 10 - 5), player);
+        PlayerEntity playerEntity = new PlayerEntity(new Vector3f(0.5F, 15, 0.3F), player);
         listener.setPlayer(player);
         listener.setPlayerEntity(playerEntity);
         listener.getConnection().write(new PacketS2CHello(player, new ArrayList<>(players.values()), new ArrayList<>(entities.values())));

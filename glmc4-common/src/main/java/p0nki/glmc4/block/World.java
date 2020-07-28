@@ -1,33 +1,47 @@
 package p0nki.glmc4.block;
 
 import org.joml.Vector2i;
-import p0nki.glmc4.utils.math.BlockPos;
+import org.joml.Vector3i;
 
 public interface World {
 
-    static int getCoordinateInChunk(int worldCoordinate) {
-        worldCoordinate %= 16;
-        return worldCoordinate < 0 ? worldCoordinate + 16 : worldCoordinate;
+    static Vector2i getCoordinateInChunk(Vector2i worldPos) {
+        int x = worldPos.x % 16;
+        int y = worldPos.y % 16;
+        if (x < 0) x += 16;
+        if (y < 0) y += 16;
+        return new Vector2i(x, y);
     }
 
-    static BlockPos getCoordinateInChunk(BlockPos chunkCoordinate) {
-        return new BlockPos(getCoordinateInChunk(chunkCoordinate.getX()), chunkCoordinate.getY(), getCoordinateInChunk(chunkCoordinate.getZ()));
+    static Vector2i getChunkCoordinate(Vector2i worldPos) {
+        Vector2i c = getCoordinateInChunk(worldPos);
+        return new Vector2i((worldPos.x - c.x) / 16, (worldPos.y - c.y) / 16);
     }
 
-    static int getChunkCoordinate(int worldCoordinate) {
-        return (worldCoordinate - getCoordinateInChunk(worldCoordinate)) / 16;
-    }
-
-    static Vector2i getChunkCoordinate(BlockPos blockPos) {
-        return new Vector2i(getChunkCoordinate(blockPos.getX()), getChunkCoordinate(blockPos.getZ()));
-    }
+//
+//    static int getCoordinateInChunk(int worldCoordinate) {
+//        worldCoordinate %= 16;
+//        return worldCoordinate < 0 ? worldCoordinate + 16 : worldCoordinate;
+//    }
+//
+//    static Vector3i getCoordinateInChunk(Vector3i chunkCoordinate) {
+//        return new Vector3i(getCoordinateInChunk(chunkCoordinate.x), chunkCoordinate.y, getCoordinateInChunk(chunkCoordinate.z));
+//    }
+//
+//    static int getChunkCoordinate(int worldCoordinate) {
+//        return (worldCoordinate - getCoordinateInChunk(worldCoordinate)) / 16;
+//    }
+//
+//    static Vector2i getChunkCoordinate(Vector3i blockPos) {
+//        return new Vector2i(getChunkCoordinate(blockPos.x), getChunkCoordinate(blockPos.z));
+//    }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     boolean isChunkLoaded(Vector2i chunkCoordinate);
 
     boolean isClient();
 
-    BlockState get(BlockPos blockPos);
+    BlockState get(Vector3i blockPos);
 
     Chunk getChunk(Vector2i chunkCoordinate);
 

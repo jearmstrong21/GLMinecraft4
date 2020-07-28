@@ -42,16 +42,21 @@ public abstract class EntityRenderer<E extends Entity> {
 
     public abstract void initialize();
 
-    protected abstract void renderType(WorldRenderContext context, E entity, Vector3f extrapolatedPosition);
+    protected abstract void renderType(WorldRenderContext context, E entity);
 
     @SuppressWarnings("unchecked") // :sunglasses:
     public final void render(WorldRenderContext context, Entity entity) {
-        renderType(context, (E) entity, GLMC4Client.extrapolateEntityPosition(entity));
+        renderType(context, (E) entity);
         if (ClientSettings.RENDER_HITBOXES) {
-            GLMC4Client.debugRenderer3D.renderCube(context, ClientSettings.HITBOX_COLOR, entity.getAABB().getV0(), entity.getSize());
-            entity.getAABB().listBlockPos().forEach(blockPos -> GLMC4Client.debugRenderer3D.renderCube(context,
-                    new Vector3f(0, 0, 1),
-                    new Vector3f(blockPos.getX(), blockPos.getY(), blockPos.getZ()), new Vector3f(1)));
+            GLMC4Client.debugRenderer3D.renderCube(context, ClientSettings.HITBOX_COLOR,
+                    entity.getPosition(),
+                    entity.getSize()
+            );
+//            entity.listBlockPos().forEach(blockPos -> GLMC4Client.debugRenderer3D.renderCube(context,
+//                    new Vector3f(0, 0, 1), // color
+//                    new Vector3f(blockPos), // pos
+//                    new Vector3f(1)) // size
+//            );
         }
     }
 

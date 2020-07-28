@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 
 import static org.lwjgl.opengl.GL33.*;
 
-public class Shader {
+public final class Shader {
 
     private final int shader;
 
