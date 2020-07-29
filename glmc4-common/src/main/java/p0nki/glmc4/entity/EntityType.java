@@ -1,10 +1,12 @@
 package p0nki.glmc4.entity;
 
 import org.joml.Vector3f;
+import p0nki.glmc4.registry.Registrable;
+import p0nki.glmc4.registry.Registry;
 import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.utils.Identifier;
 
-public class EntityType<E extends Entity> {
+public class EntityType<E extends Entity> extends Registrable<EntityType<?>> {
 
     public static Entity from(CompoundTag tag) {
         Identifier type = tag.getIdentifier("type");
@@ -34,6 +36,16 @@ public class EntityType<E extends Entity> {
 
     public Vector3f getSize() {
         return size;
+    }
+
+    @Override
+    public Registry<EntityType<?>> getRegistry() {
+        return EntityTypes.REGISTRY;
+    }
+
+    @Override
+    public EntityType<E> getValue() {
+        return this;
     }
 
     public interface Factory<E extends Entity> {

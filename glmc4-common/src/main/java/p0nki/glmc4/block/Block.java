@@ -1,6 +1,8 @@
 package p0nki.glmc4.block;
 
 import p0nki.glmc4.registry.AfterRegisterCallback;
+import p0nki.glmc4.registry.Registrable;
+import p0nki.glmc4.registry.Registry;
 import p0nki.glmc4.state.PropertySchema;
 import p0nki.glmc4.utils.Identifier;
 
@@ -8,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class Block implements AfterRegisterCallback {
+public abstract class Block extends Registrable<Block> implements AfterRegisterCallback {
 
     private final PropertySchema schema;
     private List<BlockState> states;
@@ -16,6 +18,16 @@ public abstract class Block implements AfterRegisterCallback {
     protected Block() {
         schema = new PropertySchema();
         initProperties();
+    }
+
+    @Override
+    public Registry<Block> getRegistry() {
+        return Blocks.REGISTRY;
+    }
+
+    @Override
+    public Block getValue() {
+        return this;
     }
 
     @Override

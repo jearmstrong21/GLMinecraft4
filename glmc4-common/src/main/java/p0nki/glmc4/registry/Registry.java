@@ -5,7 +5,7 @@ import p0nki.glmc4.utils.Identifier;
 
 import java.util.*;
 
-public class Registry<T> {
+public class Registry<T extends Registrable<T>> {
 
     private final Map<Identifier, Entry<T>> identifierMap;
     private final Map<T, Entry<T>> valueMap;

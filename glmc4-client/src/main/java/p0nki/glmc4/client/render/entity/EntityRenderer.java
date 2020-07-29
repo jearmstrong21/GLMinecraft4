@@ -7,8 +7,20 @@ import p0nki.glmc4.client.assets.AtlasPosition;
 import p0nki.glmc4.client.render.MeshData;
 import p0nki.glmc4.client.render.WorldRenderContext;
 import p0nki.glmc4.entity.Entity;
+import p0nki.glmc4.registry.Registrable;
+import p0nki.glmc4.registry.Registry;
 
-public abstract class EntityRenderer<E extends Entity> {
+public abstract class EntityRenderer<E extends Entity> extends Registrable<EntityRenderer<?>> {
+
+    @Override
+    public Registry<EntityRenderer<?>> getRegistry() {
+        return EntityRenderers.REGISTRY;
+    }
+
+    @Override
+    public EntityRenderer<?> getValue() {
+        return this;
+    }
 
     public static MeshData createCube(int x, int y, int width, int height, int depth, int texWidth, int texHeight, boolean centerY) {
         MeshData data = new MeshData();
