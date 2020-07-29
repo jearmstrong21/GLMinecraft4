@@ -3,6 +3,8 @@ package p0nki.glmc4.block;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
+import java.util.List;
+
 public interface World {
 
     static Vector2i getCoordinateInChunk(Vector2i worldPos) {
@@ -29,5 +31,7 @@ public interface World {
     BlockState get(Vector3i blockPos);
 
     Chunk getChunk(Vector2i chunkCoordinate);
+
+    List<Vector2i> getLoadedChunks();
 
 }
