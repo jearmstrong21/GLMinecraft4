@@ -7,6 +7,7 @@ import p0nki.glmc4.block.blocks.GrassBlock;
 import p0nki.glmc4.network.PacketByteBuf;
 import p0nki.glmc4.utils.math.BlockPos;
 import p0nki.glmc4.utils.math.MathUtils;
+import org.red.generator.*;
 
 import java.util.Random;
 
@@ -21,11 +22,22 @@ public class Chunk implements PacketByteBuf.Equivalent {
     public static Chunk generate(int cx, int cz) {
         Chunk c = new Chunk();
         var biomes = Generator.generate(seed, 16, 16, cx, cz);
+        IGenerator generator = new SimplexNoiseGenerator(0.05f, seed);
 
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
                 Biome b = Biomes.BIOMES.get(biomes[x][z]);
-                c.set(x, 1, z, b.topBlock.getDefaultState());
+                int genX = x + (16 * cx);
+                int genZ = z + (16 * cz);
+                try {
+                    int y = (int)generator.generate(genX, genZ);
+                    c.set(x, y, z, b.topBlock.getDefaultState());
+                    for (int i = y - 1; i > 0; i--) {
+                        c.set(x, i, z, Blocks.STONE.getDefaultState());
+                    }
+                } catch (Exception e) {
+                    System.err.println(e);
+                }
             }
         }
         return c;
