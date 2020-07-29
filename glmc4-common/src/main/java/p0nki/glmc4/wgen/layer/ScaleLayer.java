@@ -1,6 +1,6 @@
-package com.structbuilders.worldgen.layer;
+package p0nki.glmc4.wgen.layer;
 
-import com.structbuilders.worldgen.RandomContext;
+import p0nki.glmc4.wgen.RandomContext;
 
 public enum ScaleLayer implements ParentedLayer {
     NORMAL {
@@ -59,11 +59,11 @@ public enum ScaleLayer implements ParentedLayer {
         else {
             int zpl = parent.sample(x >> 1, (z >> 1) + 1);
             int zpl_rand = context.nextInt(2) == 0 ? center : zpl;
-            if (ox == 0 && oz == 1) return zpl_rand;
+            if (ox == 0) return zpl_rand;
             else {
                 int xpl = parent.sample((x >> 1) + 1, z >> 1);
                 int xpl_rand = context.nextInt(2) == 0 ? center : xpl;
-                if (ox == 1 && oz == 0) return xpl_rand;
+                if (oz == 0) return xpl_rand;
                 else {
                     int plpl = parent.sample((x >> 1) + 1, (z >> 1) + 1);
                     return sample(context, center, xpl, zpl, plpl);

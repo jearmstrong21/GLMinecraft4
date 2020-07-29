@@ -14,12 +14,12 @@ import java.util.UUID;
 
 public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
 
+    private final EntityType<?> type;
     private Vector3f position;
     private Vector3f velocity;
     private Vector3f facingTowards;
     private Vector3f lookingAt;
     private UUID uuid;
-    private final EntityType<?> type;
 
     public Entity(EntityType<?> type, Vector3f position, UUID uuid) {
         this.type = type;
@@ -82,6 +82,7 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
         System.out.println(str);
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public final boolean isValidPosition(Vector3f testPosition) {
         final int x0 = (int) testPosition.x;
         final int y0 = (int) testPosition.y;

@@ -1,4 +1,4 @@
-package com.structbuilders.worldgen;
+package p0nki.glmc4.wgen;
 
 import p0nki.glmc4.block.Block;
 
@@ -18,8 +18,8 @@ public class Biome {
         this.name = name;
         this.temp = temp;
         this.snow = snow;
-        this.color=new Color(red,green,blue).getRGB();
-        Biomes.BIOMES.put(id,this);
+        this.color = new Color(red, green, blue).getRGB();
+        Biomes.BIOMES.put(id, this);
         this.topBlock = topBlock;
     }
 

@@ -16,12 +16,9 @@ import java.util.*;
 
 public class MinecraftServer {
 
+    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Marker GAMELOOP = MarkerManager.getMarker("GAMELOOP");
     public static MinecraftServer INSTANCE;
-
-    private static Logger LOGGER = LogManager.getLogger();
-    private static Marker GAMELOOP = MarkerManager.getMarker("GAMELOOP");
-
-
     private final Map<UUID, ServerPlayer> players = new HashMap<>();
     private final Map<UUID, ServerPacketListener> listeners = new HashMap<>();
     private final Map<UUID, Entity> entities = new HashMap<>();

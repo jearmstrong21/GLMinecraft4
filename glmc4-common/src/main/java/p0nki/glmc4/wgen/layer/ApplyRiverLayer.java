@@ -1,7 +1,7 @@
-package com.structbuilders.worldgen.layer;
+package p0nki.glmc4.wgen.layer;
 
-import com.structbuilders.worldgen.Biomes;
-import com.structbuilders.worldgen.RandomContext;
+import p0nki.glmc4.wgen.Biomes;
+import p0nki.glmc4.wgen.RandomContext;
 
 public enum ApplyRiverLayer implements ParentedLayer {
     INSTANCE;

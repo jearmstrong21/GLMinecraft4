@@ -16,6 +16,10 @@ public class TestEntity extends Entity {
         this.color = color;
     }
 
+    public TestEntity(CompoundTag tag) {
+        super(EntityTypes.TEST, tag);
+    }
+
     @Override
     public void tick(Random random) {
         super.tick(random);
@@ -24,10 +28,6 @@ public class TestEntity extends Entity {
 
     public Vector3f getColor() {
         return color;
-    }
-
-    public TestEntity(CompoundTag tag) {
-        super(EntityTypes.TEST, tag);
     }
 
     @Override

@@ -1,15 +1,15 @@
-package com.structbuilders.worldgen.layer;
+package p0nki.glmc4.wgen.layer;
 
-import com.structbuilders.worldgen.RandomContext;
+import p0nki.glmc4.wgen.RandomContext;
 
 public enum ApplyIslandsLayer implements BiParentedLayer {
     INSTANCE;
 
     @Override
     public int sample(RandomContext context, LayerSampler a, LayerSampler b, int x, int z) {
-        int _a=a.sample(x,z);
-        int _b=b.sample(x,z);
-        if(!Layers.isOcean(_b))return _b;
+        int _a = a.sample(x, z);
+        int _b = b.sample(x, z);
+        if (!Layers.isOcean(_b)) return _b;
         return _a;
     }
 }

@@ -1,6 +1,6 @@
-package com.structbuilders.worldgen.layer;
+package p0nki.glmc4.wgen.layer;
 
-import com.structbuilders.worldgen.Utils;
+import p0nki.glmc4.wgen.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,16 +8,20 @@ import java.util.List;
 import java.util.Map;
 
 public class CachedLayerSampler implements LayerSampler {
-    private int cacheCapacity;
-    private List<Long> coords;
-    private Map<Long, Integer> cache;
-    private LayerSampler sampler;
+    private final int cacheCapacity;
+    private final List<Long> coords;
+    private final Map<Long, Integer> cache;
+    private final LayerSampler sampler;
 
     public CachedLayerSampler(int cacheCapacity, LayerSampler sampler) {
         this.cacheCapacity = cacheCapacity;
         this.sampler = sampler;
         coords = new ArrayList<>();
         cache = new HashMap<>();
+    }
+
+    public static CachedLayerSampler create(LayerSampler sampler) {
+        return new CachedLayerSampler(25, sampler);
     }
 
     @Override
@@ -32,9 +36,5 @@ public class CachedLayerSampler implements LayerSampler {
             coords.remove(0);
         }
         return i;
-    }
-
-    public static CachedLayerSampler create(LayerSampler sampler) {
-        return new CachedLayerSampler(25, sampler);
     }
 }

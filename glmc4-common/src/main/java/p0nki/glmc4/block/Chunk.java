@@ -1,16 +1,15 @@
 package p0nki.glmc4.block;
 
-import com.structbuilders.worldgen.Biome;
-import com.structbuilders.worldgen.Biomes;
-import com.structbuilders.worldgen.Generator;
 import org.joml.Vector3i;
-import org.red.generator.IGenerator;
-import org.red.generator.SimplexNoiseGenerator;
 import p0nki.glmc4.network.PacketByteBuf;
+import p0nki.glmc4.wgen.Biome;
+import p0nki.glmc4.wgen.Biomes;
+import p0nki.glmc4.wgen.Generator;
+import p0nki.glmc4.wgen.SimplexNoiseGenerator;
 
 public class Chunk implements PacketByteBuf.Equivalent {
-    private final long[][][] data;
     public static final long seed = System.currentTimeMillis();
+    private final long[][][] data;
 
     public Chunk() {
         data = new long[16][256][16];
@@ -18,23 +17,20 @@ public class Chunk implements PacketByteBuf.Equivalent {
 
     public static Chunk generate(int cx, int cz) {
         Chunk c = new Chunk();
-        var biomes = Generator.generate(seed, 16, 16, cx, cz);
-        IGenerator generator = new SimplexNoiseGenerator(0.05f, seed);
+        int[][] biomes = Generator.generate(seed, 16, 16, cx, cz);
+        SimplexNoiseGenerator generator = new SimplexNoiseGenerator(0.05f, seed);
 
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
                 Biome b = Biomes.BIOMES.get(biomes[x][z]);
                 int genX = x + (16 * cx);
                 int genZ = z + (16 * cz);
-                try {
-                    int y = (int) generator.generate(genX, genZ);
-                    c.set(x, y, z, b.topBlock.getDefaultState());
-                    for (int i = y - 1; i > 0; i--) {
-                        c.set(x, i, z, Blocks.STONE.getDefaultState());
-                    }
-                } catch (Exception e) {
-                    System.err.println(e);
+                int y = (int) (8 + 4 * generator.generate(genX, genZ));
+                c.set(x, y, z, b.topBlock.getDefaultState());
+                for (int i = y - 1; i > 0; i--) {
+                    c.set(x, i, z, Blocks.STONE.getDefaultState());
                 }
+
             }
         }
         return c;

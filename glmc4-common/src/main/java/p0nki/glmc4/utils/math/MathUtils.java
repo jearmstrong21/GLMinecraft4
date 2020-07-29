@@ -2,11 +2,11 @@ package p0nki.glmc4.utils.math;
 
 public class MathUtils {
 
+    public static float PI = (float) Math.PI;
+
     private MathUtils() {
 
     }
-
-    public static float PI = (float) Math.PI;
 
     public static float clamp(float t, float min, float max) {
         return Math.max(min, Math.min(max, t));

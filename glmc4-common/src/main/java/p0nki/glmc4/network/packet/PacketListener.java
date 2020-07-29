@@ -17,12 +17,12 @@ public abstract class PacketListener<L extends PacketListener<L>> {
         return connection;
     }
 
-    public ServerPlayer getPlayer() {
-        return player;
-    }
-
     public void setConnection(NetworkConnection<L> connection) {
         this.connection = connection;
+    }
+
+    public ServerPlayer getPlayer() {
+        return player;
     }
 
     public void setPlayer(ServerPlayer player) {

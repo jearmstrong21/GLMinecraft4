@@ -1,18 +1,10 @@
-package com.structbuilders.worldgen;
+package p0nki.glmc4.wgen;
 
-import com.structbuilders.worldgen.layer.LayerSampler;
-import com.structbuilders.worldgen.layer.Layers;
+import p0nki.glmc4.wgen.layer.LayerSampler;
+import p0nki.glmc4.wgen.layer.Layers;
 
 public class Generator {
-    /**
-     * generates shit
-     * @param seed the seed
-     * @param w width of chunk (usually 16)
-     * @param h height (z dir) of chunk (usually 16)
-     * @param cx chunk x
-     * @param cz chunk z
-     * @return chunk data or something idk
-     */
+
     public static int[][] generate(long seed, int w, int h, int cx, int cz) {
         LayerSampler sampler = Layers.build(seed, w, h);
         int[][] data = new int[w][h];

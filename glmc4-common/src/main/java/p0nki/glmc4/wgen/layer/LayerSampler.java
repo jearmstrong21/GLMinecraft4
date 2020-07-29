@@ -1,4 +1,4 @@
-package com.structbuilders.worldgen.layer;
+package p0nki.glmc4.wgen.layer;
 
 public interface LayerSampler {
 

@@ -1,23 +1,23 @@
-package com.structbuilders.worldgen.layer;
+package p0nki.glmc4.wgen.layer;
 
-import com.structbuilders.worldgen.Biomes;
-import com.structbuilders.worldgen.PerlinNoiseSampler;
-import com.structbuilders.worldgen.RandomContext;
+import p0nki.glmc4.wgen.Biomes;
+import p0nki.glmc4.wgen.PerlinNoiseSampler;
+import p0nki.glmc4.wgen.RandomContext;
 
 import java.util.Random;
 
 public class BiomeChooseLayer implements InitLayer {
 
     private final static int WARM = Biomes.BADLANDS.id, COLD = Biomes.MOUNTAINS.id, NORMAL = Biomes.PLAINS.id;
+    point[] points = new point[4];
 
     public BiomeChooseLayer(long seed) {
-        this.seed = seed;
         int r = 200;
         points[0] = new point(-r, -r);
         points[1] = new point(-r, +r);
         points[2] = new point(+r, -r);
         points[3] = new point(+r, +r);
-        Random rand = new Random(this.seed);
+        Random rand = new Random(seed);
         int d = 500;
         final int[][] temps = new int[][]{
                 {0, 1, 2, 3},
@@ -57,19 +57,6 @@ public class BiomeChooseLayer implements InitLayer {
         }
     }
 
-    class point {
-        int a, b, t;
-
-        public point(int a, int b) {
-            this.a = a;
-            this.b = b;
-        }
-    }
-
-    point[] points = new point[4];
-
-    private long seed;
-
     private double dist(int i, double x, double z) {
         return Math.sqrt((points[i].a - x) * (points[i].a - x) + (points[i].b - z) * (points[i].b - z));
     }
@@ -98,5 +85,14 @@ public class BiomeChooseLayer implements InitLayer {
             return Biomes.DEEP_OCEAN.id;
         }
         return points[best].t;
+    }
+
+    class point {
+        int a, b, t;
+
+        public point(int a, int b) {
+            this.a = a;
+            this.b = b;
+        }
     }
 }
