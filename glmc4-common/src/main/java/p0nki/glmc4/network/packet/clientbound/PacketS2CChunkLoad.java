@@ -1,15 +1,11 @@
 package p0nki.glmc4.network.packet.clientbound;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import p0nki.glmc4.block.Chunk;
 import p0nki.glmc4.network.PacketByteBuf;
 import p0nki.glmc4.network.packet.Packet;
 import p0nki.glmc4.network.packet.PacketTypes;
 
 public class PacketS2CChunkLoad extends Packet<ClientPacketListener> {
-
-    private static final Logger LOGGER = LogManager.getLogger();
 
     private int x;
     private int z;

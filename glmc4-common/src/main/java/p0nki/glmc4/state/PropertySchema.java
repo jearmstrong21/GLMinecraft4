@@ -24,6 +24,7 @@ public class PropertySchema {
         if (currentUsedBits >= 32) throw INVALID_PROPERTY;
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean hasProperty(Property<?> property) {
         return properties.contains(property);
     }

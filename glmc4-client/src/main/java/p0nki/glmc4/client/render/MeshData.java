@@ -54,7 +54,7 @@ public class MeshData {
         return this;
     }
 
-    public MeshData mult4(int buffer, Matrix4f matrix) {
+    public MeshData multiply4f(int buffer, Matrix4f matrix) {
         if (sizes.get(buffer) != 3) throw new AssertionError("Invalid buffer size");
         for (int i = 0; i < data.get(buffer).size(); i += 3) {
             Vector4f original = new Vector4f(data.get(buffer).get(i), data.get(buffer).get(i + 1), data.get(buffer).get(i + 2), 1);
@@ -66,6 +66,7 @@ public class MeshData {
         return this;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public MeshData append(MeshData other) {
         Objects.requireNonNull(other);
         if (other.data.size() != data.size()) throw new AssertionError("Invalid data");
@@ -84,6 +85,7 @@ public class MeshData {
         return this;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public MeshData appendBuffer2f(int buffer, List<Vector2f> data) {
         for (Vector2f v : data) {
             this.data.get(buffer).add(v.x);
@@ -92,11 +94,13 @@ public class MeshData {
         return this;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public MeshData addQuad(int buffer, Vector2f o, Vector2f a, Vector2f b) {
         appendBuffer2f(buffer, List.of(o, new Vector2f(o).add(a), new Vector2f(o).add(b), new Vector2f(o).add(a).add(b)));
         return this;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public MeshData addQuad(int buffer, AtlasPosition atlasPosition) {
         addQuad(buffer, new Vector2f(atlasPosition.x, atlasPosition.y), new Vector2f(atlasPosition.w, 0), new Vector2f(0, atlasPosition.h));
         return this;
@@ -144,11 +148,13 @@ public class MeshData {
         return this;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public MeshData addQuad(int buffer, Vector3f o, Vector3f a, Vector3f b) {
         appendBuffer3f(buffer, List.of(o, new Vector3f(o).add(a), new Vector3f(o).add(b), new Vector3f(o).add(a).add(b)));
         return this;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public MeshData appendBuffer3f(int buffer, List<Vector3f> data) {
         for (Vector3f v : data) {
             this.data.get(buffer).add(v.x);
@@ -164,6 +170,7 @@ public class MeshData {
         return this;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public MeshData appendTriOffset(List<Integer> tri) {
         appendTri(tri.stream().map(x -> x + maxReferredVertex).collect(Collectors.toList()));
         return this;

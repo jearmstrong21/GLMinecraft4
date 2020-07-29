@@ -65,8 +65,7 @@ public enum ScaleLayer implements ParentedLayer {
                 int xpl_rand = context.nextInt(2) == 0 ? center : xpl;
                 if (oz == 0) return xpl_rand;
                 else {
-                    int plpl = parent.sample((x >> 1) + 1, (z >> 1) + 1);
-                    return sample(context, center, xpl, zpl, plpl);
+                    return sample(context, center, xpl, zpl, parent.sample((x >> 1) + 1, (z >> 1) + 1));
                 }
             }
         }

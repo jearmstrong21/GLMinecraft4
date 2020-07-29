@@ -3,10 +3,11 @@ package p0nki.glmc4;
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.entity.EntityTypes;
 import p0nki.glmc4.network.packet.PacketTypes;
+import p0nki.glmc4.wgen.Biomes;
 
 import java.io.PrintStream;
 
-public class CommonBoostrap {
+public class CommonBootstrap {
 
     public static final PrintStream STDOUT;
     public static final PrintStream STDERR;
@@ -23,6 +24,7 @@ public class CommonBoostrap {
         PacketTypes.initialize();
         EntityTypes.initialize();
         Blocks.initialize();
+        Biomes.initialize();
     }
 
 }

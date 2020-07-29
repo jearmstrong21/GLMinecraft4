@@ -1,27 +1,50 @@
 package p0nki.glmc4.wgen;
 
 import p0nki.glmc4.block.Blocks;
-
-import java.util.HashMap;
-import java.util.Map;
+import p0nki.glmc4.registry.Registry;
+import p0nki.glmc4.utils.Identifier;
 
 public class Biomes {
 
-    public static final Biome OCEAN = new Biome(0, "OCEAN", 0, false, 0, 0, 112, Blocks.STONE);
-    public static final Biome PLAINS = new Biome(1, "PLAINS", 2, false, 141, 179, 96, Blocks.GRASS);
-    public static final Biome MOUNTAINS = new Biome(3, "MOUNTAINS", 2, false, 96, 96, 96, Blocks.GRASS);
-    public static final Biome RIVER = new Biome(7, "RIVER", 2, false, 0, 0, 255, Blocks.STONE);
-    public static final Biome FROZEN_OCEAN = new Biome(10, "FROZEN_OCEAN", 0, true, 112, 112, 214, Blocks.STONE);
-    public static final Biome BEACH = new Biome(16, "BEACH", 2, false, 250, 222, 85, Blocks.DIRT);
-    public static final Biome DEEP_OCEAN = new Biome(24, "DEEP_OCEAN", 0, false, 0, 0, 48, Blocks.STONE);
-    public static final Biome BADLANDS = new Biome(37, "BADLANDS", 3, false, 217, 69, 21, Blocks.CACTUS);
-    public static final Biome WARM_OCEAN = new Biome(44, "WARM_OCEAN", 0, false, 0, 0, 172, Blocks.STONE);
-    public static final Biome LUKEWARM_OCEAN = new Biome(45, "LUKEWARM_OCEAN", 0, false, 0, 0, 144, Blocks.STONE);
-    public static final Biome COLD_OCEAN = new Biome(46, "COLD_OCEAN", 0, false, 32, 32, 112, Blocks.STONE);
-    public static final Biome DEEP_WARM_OCEAN = new Biome(47, "DEEP_WARM_OCEAN", 0, false, 0, 0, 80, Blocks.STONE);
-    public static final Biome DEEP_LUKEWARM_OCEAN = new Biome(48, "DEEP_LUKEWARM_OCEAN", 0, false, 0, 0, 64, Blocks.STONE);
-    public static final Biome DEEP_COLD_OCEAN = new Biome(49, "DEEP_COLD_OCEAN", 0, false, 32, 32, 56, Blocks.STONE);
-    public static final Biome DEEP_FROZEN_OCEAN = new Biome(50, "DEEP_FROZEN_OCEAN", 0, false, 64, 64, 144, Blocks.STONE);
-    public static Map<Integer, Biome> BIOMES = new HashMap<>();
+    public static Registry<Biome> REGISTRY;
+
+    public static Biome OCEAN;
+    public static Biome PLAINS;
+    public static Biome MOUNTAINS;
+    public static Biome RIVER;
+    public static Biome FROZEN_OCEAN;
+    public static Biome BEACH;
+    public static Biome DEEP_OCEAN;
+    public static Biome BADLANDS;
+    public static Biome WARM_OCEAN;
+    public static Biome LUKEWARM_OCEAN;
+    public static Biome COLD_OCEAN;
+    public static Biome DEEP_WARM_OCEAN;
+    public static Biome DEEP_LUKEWARM_OCEAN;
+    public static Biome DEEP_COLD_OCEAN;
+    public static Biome DEEP_FROZEN_OCEAN;
+
+    private static void register(String name, Biome biome) {
+        REGISTRY.register(new Identifier("minecraft", name), biome);
+    }
+
+    public static void initialize() {
+        REGISTRY = new Registry<>();
+        register("ocean", OCEAN = new Biome(Blocks.STONE.getDefaultState()));
+        register("plains", PLAINS = new Biome(Blocks.GRASS.getDefaultState()));
+        register("mountains", MOUNTAINS = new Biome(Blocks.GRASS.getDefaultState()));
+        register("river", RIVER = new Biome(Blocks.STONE.getDefaultState()));
+        register("frozen_ocean", FROZEN_OCEAN = new Biome(Blocks.STONE.getDefaultState()));
+        register("beach", BEACH = new Biome(Blocks.DIRT.getDefaultState()));
+        register("deep_ocean", DEEP_OCEAN = new Biome(Blocks.STONE.getDefaultState()));
+        register("badlands", BADLANDS = new Biome(Blocks.CACTUS.getDefaultState()));
+        register("warm_ocean", WARM_OCEAN = new Biome(Blocks.STONE.getDefaultState()));
+        register("lukewarm_ocean", LUKEWARM_OCEAN = new Biome(Blocks.STONE.getDefaultState()));
+        register("cold_ocean", COLD_OCEAN = new Biome(Blocks.STONE.getDefaultState()));
+        register("deep_warm_ocean", DEEP_WARM_OCEAN = new Biome(Blocks.STONE.getDefaultState()));
+        register("deep_lukewarm_ocean", DEEP_LUKEWARM_OCEAN = new Biome(Blocks.STONE.getDefaultState()));
+        register("deep_cold_ocean", DEEP_COLD_OCEAN = new Biome(Blocks.STONE.getDefaultState()));
+        register("deep_frozen_ocean", DEEP_FROZEN_OCEAN = new Biome(Blocks.STONE.getDefaultState()));
+    }
 
 }

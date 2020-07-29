@@ -11,6 +11,6 @@ public enum ApplyRiverLayer implements ParentedLayer {
         boolean river = Math.abs(context.getNoiseSampler().sample(x / 80d, z / 80d, 7, 0, 0)) < 0.05;
 
         int biome = a.sample(x, z);
-        return !Layers.isOcean(biome) && river ? Biomes.RIVER.id : biome;
+        return !Layers.isOcean(biome) && river ? Biomes.RIVER.getIndex() : biome;
     }
 }

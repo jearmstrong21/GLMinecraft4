@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class TextureAssembler {
@@ -31,7 +32,7 @@ public class TextureAssembler {
     private TextureAssembler(Identifier identifier) {
         try {
             long start = System.currentTimeMillis();
-            identifiers = listFiles(new Identifier(identifier.getNamespace(), ""), Path.of(ClassLoader.getSystemClassLoader().getResource(identifier.getPath()).toURI()));
+            identifiers = listFiles(new Identifier(identifier.getNamespace(), ""), Path.of(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource(identifier.getPath())).toURI()));
             LOGGER.trace("{} identifiers found", identifiers.size());
             images = new HashMap<>();
             for (Identifier s : identifiers.keySet()) {

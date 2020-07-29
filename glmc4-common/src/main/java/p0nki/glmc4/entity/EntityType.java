@@ -2,8 +2,17 @@ package p0nki.glmc4.entity;
 
 import org.joml.Vector3f;
 import p0nki.glmc4.tag.CompoundTag;
+import p0nki.glmc4.utils.Identifier;
 
 public class EntityType<E extends Entity> {
+
+    public static Entity from(CompoundTag tag) {
+        Identifier type = tag.getIdentifier("type");
+        if (EntityTypes.REGISTRY.hasKey(type)) {
+            return EntityTypes.REGISTRY.get(type).getValue().create(tag);
+        }
+        throw new IllegalArgumentException("Illegal entity type " + type);
+    }
 
     private final float eyeHeight;
     private final Vector3f size;

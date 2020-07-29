@@ -1,7 +1,5 @@
 package p0nki.glmc4.client.render.entity.renderers;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.joml.Matrix4f;
 import p0nki.glmc4.client.GLMC4Client;
 import p0nki.glmc4.client.gl.Mesh;
@@ -16,8 +14,6 @@ import java.nio.file.Path;
 
 public class PlayerEntityRenderer extends EntityRenderer<PlayerEntity> {
 
-    private static final Logger LOGGER = LogManager.getLogger();
-
     private Shader shader;
     private Texture texture;
     private Mesh leftLeg;
@@ -31,12 +27,12 @@ public class PlayerEntityRenderer extends EntityRenderer<PlayerEntity> {
     public void initialize() {
         shader = Shader.create("entity");
         texture = new Texture(Path.of(GLMC4Client.resourcePath("entity"), "steve.png"));
-        head = new Mesh(createCube(0, 16, 8, 8, 8, 64, 64, true).mult4(0, new Matrix4f().scale(8.0F / 16.0F)));
-        body = new Mesh(createCube(16, 32, 8, 12, 4, 64, 64, false).mult4(0, new Matrix4f().scale(8.0F / 16.0F, 12.0F / 16.0F, 4.0F / 16.0F)));
-        leftLeg = new Mesh(createCube(0, 32, 4, 12, 4, 64, 64, false).mult4(0, new Matrix4f().scale(4.0F / 16.0F, 12.0F / 16.0F, 4.0F / 16.0F)));
-        rightLeg = new Mesh(createCube(16, 0, 4, 12, 4, 64, 64, false).mult4(0, new Matrix4f().scale(4.0F / 16.0F, 12.0F / 16.0F, 4.0F / 16.0F)));
-        leftArm = new Mesh(createCube(40, 32, 4, 12, 4, 64, 64, false).mult4(0, new Matrix4f().scale(4.0F / 16.0F, 12.0F / 16.0F, 4.0F / 16.0F)));
-        rightArm = new Mesh(createCube(32, 0, 4, 12, 4, 64, 64, false).mult4(0, new Matrix4f().scale(4.0F / 16.0F, 12.0F / 16.0F, 4.0F / 16.0F)));
+        head = new Mesh(createCube(0, 16, 8, 8, 8, 64, 64, true).multiply4f(0, new Matrix4f().scale(8.0F / 16.0F)));
+        body = new Mesh(createCube(16, 32, 8, 12, 4, 64, 64, false).multiply4f(0, new Matrix4f().scale(8.0F / 16.0F, 12.0F / 16.0F, 4.0F / 16.0F)));
+        leftLeg = new Mesh(createCube(0, 32, 4, 12, 4, 64, 64, false).multiply4f(0, new Matrix4f().scale(4.0F / 16.0F, 12.0F / 16.0F, 4.0F / 16.0F)));
+        rightLeg = new Mesh(createCube(16, 0, 4, 12, 4, 64, 64, false).multiply4f(0, new Matrix4f().scale(4.0F / 16.0F, 12.0F / 16.0F, 4.0F / 16.0F)));
+        leftArm = new Mesh(createCube(40, 32, 4, 12, 4, 64, 64, false).multiply4f(0, new Matrix4f().scale(4.0F / 16.0F, 12.0F / 16.0F, 4.0F / 16.0F)));
+        rightArm = new Mesh(createCube(32, 0, 4, 12, 4, 64, 64, false).multiply4f(0, new Matrix4f().scale(4.0F / 16.0F, 12.0F / 16.0F, 4.0F / 16.0F)));
     }
 
     @Override

@@ -8,7 +8,7 @@ public enum IslandLayer implements InitLayer {
 
     @Override
     public int sample(RandomContext context, int x, int z) {
-        if (context.nextInt(10) == 0) return Biomes.PLAINS.id;
+        if (context.nextInt(10) == 0) return Biomes.PLAINS.getIndex();
         return 0;
     }
 }

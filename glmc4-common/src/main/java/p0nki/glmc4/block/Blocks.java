@@ -6,20 +6,25 @@ import p0nki.glmc4.utils.Identifier;
 
 public class Blocks {
 
-    public final static Registry<Block> REGISTRY = new Registry<>();
+    public static Registry<Block> REGISTRY;
 
-    public final static AirBlock AIR = new AirBlock();
-    public final static CactusBlock CACTUS = new CactusBlock();
-    public final static DirtBlock DIRT = new DirtBlock();
-    public final static GrassBlock GRASS = new GrassBlock();
-    public final static StoneBlock STONE = new StoneBlock();
+    public static Block AIR;
+    public static Block CACTUS;
+    public static Block DIRT;
+    public static Block GRASS;
+    public static Block STONE;
+
+    private static void register(String name, Block block) {
+        REGISTRY.register(new Identifier("minecraft", name), block);
+    }
 
     public static void initialize() {
-        REGISTRY.register(new Identifier("minecraft:air"), AIR);
-        REGISTRY.register(new Identifier("minecraft:cactus"), CACTUS);
-        REGISTRY.register(new Identifier("minecraft:dirt"), DIRT);
-        REGISTRY.register(new Identifier("minecraft:grass"), GRASS);
-        REGISTRY.register(new Identifier("minecraft:stone"), STONE);
+        REGISTRY = new Registry<>();
+        register("air", AIR = new AirBlock());
+        register("cactus", CACTUS = new CactusBlock());
+        register("dirt", DIRT = new DirtBlock());
+        register("grass", GRASS = new GrassBlock());
+        register("stone", STONE = new StoneBlock());
     }
 
 }

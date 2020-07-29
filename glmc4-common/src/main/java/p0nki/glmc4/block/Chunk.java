@@ -22,11 +22,11 @@ public class Chunk implements PacketByteBuf.Equivalent {
 
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
-                Biome b = Biomes.BIOMES.get(biomes[x][z]);
+                Biome b = Biomes.REGISTRY.get(biomes[x][z]).getValue();
                 int genX = x + (16 * cx);
                 int genZ = z + (16 * cz);
                 int y = (int) (8 + 4 * generator.generate(genX, genZ));
-                c.set(x, y, z, b.topBlock.getDefaultState());
+                c.set(x, y, z, b.getTopBlockState());
                 for (int i = y - 1; i > 0; i--) {
                     c.set(x, i, z, Blocks.STONE.getDefaultState());
                 }

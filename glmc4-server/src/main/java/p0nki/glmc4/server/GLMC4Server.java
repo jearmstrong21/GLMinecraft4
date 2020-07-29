@@ -7,7 +7,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.ResourceLeakDetector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import p0nki.glmc4.CommonBoostrap;
+import p0nki.glmc4.CommonBootstrap;
 import p0nki.glmc4.network.NetworkHandler;
 import p0nki.glmc4.network.PacketCodec;
 
@@ -16,7 +16,7 @@ public class GLMC4Server {
     private static final Logger LOGGER = LogManager.getLogger();
 
     public static void main(String[] args) {
-        CommonBoostrap.initialize();
+        CommonBootstrap.initialize();
         MinecraftServer.INSTANCE = new MinecraftServer();
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();

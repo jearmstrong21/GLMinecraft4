@@ -26,17 +26,14 @@ public class Layers {
         LayerFactory biomes = ApplyIslandsLayer.INSTANCE.create(supplier.get(), islands, baseBiomes);
 
         LayerFactory rivers = ApplyRiverLayer.INSTANCE.create(supplier.get(), biomes);
-        LayerFactory yeetBeetchez = ApplyBeechLayer.INSTANCE.create(supplier.get(), rivers);
+        LayerFactory beaches = ApplyBeachLayer.INSTANCE.create(supplier.get(), rivers);
 
-        LayerSampler sampler = yeetBeetchez.make();
+        LayerSampler sampler = beaches.make();
         return (x, z) -> sampler.sample(x - w / 2, z - h / 2);
     }
 
     public static boolean isOcean(int id) {
-        return id == Biomes.WARM_OCEAN.id || id == Biomes.LUKEWARM_OCEAN.id || id == Biomes.OCEAN.id || id == Biomes.COLD_OCEAN.id || id == Biomes.FROZEN_OCEAN.id || id == Biomes.DEEP_WARM_OCEAN.id || id == Biomes.DEEP_LUKEWARM_OCEAN.id || id == Biomes.DEEP_OCEAN.id || id == Biomes.DEEP_COLD_OCEAN.id || id == Biomes.DEEP_FROZEN_OCEAN.id;
+        return id == Biomes.WARM_OCEAN.getIndex() || id == Biomes.LUKEWARM_OCEAN.getIndex() || id == Biomes.OCEAN.getIndex() || id == Biomes.COLD_OCEAN.getIndex() || id == Biomes.FROZEN_OCEAN.getIndex() || id == Biomes.DEEP_WARM_OCEAN.getIndex() || id == Biomes.DEEP_LUKEWARM_OCEAN.getIndex() || id == Biomes.DEEP_OCEAN.getIndex() || id == Biomes.DEEP_COLD_OCEAN.getIndex() || id == Biomes.DEEP_FROZEN_OCEAN.getIndex();
     }
 
-    public static boolean isShallowOcean(int id) {
-        return id == Biomes.WARM_OCEAN.id || id == Biomes.LUKEWARM_OCEAN.id || id == Biomes.OCEAN.id || id == Biomes.COLD_OCEAN.id || id == Biomes.FROZEN_OCEAN.id;
-    }
 }

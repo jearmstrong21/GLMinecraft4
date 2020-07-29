@@ -2,6 +2,7 @@ package p0nki.glmc4.network.packet.clientbound;
 
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.entity.Entity;
+import p0nki.glmc4.entity.EntityType;
 import p0nki.glmc4.entity.EntityTypes;
 import p0nki.glmc4.network.PacketByteBuf;
 import p0nki.glmc4.network.packet.Packet;
@@ -55,7 +56,7 @@ public class PacketS2CHello extends Packet<ClientPacketListener> {
         ListTag entitiesTag = buf.readListTag();
         allEntities = new ArrayList<>();
         for (Tag tag : entitiesTag) {
-            allEntities.add(EntityTypes.from((CompoundTag) tag));
+            allEntities.add(EntityType.from((CompoundTag) tag));
         }
 
         Blocks.REGISTRY.verify(buf);

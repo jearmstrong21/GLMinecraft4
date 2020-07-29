@@ -1,26 +1,28 @@
 package p0nki.glmc4.wgen;
 
-import p0nki.glmc4.block.Block;
+import p0nki.glmc4.block.BlockState;
+import p0nki.glmc4.registry.Registrable;
+import p0nki.glmc4.registry.Registry;
 
-import java.awt.*;
+public class Biome extends Registrable<Biome> {
 
-public class Biome {
+    private final BlockState topBlock;
 
-    public final int id;
-    public String name;
-    public int temp;
-    public boolean snow;
-    public int color;
-    public Block topBlock;
-
-    public Biome(int id, String name, int temp, boolean snow, int red, int green, int blue, Block topBlock) {
-        this.id = id;
-        this.name = name;
-        this.temp = temp;
-        this.snow = snow;
-        this.color = new Color(red, green, blue).getRGB();
-        Biomes.BIOMES.put(id, this);
+    public Biome(BlockState topBlock) {
         this.topBlock = topBlock;
     }
 
+    public BlockState getTopBlockState() {
+        return topBlock;
+    }
+
+    @Override
+    public Registry<Biome> getRegistry() {
+        return Biomes.REGISTRY;
+    }
+
+    @Override
+    public Biome getValue() {
+        return this;
+    }
 }

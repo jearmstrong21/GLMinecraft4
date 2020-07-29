@@ -57,13 +57,12 @@ public class MCWindow {
         if (SystemUtils.IS_OS_MAC_OSX) {
             glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-            LOGGER.warn(OPENGL, "CREATING FORWARD COMPAT CORE PROFILE CONTEXT FOR OPENGL. THIS IS ONLY DONE ON MAC OS. IF YOU ARE NOT ON A MAC OS THIS IS AN ISSUE AND WILL LIKELY CRASH.");
         }
         ptr = glfwCreateWindow(750, 750, "Minecraft", 0, 0);
         glfwSetCursorPosCallback(ptr, new GLFWCursorPosCallback() {
             @Override
-            public void invoke(long window, double xpos, double ypos) {
-                mouseMoveCallback.accept(xpos, ypos);
+            public void invoke(long window, double x, double y) {
+                mouseMoveCallback.accept(x, y);
             }
         });
         glfwMakeContextCurrent(ptr);
@@ -74,17 +73,17 @@ public class MCWindow {
         LOGGER.info(OPENGL, "OpenGL Vendor: {}", glGetString(GL_VENDOR));
         LOGGER.info(OPENGL, "OpenGL Version: {}", glGetString(GL_VERSION));
         LOGGER.info(OPENGL, "OpenGL Renderer: {}", glGetString(GL_RENDERER));
-        int framecount = 0;
+        int frameCount = 0;
         initializeCallback.run();
         double lastTime = 0;
-        int totalFramecount = 0;
+        int totalFrameCount = 0;
         while (!glfwWindowShouldClose(ptr)) {
-            double currentTime = glfwGetTime();
+            double currentTime = time();
             double delta = currentTime - lastTime;
-            framecount++;
+            frameCount++;
             if (delta >= 1.0F) {
-                fps = framecount / delta;
-                framecount = 0;
+                fps = frameCount / delta;
+                frameCount = 0;
                 lastTime = currentTime;
             }
             glViewport(0, 0, getWidth(), getHeight());
@@ -93,7 +92,7 @@ public class MCWindow {
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LESS);
 
-            frameCallback.accept(totalFramecount++);
+            frameCallback.accept(totalFrameCount++);
 
             glfwPollEvents();
             glfwSwapBuffers(ptr);

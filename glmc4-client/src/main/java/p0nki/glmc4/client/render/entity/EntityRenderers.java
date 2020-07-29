@@ -12,9 +12,13 @@ public class EntityRenderers {
     public static final PlayerEntityRenderer PLAYER = new PlayerEntityRenderer();
     public static final TestEntityRenderer TEST = new TestEntityRenderer();
 
+    private static void register(String name, EntityRenderer<?> entityRenderer) {
+        REGISTRY.register(new Identifier("minecraft", name), entityRenderer);
+    }
+
     public static void initialize() {
-        REGISTRY.register(new Identifier("minecraft:player"), PLAYER);
-        REGISTRY.register(new Identifier("minecraft:test"), TEST);
+        register("player", PLAYER);
+        register("test", TEST);
     }
 
 }

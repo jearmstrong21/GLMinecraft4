@@ -100,14 +100,6 @@ public class Registry<T> {
         return Collections.unmodifiableList(entries);
     }
 
-    public Set<Identifier> getKeys() {
-        return Collections.unmodifiableSet(identifierMap.keySet());
-    }
-
-    public int size() {
-        return entries.size();
-    }
-
     public Entry<T> get(Identifier identifier) {
         assertHasKey(identifier);
         return identifierMap.get(identifier);

@@ -10,7 +10,7 @@ public enum BeachLayer implements ParentedLayer {
     public int sample(RandomContext context, LayerSampler parent, int x, int z) {
         int c = parent.sample(x, z);
         if (parent.sample(x - 1, z) == 0 || parent.sample(x + 1, z) == 0 || parent.sample(x, z - 1) == 0 || parent.sample(x, z + 1) == 0) {
-            if (c != 0) return Biomes.BEACH.id;
+            if (c != 0) return Biomes.BEACH.getIndex();
         }
         return c;
     }

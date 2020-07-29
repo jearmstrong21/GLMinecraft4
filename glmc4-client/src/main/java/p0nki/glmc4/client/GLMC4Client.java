@@ -121,7 +121,7 @@ public class GLMC4Client {
                         BlockRenderer renderer = BlockRenderers.REGISTRY.get(identifier).getValue();
                         BlockRenderContext context = new BlockRenderContext(chunk.getOrAir(x - 1, y, z), chunk.getOrAir(x + 1, y, z), chunk.getOrAir(x, y - 1, z), chunk.getOrAir(x, y + 1, z), chunk.getOrAir(x, y, z - 1), chunk.getOrAir(x, y, z + 1), state);
                         MeshData rendered = renderer.render(context);
-                        rendered.mult4(0, new Matrix4f().translate(x, y, z));
+                        rendered.multiply4f(0, new Matrix4f().translate(x, y, z));
                         data.append(rendered);
                     } else if (!warnedIdentifiers.contains(identifier)) {
                         LOGGER.warn(RENDER, "No renderer found for {}", state);
@@ -143,11 +143,11 @@ public class GLMC4Client {
         EntityRenderers.REGISTRY.getEntries().forEach(entry -> entry.getValue().initialize());
     }
 
-    private static void mouseMoveClient(double xpos, double ypos) {
-        xpos -= MCWindow.getWidth() / 2.0F;
-        ypos -= MCWindow.getHeight() / 2.0F;
-        float dx = MathUtils.map((float) ypos, -10, 10, -MathUtils.PI * 0.5F, MathUtils.PI * 0.5F);
-        float dy = MathUtils.map((float) xpos, -10, 10, MathUtils.PI, -MathUtils.PI);
+    private static void mouseMoveClient(double x, double y) {
+        x -= MCWindow.getWidth() / 2.0F;
+        y -= MCWindow.getHeight() / 2.0F;
+        float dx = MathUtils.map((float) y, -10, 10, -MathUtils.PI * 0.5F, MathUtils.PI * 0.5F);
+        float dy = MathUtils.map((float) x, -10, 10, MathUtils.PI, -MathUtils.PI);
         dx *= 0.01F;
         dy *= 0.01F;
         dx = MathUtils.clamp(dx, -0.49F * MathUtils.PI, 0.49F * MathUtils.PI);

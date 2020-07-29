@@ -1,7 +1,7 @@
 package p0nki.glmc4.network.packet.clientbound;
 
 import p0nki.glmc4.entity.Entity;
-import p0nki.glmc4.entity.EntityTypes;
+import p0nki.glmc4.entity.EntityType;
 import p0nki.glmc4.network.PacketByteBuf;
 import p0nki.glmc4.network.packet.Packet;
 import p0nki.glmc4.network.packet.PacketTypes;
@@ -25,7 +25,7 @@ public class PacketS2CEntitySpawn extends Packet<ClientPacketListener> {
 
     @Override
     public void read(PacketByteBuf buf) {
-        entity = EntityTypes.from(buf.readCompoundTag());
+        entity = EntityType.from(buf.readCompoundTag());
     }
 
     @Override
