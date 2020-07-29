@@ -22,7 +22,7 @@ public class Chunk implements PacketByteBuf.Equivalent {
     public static Chunk generate(int cx, int cz) {
         Chunk c = new Chunk();
         var biomes = Generator.generate(seed, 16, 16, cx, cz);
-        IGenerator generator = new SimplexNoiseGenerator(0.1f, seed);
+        IGenerator generator = new SimplexNoiseGenerator(0.05f, seed);
 
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
