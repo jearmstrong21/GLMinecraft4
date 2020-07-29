@@ -25,7 +25,7 @@ public class SimplexNoiseGenerator implements IGenerator {
      * @throws Exception A generic exception if you give it the wrong parameters.
      */
     public float generate(float... coords) throws Exception {
-        if (coords.length == 2) return Math.abs(SimplexNoise.noise((coords[0] + _seed) * _scale, (coords[1] + _seed) * _scale));
+        if (coords.length == 2) return 8 + 4 * SimplexNoise.noise((coords[0]) * _scale, (coords[1]) * _scale) + (SimplexNoise.noise((coords[0]) * _scale, (coords[1]) * _scale) * 0.5f) ;
         else throw new Exception("You need to pass in 2 floats!");
     }
 }

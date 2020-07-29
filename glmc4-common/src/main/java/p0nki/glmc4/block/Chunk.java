@@ -30,7 +30,11 @@ public class Chunk implements PacketByteBuf.Equivalent {
                 int genX = x + (16 * cx);
                 int genZ = z + (16 * cz);
                 try {
-                    c.set(x, (int)(generator.generate(genX, genZ) * 64), z, b.topBlock.getDefaultState());
+                    int y = (int)generator.generate(genX, genZ);
+                    c.set(x, y, z, b.topBlock.getDefaultState());
+                    for (int i = y - 1; i > 0; i--) {
+                        c.set(x, i, z, Blocks.STONE.getDefaultState());
+                    }
                 } catch (Exception e) {
                     System.err.println(e);
                 }
