@@ -25,7 +25,8 @@ public class Chunk implements PacketByteBuf.Equivalent {
                 Biome b = Biomes.BIOMES.get(biomes[x][z]);
                 int genX = x + (16 * cx);
                 int genZ = z + (16 * cz);
-                int y = (int) (8 + 4 * generator.generate(genX, genZ));
+                // AAIAIAJUAIAIAIIAIAIAIA
+                int y = (int) (8 + 4 * generator.generate(genX, genZ) + (generator.generate(genX, genZ) * 0.5f) + (generator.generate(genX, genZ) * 0.25f));
                 c.set(x, y, z, b.topBlock.getDefaultState());
                 for (int i = y - 1; i > 0; i--) {
                     c.set(x, i, z, Blocks.STONE.getDefaultState());
