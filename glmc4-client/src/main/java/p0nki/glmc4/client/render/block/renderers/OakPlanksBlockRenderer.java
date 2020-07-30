@@ -7,39 +7,39 @@ import p0nki.glmc4.client.assets.TextureQuad;
 import p0nki.glmc4.client.render.block.BakedConstantSidedBlockRenderer;
 import p0nki.glmc4.utils.Identifier;
 
-public class StoneBlockRenderer extends BakedConstantSidedBlockRenderer {
+public class OakPlanksBlockRenderer extends BakedConstantSidedBlockRenderer {
 
-    public StoneBlockRenderer() {
-        super(Blocks.STONE);
+    public OakPlanksBlockRenderer() {
+        super(Blocks.OAK_PLANKS);
     }
 
     @Override
     protected TextureQuad xmiTexture(BlockState blockState) {
-        return AtlasPosition.block(new Identifier("minecraft:stone")).layer().quad();
+        return AtlasPosition.block(new Identifier("minecraft:oak_planks")).layer().quad();
     }
 
     @Override
     protected TextureQuad xplTexture(BlockState blockState) {
-        return AtlasPosition.block(new Identifier("minecraft:stone")).layer().quad();
+        return AtlasPosition.block(new Identifier("minecraft:oak_planks")).layer().quad();
     }
 
     @Override
     protected TextureQuad ymiTexture(BlockState blockState) {
-        return AtlasPosition.block(new Identifier("minecraft:stone")).layer().quad();
+        return AtlasPosition.block(new Identifier("minecraft:oak_planks")).layer().quad();
     }
 
     @Override
     protected TextureQuad yplTexture(BlockState blockState) {
-        return AtlasPosition.block(new Identifier("minecraft:stone")).layer().quad();
+        return AtlasPosition.block(new Identifier("minecraft:oak_planks")).layer().quad();
     }
 
     @Override
     protected TextureQuad zmiTexture(BlockState blockState) {
-        return AtlasPosition.block(new Identifier("minecraft:stone")).layer().quad();
+        return AtlasPosition.block(new Identifier("minecraft:oak_planks")).layer().quad();
     }
 
     @Override
     protected TextureQuad zplTexture(BlockState blockState) {
-        return AtlasPosition.block(new Identifier("minecraft:stone")).layer().quad();
+        return AtlasPosition.block(new Identifier("minecraft:oak_planks")).layer().quad();
     }
 }

@@ -3,6 +3,7 @@ package p0nki.glmc4.client.render.block.renderers;
 import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.client.assets.AtlasPosition;
+import p0nki.glmc4.client.assets.TextureQuad;
 import p0nki.glmc4.client.render.block.BakedConstantSidedBlockRenderer;
 import p0nki.glmc4.utils.Identifier;
 
@@ -13,32 +14,32 @@ public class DirtBlockRenderer extends BakedConstantSidedBlockRenderer {
     }
 
     @Override
-    protected AtlasPosition xmiTexture(BlockState blockState) {
-        return AtlasPosition.block(new Identifier("minecraft:dirt"));
+    protected TextureQuad xmiTexture(BlockState blockState) {
+        return AtlasPosition.block(new Identifier("minecraft:dirt")).layer().quad();
     }
 
     @Override
-    protected AtlasPosition xplTexture(BlockState blockState) {
-        return AtlasPosition.block(new Identifier("minecraft:dirt"));
+    protected TextureQuad xplTexture(BlockState blockState) {
+        return AtlasPosition.block(new Identifier("minecraft:dirt")).layer().quad();
     }
 
     @Override
-    protected AtlasPosition ymiTexture(BlockState blockState) {
-        return AtlasPosition.block(new Identifier("minecraft:dirt"));
+    protected TextureQuad ymiTexture(BlockState blockState) {
+        return AtlasPosition.block(new Identifier("minecraft:dirt")).layer().quad();
     }
 
     @Override
-    protected AtlasPosition yplTexture(BlockState blockState) {
-        return AtlasPosition.block(new Identifier("minecraft:dirt"));
+    protected TextureQuad yplTexture(BlockState blockState) {
+        return AtlasPosition.block(new Identifier("minecraft:dirt")).layer().quad();
     }
 
     @Override
-    protected AtlasPosition zmiTexture(BlockState blockState) {
-        return AtlasPosition.block(new Identifier("minecraft:dirt"));
+    protected TextureQuad zmiTexture(BlockState blockState) {
+        return AtlasPosition.block(new Identifier("minecraft:dirt")).layer().quad();
     }
 
     @Override
-    protected AtlasPosition zplTexture(BlockState blockState) {
-        return AtlasPosition.block(new Identifier("minecraft:dirt"));
+    protected TextureQuad zplTexture(BlockState blockState) {
+        return AtlasPosition.block(new Identifier("minecraft:dirt")).layer().quad();
     }
 }

@@ -4,7 +4,8 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
-import p0nki.glmc4.client.assets.AtlasPosition;
+import p0nki.glmc4.client.assets.TextureLayer;
+import p0nki.glmc4.client.assets.TextureQuad;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,7 @@ public class MeshData {
     }
 
     public static MeshData chunk() {
-        return new MeshData().addBuffer(3).addBuffer(2);
+        return new MeshData().addBuffer(3).addBuffer(2).addBuffer(3);
     }
 
     public int size() {
@@ -101,50 +102,51 @@ public class MeshData {
     }
 
     @SuppressWarnings("UnusedReturnValue")
-    public MeshData addQuad(int buffer, AtlasPosition atlasPosition) {
-        addQuad(buffer, new Vector2f(atlasPosition.x, atlasPosition.y), new Vector2f(atlasPosition.w, 0), new Vector2f(0, atlasPosition.h));
+    public MeshData addQuad(int uvBuffer, int colorBuffer, TextureLayer layer) {
+        addQuad(uvBuffer, new Vector2f(layer.atlasPosition.x, layer.atlasPosition.y), new Vector2f(layer.atlasPosition.w, 0), new Vector2f(0, layer.atlasPosition.h));
+        appendBuffer3f(colorBuffer, List.of(layer.color, layer.color, layer.color, layer.color));
         return this;
     }
 
-    public MeshData addXmiQuad(int posBuffer, int uvBuffer, Vector3f origin, AtlasPosition atlasPosition) {
+    public MeshData addXmiQuad(int posBuffer, int uvBuffer, int colorBuffer, Vector3f origin, TextureQuad textureQuad) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
         addQuad(posBuffer, new Vector3f(0, 1, 0).add(origin), new Vector3f(0, 0, 1), new Vector3f(0, -1, 0));
-        addQuad(uvBuffer, atlasPosition);
+        addQuad(uvBuffer, colorBuffer, textureQuad.layer1);
         return this;
     }
 
-    public MeshData addXplQuad(int posBuffer, int uvBuffer, Vector3f origin, AtlasPosition atlasPosition) {
+    public MeshData addXplQuad(int posBuffer, int uvBuffer, int colorBuffer, Vector3f origin, TextureQuad textureQuad) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
         addQuad(posBuffer, new Vector3f(1, 1, 1).add(origin), new Vector3f(0, 0, -1), new Vector3f(0, -1, 0));
-        addQuad(uvBuffer, atlasPosition);
+        addQuad(uvBuffer, colorBuffer, textureQuad.layer1);
         return this;
     }
 
-    public MeshData addYmiQuad(int posBuffer, int uvBuffer, Vector3f origin, AtlasPosition atlasPosition) {
+    public MeshData addYmiQuad(int posBuffer, int uvBuffer, int colorBuffer, Vector3f origin, TextureQuad textureQuad) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
         addQuad(posBuffer, new Vector3f(0, 0, 0).add(origin), new Vector3f(1, 0, 0), new Vector3f(0, 0, 1));
-        addQuad(uvBuffer, atlasPosition);
+        addQuad(uvBuffer, colorBuffer, textureQuad.layer1);
         return this;
     }
 
-    public MeshData addYplQuad(int posBuffer, int uvBuffer, Vector3f origin, AtlasPosition atlasPosition) {
+    public MeshData addYplQuad(int posBuffer, int uvBuffer, int colorBuffer, Vector3f origin, TextureQuad textureQuad) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
         addQuad(posBuffer, new Vector3f(0, 1, 0).add(origin), new Vector3f(1, 0, 0), new Vector3f(0, 0, 1));
-        addQuad(uvBuffer, atlasPosition);
+        addQuad(uvBuffer, colorBuffer, textureQuad.layer1);
         return this;
     }
 
-    public MeshData addZmiQuad(int posBuffer, int uvBuffer, Vector3f origin, AtlasPosition atlasPosition) {
+    public MeshData addZmiQuad(int posBuffer, int uvBuffer, int colorBuffer, Vector3f origin, TextureQuad textureQuad) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
         addQuad(posBuffer, new Vector3f(1, 1, 0).add(origin), new Vector3f(-1, 0, 0), new Vector3f(0, -1, 0));
-        addQuad(uvBuffer, atlasPosition);
+        addQuad(uvBuffer, colorBuffer, textureQuad.layer1);
         return this;
     }
 
-    public MeshData addZplQuad(int posBuffer, int uvBuffer, Vector3f origin, AtlasPosition atlasPosition) {
+    public MeshData addZplQuad(int posBuffer, int uvBuffer, int colorBuffer, Vector3f origin, TextureQuad textureQuad) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
         addQuad(posBuffer, new Vector3f(0, 1, 1).add(origin), new Vector3f(1, 0, 0), new Vector3f(0, -1, 0));
-        addQuad(uvBuffer, atlasPosition);
+        addQuad(uvBuffer, colorBuffer, textureQuad.layer1);
         return this;
     }
 

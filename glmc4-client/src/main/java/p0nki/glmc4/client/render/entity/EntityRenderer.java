@@ -23,9 +23,7 @@ public abstract class EntityRenderer<E extends Entity> extends Registrable<Entit
     }
 
     public static MeshData createCube(int x, int y, int width, int height, int depth, int texWidth, int texHeight, boolean centerY) {
-        MeshData data = new MeshData();
-        data.addBuffer(3);
-        data.addBuffer(2);
+        MeshData data = MeshData.chunk();
 
         AtlasPosition left = new AtlasPosition(x + depth + width, y - height, depth, height, texWidth, texHeight);
         AtlasPosition right = new AtlasPosition(x, y - height, depth, height, texWidth, texHeight);
@@ -34,14 +32,14 @@ public abstract class EntityRenderer<E extends Entity> extends Registrable<Entit
         AtlasPosition front = new AtlasPosition(x + depth, y - height, width, height, texWidth, texHeight);
         AtlasPosition back = new AtlasPosition(x + depth + width + depth, y - height, width, height, texWidth, texHeight);
 
-        data.addXmiQuad(0, 1, new Vector3f(0), right);
-        data.addXplQuad(0, 1, new Vector3f(0), left);
+        data.addXmiQuad(0, 1, 2, new Vector3f(0), right.layer().quad());
+        data.addXplQuad(0, 1, 2, new Vector3f(0), left.layer().quad());
 
-        data.addYmiQuad(0, 1, new Vector3f(0), bottom);
-        data.addYplQuad(0, 1, new Vector3f(0), top);
+        data.addYmiQuad(0, 1, 2, new Vector3f(0), bottom.layer().quad());
+        data.addYplQuad(0, 1, 2, new Vector3f(0), top.layer().quad());
 
-        data.addZmiQuad(0, 1, new Vector3f(0), back);
-        data.addZplQuad(0, 1, new Vector3f(0), front);
+        data.addZmiQuad(0, 1, 2, new Vector3f(0), back.layer().quad());
+        data.addZplQuad(0, 1, 2, new Vector3f(0), front.layer().quad());
 
         for (int i = 0; i < data.getBuffer(0).size(); i += 3) {
             data.getBuffer(0).set(i, data.getBuffer(0).get(i) - 0.5F);
