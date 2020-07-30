@@ -13,6 +13,11 @@ public class Blocks {
     public static Block DIRT;
     public static Block GRASS;
     public static Block STONE;
+    public static Block GRAVEL;
+    public static Block OAK_LOG;
+    public static Block SAND;
+    public static Block OAK_LEAVES;
+    public static Block OAK_PLANKS;
 
     private static void register(String name, Block block) {
         REGISTRY.register(new Identifier("minecraft", name), block);
@@ -25,6 +30,11 @@ public class Blocks {
         register("dirt", DIRT = new DirtBlock());
         register("grass", GRASS = new GrassBlock());
         register("stone", STONE = new StoneBlock());
+        register("gravel", GRAVEL = new GravelBlock());
+        register("oak_log", OAK_LOG = new OakLogBlock());
+        register("sand", SAND = new SandBlock());
+        register("oak_leaves", OAK_LEAVES = new OakLeavesBlock());
+        register("oak_planks", OAK_PLANKS = new OakPlanksBlock());
     }
 
 }
