@@ -38,9 +38,11 @@ public class TextureAssembler {
             for (Identifier s : identifiers.keySet()) {
                 images.put(s, read(s));
             }
+            boolean[][] filled = new boolean[width][height];
             int[][] data = new int[width][height];
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
+                    filled[x][y] = false;
                     data[x][y] = -1;
                 }
             }
@@ -48,7 +50,7 @@ public class TextureAssembler {
                 int i = Integer.compare(images.get(o2).area(), images.get(o1).area());
                 if (i == 0) return o1.toString().compareTo(o2.toString());
                 else return i;
-            }).forEach(key -> place(data, key));
+            }).forEach(key -> place(filled, data, key));
             BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
@@ -133,23 +135,24 @@ public class TextureAssembler {
         return image;
     }
 
-    private boolean canPlace(int[][] data, Identifier identifier, int x, int y) {
+    private boolean canPlace(boolean[][] filled, Identifier identifier, int x, int y) {
         int w = images.get(identifier).w;
         int h = images.get(identifier).h;
         for (int i = x; i < x + w; i++) {
             for (int j = y; j < y + h; j++) {
                 if (i < 0 || j < 0 || i >= width || j >= height) return false;
-                if (data[i][j] != -1) return false;
+                if (filled[i][j]) return false;
             }
         }
         return true;
     }
 
-    private void place(int[][] data, Identifier identifier, int x, int y) {
+    private void place(boolean[][] filled, int[][] data, Identifier identifier, int x, int y) {
         int w = images.get(identifier).w;
         int h = images.get(identifier).h;
         for (int i = x; i < x + w; i++) {
             for (int j = y; j < y + h; j++) {
+                filled[i][j] = true;
                 data[i][j] = images.get(identifier).data[i - x][j - y];
             }
         }
@@ -158,11 +161,11 @@ public class TextureAssembler {
         images.get(identifier).y = y;
     }
 
-    private void place(int[][] data, Identifier identifier) {
+    private void place(boolean[][] filled, int[][] data, Identifier identifier) {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                if (canPlace(data, identifier, x, y)) {
-                    place(data, identifier, x, y);
+                if (canPlace(filled, identifier, x, y)) {
+                    place(filled, data, identifier, x, y);
                     return;
                 }
             }

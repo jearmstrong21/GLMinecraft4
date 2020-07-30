@@ -33,13 +33,6 @@ public class PropertySchema {
         return (~(1 << property.bits()) << (32 - property.bits())) >>> bitStart.get(property);
     }
 
-    public int clear(int state, Property<?> property) {
-        if (!hasProperty(property)) throw INVALID_PROPERTY;
-        int mask = mask(property);
-        state &= ~mask;
-        return state;
-    }
-
     public <T> int set(int state, Property<T> property, T value) {
         if (!hasProperty(property)) throw INVALID_PROPERTY;
         if (!property.supportsValue(value)) throw INVALID_VALUE;
