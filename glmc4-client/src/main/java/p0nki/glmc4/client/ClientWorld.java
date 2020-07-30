@@ -1,5 +1,7 @@
 package p0nki.glmc4.client;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
@@ -22,6 +24,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class ClientWorld implements World {
 
+    private static final Logger LOGGER = LogManager.getLogger();
+
     private final ReentrantLock chunkLock = new ReentrantLock(true);
     private final Map<Vector2i, Chunk> chunks = new HashMap<>();
     private final Map<Vector2i, Mesh> meshes = new HashMap<>();
@@ -33,12 +37,16 @@ public class ClientWorld implements World {
         texture = new Texture(Path.of("run", "atlas", "block.png"));
     }
 
-    private static MeshData mesh(int cx, int cz, Chunk chunk) {
+    private MeshData mesh(int cx, int cz, Chunk chunk) {
         MeshData data = MeshData.chunk();
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 256; y++) {
                 for (int z = 0; z < 16; z++) {
                     BlockState state = chunk.get(x, y, z);
+                    BlockState testState = get(new Vector3i(x + cx * 16, y, z + cz * 16));
+                    if (!state.equals(testState)) {
+                        LOGGER.error("Expected {} at {},{},{}, got {}", state, x, y, z, testState);
+                    }
                     if (state.getBlock() == Blocks.AIR) continue;
                     Identifier identifier = Blocks.REGISTRY.get(state.getBlock()).getKey();
                     BlockRenderer renderer = BlockRenderers.REGISTRY.get(identifier).getValue();
