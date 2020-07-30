@@ -39,6 +39,7 @@ public class ServerWorld implements World {
         Vector2i chunkCoordinate = World.getChunkCoordinate(new Vector2i(blockPos.x, blockPos.z));
         if (!isChunkLoaded(chunkCoordinate)) throw new ChunkNotLoadedException(chunkCoordinate);
         Vector2i coordinateInChunk = World.getCoordinateInChunk(new Vector2i(blockPos.x, blockPos.z));
+        System.out.println(blockPos.x + " " + blockPos.y + " " + blockPos.z + " -> " + chunkCoordinate.x + " " + chunkCoordinate.y + "," + coordinateInChunk.x + " " + coordinateInChunk.y);
         return chunks.get(chunkCoordinate).get(coordinateInChunk.x, blockPos.y, coordinateInChunk.y);
     }
 
