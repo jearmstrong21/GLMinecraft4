@@ -8,6 +8,7 @@ import p0nki.glmc4.block.ChunkNotLoadedException;
 import p0nki.glmc4.block.World;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ServerWorld implements World {
@@ -45,5 +46,10 @@ public class ServerWorld implements World {
     public Chunk getChunk(Vector2i chunkCoordinate) {
         if (!isChunkLoaded(chunkCoordinate)) throw new ChunkNotLoadedException(chunkCoordinate);
         return chunks.get(chunkCoordinate);
+    }
+
+    @Override
+    public List<Vector2i> getLoadedChunks() {
+        return List.copyOf(chunks.keySet());
     }
 }

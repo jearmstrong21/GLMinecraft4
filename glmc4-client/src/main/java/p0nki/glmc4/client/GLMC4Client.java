@@ -14,19 +14,10 @@ import org.apache.logging.log4j.MarkerManager;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
-import p0nki.glmc4.block.BlockState;
-import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.block.Chunk;
-import p0nki.glmc4.client.gl.Mesh;
-import p0nki.glmc4.client.gl.Shader;
-import p0nki.glmc4.client.gl.Texture;
 import p0nki.glmc4.client.render.DebugRenderer3D;
-import p0nki.glmc4.client.render.MeshData;
 import p0nki.glmc4.client.render.TextRenderer;
 import p0nki.glmc4.client.render.WorldRenderContext;
-import p0nki.glmc4.client.render.block.BlockRenderContext;
-import p0nki.glmc4.client.render.block.BlockRenderer;
-import p0nki.glmc4.client.render.block.BlockRenderers;
 import p0nki.glmc4.client.render.entity.EntityRenderer;
 import p0nki.glmc4.client.render.entity.EntityRenderers;
 import p0nki.glmc4.entity.Entity;
@@ -40,11 +31,8 @@ import p0nki.glmc4.utils.Identifier;
 import p0nki.glmc4.utils.math.MathUtils;
 
 import java.net.URISyntaxException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 public class GLMC4Client {
@@ -60,17 +48,12 @@ public class GLMC4Client {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Marker SOCKET = MarkerManager.getMarker("SOCKET");
     private static final Marker RENDER = MarkerManager.getMarker("RENDER");
-    private static final Map<Vector2i, Chunk> chunks = new HashMap<>();
-    private static final Map<Vector2i, Mesh> meshes = new HashMap<>();
-    private final static Set<Identifier> warnedIdentifiers = new HashSet<>();
-    private final static Lock chunkLock = new ReentrantLock();
+    private static final Marker CLIENT = MarkerManager.getMarker("CLIENT");
+    private static ClientWorld clientWorld;
     private static ClientPacketListener packetListener;
 
     public static TextRenderer textRenderer;
     private static final Map<UUID, Long> lastReceivedEntityUpdate = new HashMap<>();
-
-    private static Shader shader;
-    private static Texture texture;
     public static DebugRenderer3D debugRenderer3D;
     private static Map<UUID, Entity> entities = new HashMap<>();
 
@@ -96,9 +79,7 @@ public class GLMC4Client {
     }
 
     public static void onLoadChunk(int x, int z, Chunk chunk) {
-        chunkLock.lock();
-        chunks.put(new Vector2i(x, z), chunk);
-        chunkLock.unlock();
+        clientWorld.loadChunk(new Vector2i(x, z), chunk);
     }
 
     public static void updateEntity(UUID uuid, CompoundTag newData) {
@@ -109,41 +90,17 @@ public class GLMC4Client {
         lastReceivedEntityUpdate.put(uuid, System.currentTimeMillis());
     }
 
-    private static MeshData mesh(Chunk chunk) {
-        MeshData data = MeshData.chunk();
-        for (int x = 0; x < 16; x++) {
-            for (int y = 0; y < 256; y++) {
-                for (int z = 0; z < 16; z++) {
-                    BlockState state = chunk.get(x, y, z);
-                    if (state.getBlock() == Blocks.AIR) continue;
-                    Identifier identifier = Blocks.REGISTRY.get(state.getBlock()).getKey();
-                    if (BlockRenderers.REGISTRY.hasKey(identifier)) {
-                        BlockRenderer renderer = BlockRenderers.REGISTRY.get(identifier).getValue();
-                        BlockRenderContext context = new BlockRenderContext(chunk.getOrAir(x - 1, y, z), chunk.getOrAir(x + 1, y, z), chunk.getOrAir(x, y - 1, z), chunk.getOrAir(x, y + 1, z), chunk.getOrAir(x, y, z - 1), chunk.getOrAir(x, y, z + 1), state);
-                        MeshData rendered = renderer.render(context);
-                        rendered.multiply4f(0, new Matrix4f().translate(x, y, z));
-                        data.append(rendered);
-                    } else if (!warnedIdentifiers.contains(identifier)) {
-                        LOGGER.warn(RENDER, "No renderer found for {}", state);
-                        warnedIdentifiers.add(identifier);
-                    }
-                }
-            }
-        }
-        return data;
-    }
-
-    private static void initializeClient() {
+    private static void initializeRenderer() {
         MCWindow.captureMouse();
-        shader = Shader.create("chunk");
-        texture = new Texture(Path.of("run", "atlas", "block.png"));
+        clientWorld = new ClientWorld();
         textRenderer = new TextRenderer();
         debugRenderer3D = new DebugRenderer3D();
-        LOGGER.info(RENDER, "Client initialized");
+        LOGGER.info(RENDER, "Renderer initialized");
         EntityRenderers.REGISTRY.getEntries().forEach(entry -> entry.getValue().initialize());
+        new Thread(GLMC4Client::runNetty, "Netty Main Thread").start();
     }
 
-    private static void mouseMoveClient(double x, double y) {
+    private static void mouseMoveRenderer(double x, double y) {
         x -= MCWindow.getWidth() / 2.0F;
         y -= MCWindow.getHeight() / 2.0F;
         float dx = MathUtils.map((float) y, -10, 10, -MathUtils.PI * 0.5F, MathUtils.PI * 0.5F);
@@ -154,10 +111,11 @@ public class GLMC4Client {
         lookDir = new Vector3f(0, 0, 1).rotateX(dx).rotateY(dy);
     }
 
-    private static void tickClient(int frameCount) {
+    private static void tickRenderer(int frameCount) {
         if (packetListener == null) return;
         if (packetListener.getPlayer() == null) return;
         if (!entities.containsKey(packetListener.getPlayer().getUuid())) return;
+
         Matrix4f perspective = new Matrix4f().perspective((float) Math.toRadians(80), 1.0F, 0.001F, 300);
         Entity thisEntity = entities.get(packetListener.getPlayer().getUuid());
         Matrix4f view = new Matrix4f().lookAt(
@@ -165,45 +123,28 @@ public class GLMC4Client {
                 new Vector3f(thisEntity.getEyePosition()),
                 new Vector3f(0, 1, 0)
         );
-        WorldRenderContext context = new WorldRenderContext(perspective, view);
-        shader.use();
-        shader.setTexture("tex", texture, 0);
-        shader.set(context);
-        if (chunkLock.tryLock()) {
-            for (Map.Entry<Vector2i, Chunk> chunk : chunks.entrySet()) {
-                meshes.put(chunk.getKey(), new Mesh(mesh(chunk.getValue())));
-            }
-            chunks.clear();
-            chunkLock.unlock();
-        } else {
-            LOGGER.trace(RENDER, "Unable to obtain chunk lock. Will attempt next frame");
-        }
-        for (Map.Entry<Vector2i, Mesh> chunk : meshes.entrySet()) {
-            int x = 16 * chunk.getKey().x;
-            int z = 16 * chunk.getKey().y;
-            shader.setFloat("x", x);
-            shader.setFloat("z", z);
-            chunk.getValue().triangles();
-        }
+
+        WorldRenderContext worldRenderContext = new WorldRenderContext(perspective, view);
+        clientWorld.render(worldRenderContext);
 
         for (Entity entity : entities.values()) {
 //            if (entity.getUuid().equals(packetListener.getPlayer().getUuid())) continue;
             EntityType<?> type = entity.getType();
             Identifier identifier = EntityTypes.REGISTRY.get(type).getKey();
             EntityRenderer<?> renderer = EntityRenderers.REGISTRY.get(identifier).getValue();
-            renderer.render(context, entity);
+            renderer.render(worldRenderContext, entity);
         }
         textRenderer.renderString(-1, 1 - 0.075F, 0.075F, String.format("GLMinecraft4\nFPS: %s\nPosition: %s\nLooking: %s", MCWindow.getFps(), thisEntity.getPosition(), lookDir));
 
         packetListener.tick();
     }
 
-    private static void runClient() {
+    private static void runRenderer() {
         try {
-            MCWindow.setInitializeCallback(GLMC4Client::initializeClient);
-            MCWindow.setMouseMoveCallback(GLMC4Client::mouseMoveClient);
-            MCWindow.setFrameCallback(GLMC4Client::tickClient);
-            MCWindow.setEndCallback(GLMC4Client::endClient);
+            MCWindow.setInitializeCallback(GLMC4Client::initializeRenderer);
+            MCWindow.setMouseMoveCallback(GLMC4Client::mouseMoveRenderer);
+            MCWindow.setFrameCallback(GLMC4Client::tickRenderer);
+            MCWindow.setEndCallback(GLMC4Client::endRenderer);
             MCWindow.start();
         } catch (Error | RuntimeException error) {
             error.printStackTrace();
@@ -211,7 +152,7 @@ public class GLMC4Client {
         }
     }
 
-    private static void endClient() {
+    private static void endRenderer() {
         LOGGER.info(RENDER, "Rendering thread ended.");
         System.exit(0);
     }
@@ -235,8 +176,7 @@ public class GLMC4Client {
 
     public static void main(String[] args) {
         ClientBootstrap.initialize();
-        new Thread(GLMC4Client::runNetty, "Netty Main Thread").start();
-        runClient();
+        runRenderer();
     }
 
 }
