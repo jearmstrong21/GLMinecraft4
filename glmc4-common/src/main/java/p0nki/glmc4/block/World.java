@@ -20,11 +20,12 @@ public interface World {
     static Vector2i getChunkCoordinate(Vector2i worldPos) {
         int x = worldPos.x / 16;
         int z = worldPos.y / 16;
-//        if (worldPos.x < 0) x--;
-//        if (worldPos.y < 0) z--;
+        if (worldPos.x < 0) x--;
+        if (worldPos.y < 0) z--;
         return new Vector2i(x, z);
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     boolean isChunkLoaded(Vector2i chunkCoordinate);
 
     boolean isClient();

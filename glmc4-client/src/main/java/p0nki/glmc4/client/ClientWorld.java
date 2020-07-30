@@ -59,11 +59,9 @@ public class ClientWorld implements World {
                 for (int k = -1; k <= 0; k++) {
                     Vector3i v = new Vector3i(position.x + i, position.y + j, position.z + k);
                     float f = 1;
-                    if (isChunkLoaded(World.getChunkCoordinate(new Vector2i(v.x, v.z)))) {
-                        if (v.y >= 0 && v.y <= 255) {
-                            if (get(v).getBlock() != Blocks.AIR) {
-                                f = 0;
-                            }
+                    if (v.y >= 0 && v.y <= 255) {
+                        if (get(v).getBlock() != Blocks.AIR) {
+                            f = 0;
                         }
                     }
                     total += f;
@@ -126,7 +124,11 @@ public class ClientWorld implements World {
                         chunks.containsKey(new Vector2i(v.x - 1, v.y)) &&
                         chunks.containsKey(new Vector2i(v.x + 1, v.y)) &&
                         chunks.containsKey(new Vector2i(v.x, v.y - 1)) &&
-                        chunks.containsKey(new Vector2i(v.x, v.y + 1))) {
+                        chunks.containsKey(new Vector2i(v.x, v.y + 1)) &&
+                        chunks.containsKey(new Vector2i(v.x - 1, v.y - 1)) &&
+                        chunks.containsKey(new Vector2i(v.x + 1, v.y - 1)) &&
+                        chunks.containsKey(new Vector2i(v.x - 1, v.y + 1)) &&
+                        chunks.containsKey(new Vector2i(v.x + 1, v.y + 1))) {
                     meshes.put(v, new Mesh(mesh(v.x, v.y, chunks.get(v))));
                 }
             }
