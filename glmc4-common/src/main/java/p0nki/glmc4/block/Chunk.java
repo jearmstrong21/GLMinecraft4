@@ -2,8 +2,6 @@ package p0nki.glmc4.block;
 
 import org.joml.Vector3i;
 import p0nki.glmc4.network.PacketByteBuf;
-import p0nki.glmc4.wgen.Biome;
-import p0nki.glmc4.wgen.Biomes;
 import p0nki.glmc4.wgen.Generator;
 import p0nki.glmc4.wgen.SimplexNoiseGenerator;
 
@@ -22,15 +20,26 @@ public class Chunk implements PacketByteBuf.Equivalent {
 
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
-                Biome b = Biomes.REGISTRY.get(biomes[x][z]).getValue();
-                int genX = x + (16 * cx);
-                int genZ = z + (16 * cz);
-                int y = (int) (8 + 4 * generator.generate(genX, genZ));
-                c.set(x, y, z, b.getTopBlockState());
-                for (int i = y - 1; i > 0; i--) {
-                    c.set(x, i, z, Blocks.STONE.getDefaultState());
+//                Biome b = Biomes.REGISTRY.get(biomes[x][z]).getValue();
+//                int genX = x + (16 * cx);
+//                int genZ = z + (16 * cz);
+//                int y = (int) (8 + 4 * generator.generate(genX, genZ));
+//                c.set(x, y, z, b.getTopBlockState());
+//                for (int i = y - 1; i > 0; i--) {
+//                    c.set(x, i, z, Blocks.STONE.getDefaultState());
+//                }
+                int rx = x + cx * 16;
+                int rz = z + cz * 16;
+                int h = 10;
+                if (-2 < rx && rx < 2 && -2 < rz && rz < 2) {
+                    h = 5;
                 }
-
+                if (rx == 0 && rz == 0) h = 2;
+                for (int y = 0; y <= h; y++) {
+                    if (y < h - 4) c.set(x, y, z, Blocks.STONE.getDefaultState());
+                    else if (y < h) c.set(x, y, z, Blocks.DIRT.getDefaultState());
+                    else c.set(x, y, z, Blocks.GRASS.getDefaultState());
+                }
             }
         }
         return c;

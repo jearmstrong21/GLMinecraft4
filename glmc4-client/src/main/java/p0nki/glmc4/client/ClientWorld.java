@@ -122,7 +122,11 @@ public class ClientWorld implements World {
         }
         if (chunkLock.tryLock()) {
             for (Vector2i v : chunks.keySet()) {
-                if (!meshes.containsKey(v)) {
+                if (!meshes.containsKey(v) &&
+                        chunks.containsKey(new Vector2i(v.x - 1, v.y)) &&
+                        chunks.containsKey(new Vector2i(v.x + 1, v.y)) &&
+                        chunks.containsKey(new Vector2i(v.x, v.y - 1)) &&
+                        chunks.containsKey(new Vector2i(v.x, v.y + 1))) {
                     meshes.put(v, new Mesh(mesh(v.x, v.y, chunks.get(v))));
                 }
             }
