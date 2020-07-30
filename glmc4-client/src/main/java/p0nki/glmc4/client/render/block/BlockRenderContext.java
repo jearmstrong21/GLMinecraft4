@@ -1,9 +1,11 @@
 package p0nki.glmc4.client.render.block;
 
+import org.joml.Vector3i;
 import p0nki.glmc4.block.BlockState;
 
 public class BlockRenderContext {
 
+    private final Vector3i blockPos;
     private final BlockState xmi;
     private final BlockState xpl;
     private final BlockState ymi;
@@ -12,7 +14,8 @@ public class BlockRenderContext {
     private final BlockState zpl;
     private final BlockState cur;
 
-    public BlockRenderContext(BlockState xmi, BlockState xpl, BlockState ymi, BlockState ypl, BlockState zmi, BlockState zpl, BlockState cur) {
+    public BlockRenderContext(Vector3i blockPos, BlockState xmi, BlockState xpl, BlockState ymi, BlockState ypl, BlockState zmi, BlockState zpl, BlockState cur) {
+        this.blockPos = blockPos;
         this.xmi = xmi;
         this.xpl = xpl;
         this.ymi = ymi;
@@ -20,6 +23,10 @@ public class BlockRenderContext {
         this.zmi = zmi;
         this.zpl = zpl;
         this.cur = cur;
+    }
+
+    public Vector3i getBlockPos() {
+        return blockPos;
     }
 
     public BlockState getXmi() {

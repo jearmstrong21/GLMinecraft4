@@ -48,7 +48,6 @@ public class GLMC4Client {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Marker SOCKET = MarkerManager.getMarker("SOCKET");
     private static final Marker RENDER = MarkerManager.getMarker("RENDER");
-    private static final Marker CLIENT = MarkerManager.getMarker("CLIENT");
     private static ClientWorld clientWorld;
     private static ClientPacketListener packetListener;
 
@@ -59,6 +58,10 @@ public class GLMC4Client {
 
     public static long getLastUpdateTime(UUID uuid) {
         return lastReceivedEntityUpdate.get(uuid);
+    }
+
+    public static ClientWorld getClientWorld() {
+        return clientWorld;
     }
 
     public static void loadInitialEntities(List<Entity> entities) {

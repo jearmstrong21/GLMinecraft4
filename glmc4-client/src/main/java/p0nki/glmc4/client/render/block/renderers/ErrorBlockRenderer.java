@@ -4,10 +4,10 @@ import p0nki.glmc4.block.Block;
 import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.client.assets.AtlasPosition;
 import p0nki.glmc4.client.assets.TextureQuad;
-import p0nki.glmc4.client.render.block.BakedConstantSidedBlockRenderer;
+import p0nki.glmc4.client.render.block.NoContextConstantSidedBlockRenderer;
 import p0nki.glmc4.utils.Identifier;
 
-public class ErrorBlockRenderer extends BakedConstantSidedBlockRenderer {
+public class ErrorBlockRenderer extends NoContextConstantSidedBlockRenderer {
 
     public ErrorBlockRenderer(Block block) {
         super(block);

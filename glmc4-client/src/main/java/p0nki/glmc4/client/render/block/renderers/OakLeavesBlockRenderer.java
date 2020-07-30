@@ -1,15 +1,14 @@
 package p0nki.glmc4.client.render.block.renderers;
 
-import p0nki.glmc4.block.Block;
 import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.client.assets.AtlasPosition;
 import p0nki.glmc4.client.assets.TextureQuad;
 import p0nki.glmc4.client.render.Colors;
-import p0nki.glmc4.client.render.block.BakedConstantSidedBlockRenderer;
+import p0nki.glmc4.client.render.block.NoContextConstantSidedBlockRenderer;
 import p0nki.glmc4.utils.Identifier;
 
-public class OakLeavesBlockRenderer extends BakedConstantSidedBlockRenderer {
+public class OakLeavesBlockRenderer extends NoContextConstantSidedBlockRenderer {
 
     public OakLeavesBlockRenderer() {
         super(Blocks.OAK_LEAVES);

@@ -33,7 +33,7 @@ public class ClientWorld implements World {
         texture = new Texture(Path.of("run", "atlas", "block.png"));
     }
 
-    private static MeshData mesh(Chunk chunk) {
+    private static MeshData mesh(int cx, int cz, Chunk chunk) {
         MeshData data = MeshData.chunk();
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 256; y++) {
@@ -42,7 +42,7 @@ public class ClientWorld implements World {
                     if (state.getBlock() == Blocks.AIR) continue;
                     Identifier identifier = Blocks.REGISTRY.get(state.getBlock()).getKey();
                     BlockRenderer renderer = BlockRenderers.REGISTRY.get(identifier).getValue();
-                    BlockRenderContext context = new BlockRenderContext(chunk.getOrAir(x - 1, y, z), chunk.getOrAir(x + 1, y, z), chunk.getOrAir(x, y - 1, z), chunk.getOrAir(x, y + 1, z), chunk.getOrAir(x, y, z - 1), chunk.getOrAir(x, y, z + 1), state);
+                    BlockRenderContext context = new BlockRenderContext(new Vector3i(x + cx * 16, y, z + cz * 16), chunk.getOrAir(x - 1, y, z), chunk.getOrAir(x + 1, y, z), chunk.getOrAir(x, y - 1, z), chunk.getOrAir(x, y + 1, z), chunk.getOrAir(x, y, z - 1), chunk.getOrAir(x, y, z + 1), state);
                     MeshData rendered = renderer.render(context);
                     rendered.multiply4f(0, new Matrix4f().translate(x, y, z));
                     data.append(rendered);
@@ -50,6 +50,27 @@ public class ClientWorld implements World {
             }
         }
         return data;
+    }
+
+    public float calculateAO(Vector3i position) {
+        float total = 0;
+        for (int i = -1; i <= 0; i++) {
+            for (int j = -1; j <= 0; j++) {
+                for (int k = -1; k <= 0; k++) {
+                    Vector3i v = new Vector3i(position.x + i, position.y + j, position.z + k);
+                    float f = 1;
+                    if (isChunkLoaded(World.getChunkCoordinate(new Vector2i(v.x, v.z)))) {
+                        if (v.y >= 0 && v.y <= 255) {
+                            if (get(v).getBlock() != Blocks.AIR) {
+                                f = 0;
+                            }
+                        }
+                    }
+                    total += f;
+                }
+            }
+        }
+        return total / 8.0F;
     }
 
     public void loadChunk(Vector2i coordinate, Chunk chunk) {
@@ -102,7 +123,7 @@ public class ClientWorld implements World {
         if (chunkLock.tryLock()) {
             for (Vector2i v : chunks.keySet()) {
                 if (!meshes.containsKey(v)) {
-                    meshes.put(v, new Mesh(mesh(chunks.get(v))));
+                    meshes.put(v, new Mesh(mesh(v.x, v.y, chunks.get(v))));
                 }
             }
             chunkLock.unlock();

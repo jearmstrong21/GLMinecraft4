@@ -4,10 +4,10 @@ import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.client.assets.AtlasPosition;
 import p0nki.glmc4.client.assets.TextureQuad;
-import p0nki.glmc4.client.render.block.BakedConstantSidedBlockRenderer;
+import p0nki.glmc4.client.render.block.NoContextConstantSidedBlockRenderer;
 import p0nki.glmc4.utils.Identifier;
 
-public class StoneBlockRenderer extends BakedConstantSidedBlockRenderer {
+public class StoneBlockRenderer extends NoContextConstantSidedBlockRenderer {
 
     public StoneBlockRenderer() {
         super(Blocks.STONE);

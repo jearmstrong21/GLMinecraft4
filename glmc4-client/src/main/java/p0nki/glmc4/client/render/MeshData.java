@@ -1,18 +1,28 @@
 package p0nki.glmc4.client.render;
 
-import org.joml.Matrix4f;
-import org.joml.Vector2f;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
+import org.joml.*;
+import p0nki.glmc4.client.GLMC4Client;
 import p0nki.glmc4.client.assets.TextureLayer;
 import p0nki.glmc4.client.assets.TextureQuad;
 
+import java.lang.Math;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class MeshData {
+
+    private final static int POS_BUFFER_INDEX = 0;
+    private final static int UV_BUFFER_INDEX = 1;
+    private final static int COLOR_BUFFER_INDEX = 2;
+    private final static int AO_BUFFER_INDEX = 3;
+    private final static int FAKE_LIGHT_BUFFER_INDEX = 4;
+
+    private final static float FAKE_LIGHT_SIDE_TOP = 1.0F;
+    private final static float FAKE_LIGHT_SIDE_1 = 0.8F;
+    private final static float FAKE_LIGHT_SIDE_2 = 0.6F;
+    private final static float FAKE_LIGHT_SIDE_BOTTOM = 0.4F;
 
     private final List<List<Float>> data;
     private final List<Integer> sizes;
@@ -30,7 +40,7 @@ public class MeshData {
     }
 
     public static MeshData chunk() {
-        return new MeshData().addBuffer(3).addBuffer(2).addBuffer(3);
+        return new MeshData().addBuffer(3).addBuffer(2).addBuffer(3).addBuffer(1).addBuffer(1);
     }
 
     public int size() {
@@ -102,51 +112,101 @@ public class MeshData {
     }
 
     @SuppressWarnings("UnusedReturnValue")
-    public MeshData addQuad(int uvBuffer, int colorBuffer, TextureLayer layer) {
-        addQuad(uvBuffer, new Vector2f(layer.atlasPosition.x, layer.atlasPosition.y), new Vector2f(layer.atlasPosition.w, 0), new Vector2f(0, layer.atlasPosition.h));
-        appendBuffer3f(colorBuffer, List.of(layer.color, layer.color, layer.color, layer.color));
+    public MeshData addQuad(TextureLayer layer, float ao0, float ao1, float ao2, float ao3, float fakeLight) {
+        addQuad(UV_BUFFER_INDEX, new Vector2f(layer.atlasPosition.x, layer.atlasPosition.y), new Vector2f(layer.atlasPosition.w, 0), new Vector2f(0, layer.atlasPosition.h));
+        appendBuffer3f(COLOR_BUFFER_INDEX, List.of(layer.color, layer.color, layer.color, layer.color));
+        appendBuffer(AO_BUFFER_INDEX, List.of(ao0, ao1, ao2, ao3));
+        appendBuffer(FAKE_LIGHT_BUFFER_INDEX, List.of(fakeLight, fakeLight, fakeLight, fakeLight));
         return this;
     }
 
-    public MeshData addXmiQuad(int posBuffer, int uvBuffer, int colorBuffer, Vector3f origin, TextureQuad textureQuad) {
+    public MeshData addXmiQuad(Vector3i blockPos, Vector3f origin, TextureQuad textureQuad) {
+        return addXmiQuad(origin, textureQuad,
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y + 1, blockPos.z)),
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y + 1, blockPos.z + 1)),
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y, blockPos.z)),
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y, blockPos.z + 1)));
+    }
+
+    public MeshData addXmiQuad(Vector3f origin, TextureQuad textureQuad, float ao0, float ao1, float ao2, float ao3) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
-        addQuad(posBuffer, new Vector3f(0, 1, 0).add(origin), new Vector3f(0, 0, 1), new Vector3f(0, -1, 0));
-        addQuad(uvBuffer, colorBuffer, textureQuad.layer1);
+        addQuad(POS_BUFFER_INDEX, new Vector3f(0, 1, 0).add(origin), new Vector3f(0, 0, 1), new Vector3f(0, -1, 0));
+        addQuad(textureQuad.layer1, ao0, ao1, ao2, ao3, FAKE_LIGHT_SIDE_1);
         return this;
     }
 
-    public MeshData addXplQuad(int posBuffer, int uvBuffer, int colorBuffer, Vector3f origin, TextureQuad textureQuad) {
+    public MeshData addXplQuad(Vector3i blockPos, Vector3f origin, TextureQuad textureQuad) {
+        return addXplQuad(origin, textureQuad,
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y + 1, blockPos.z + 1)),
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y + 1, blockPos.z)),
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y, blockPos.z + 1)),
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y, blockPos.z)));
+    }
+
+    public MeshData addXplQuad(Vector3f origin, TextureQuad textureQuad, float ao0, float ao1, float ao2, float ao3) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
-        addQuad(posBuffer, new Vector3f(1, 1, 1).add(origin), new Vector3f(0, 0, -1), new Vector3f(0, -1, 0));
-        addQuad(uvBuffer, colorBuffer, textureQuad.layer1);
+        addQuad(POS_BUFFER_INDEX, new Vector3f(1, 1, 1).add(origin), new Vector3f(0, 0, -1), new Vector3f(0, -1, 0));
+        addQuad(textureQuad.layer1, ao0, ao1, ao2, ao3, FAKE_LIGHT_SIDE_2);
         return this;
     }
 
-    public MeshData addYmiQuad(int posBuffer, int uvBuffer, int colorBuffer, Vector3f origin, TextureQuad textureQuad) {
+    public MeshData addYmiQuad(Vector3i blockPos, Vector3f origin, TextureQuad textureQuad) {
+        return addYmiQuad(origin, textureQuad,
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y, blockPos.z)),
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y, blockPos.z)),
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y, blockPos.z + 1)),
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y, blockPos.z + 1)));
+    }
+
+    public MeshData addYmiQuad(Vector3f origin, TextureQuad textureQuad, float ao0, float ao1, float ao2, float ao3) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
-        addQuad(posBuffer, new Vector3f(0, 0, 0).add(origin), new Vector3f(1, 0, 0), new Vector3f(0, 0, 1));
-        addQuad(uvBuffer, colorBuffer, textureQuad.layer1);
+        addQuad(POS_BUFFER_INDEX, new Vector3f(0, 0, 0).add(origin), new Vector3f(1, 0, 0), new Vector3f(0, 0, 1));
+        addQuad(textureQuad.layer1, ao0, ao1, ao2, ao3, FAKE_LIGHT_SIDE_BOTTOM);
         return this;
     }
 
-    public MeshData addYplQuad(int posBuffer, int uvBuffer, int colorBuffer, Vector3f origin, TextureQuad textureQuad) {
+    public MeshData addYplQuad(Vector3i blockPos, Vector3f origin, TextureQuad textureQuad) {
+        return addYplQuad(origin, textureQuad,
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y + 1, blockPos.z)),
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y + 1, blockPos.z)),
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y + 1, blockPos.z + 1)),
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y + 1, blockPos.z + 1)));
+    }
+
+    public MeshData addYplQuad(Vector3f origin, TextureQuad textureQuad, float ao0, float ao1, float ao2, float ao3) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
-        addQuad(posBuffer, new Vector3f(0, 1, 0).add(origin), new Vector3f(1, 0, 0), new Vector3f(0, 0, 1));
-        addQuad(uvBuffer, colorBuffer, textureQuad.layer1);
+        addQuad(POS_BUFFER_INDEX, new Vector3f(0, 1, 0).add(origin), new Vector3f(1, 0, 0), new Vector3f(0, 0, 1));
+        addQuad(textureQuad.layer1, ao0, ao1, ao2, ao3, FAKE_LIGHT_SIDE_TOP);
         return this;
     }
 
-    public MeshData addZmiQuad(int posBuffer, int uvBuffer, int colorBuffer, Vector3f origin, TextureQuad textureQuad) {
+    public MeshData addZmiQuad(Vector3i blockPos, Vector3f origin, TextureQuad textureQuad) {
+        return addZmiQuad(origin, textureQuad,
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y + 1, blockPos.z)),
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y + 1, blockPos.z)),
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y, blockPos.z)),
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y, blockPos.z)));
+    }
+
+    public MeshData addZmiQuad(Vector3f origin, TextureQuad textureQuad, float ao0, float ao1, float ao2, float ao3) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
-        addQuad(posBuffer, new Vector3f(1, 1, 0).add(origin), new Vector3f(-1, 0, 0), new Vector3f(0, -1, 0));
-        addQuad(uvBuffer, colorBuffer, textureQuad.layer1);
+        addQuad(POS_BUFFER_INDEX, new Vector3f(1, 1, 0).add(origin), new Vector3f(-1, 0, 0), new Vector3f(0, -1, 0));
+        addQuad(textureQuad.layer1, ao0, ao1, ao2, ao3, FAKE_LIGHT_SIDE_1);
         return this;
     }
 
-    public MeshData addZplQuad(int posBuffer, int uvBuffer, int colorBuffer, Vector3f origin, TextureQuad textureQuad) {
+    public MeshData addZplQuad(Vector3i blockPos, Vector3f origin, TextureQuad textureQuad) {
+        return addZplQuad(origin, textureQuad,
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y + 1, blockPos.z + 1)),
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y + 1, blockPos.z + 1)),
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y, blockPos.z + 1)),
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y, blockPos.z + 1)));
+    }
+
+    public MeshData addZplQuad(Vector3f origin, TextureQuad textureQuad, float ao0, float ao1, float ao2, float ao3) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
-        addQuad(posBuffer, new Vector3f(0, 1, 1).add(origin), new Vector3f(1, 0, 0), new Vector3f(0, -1, 0));
-        addQuad(uvBuffer, colorBuffer, textureQuad.layer1);
+        addQuad(POS_BUFFER_INDEX, new Vector3f(0, 1, 1).add(origin), new Vector3f(1, 0, 0), new Vector3f(0, -1, 0));
+        addQuad(textureQuad.layer1, ao0, ao1, ao2, ao3, FAKE_LIGHT_SIDE_2);
         return this;
     }
 
