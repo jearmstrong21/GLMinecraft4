@@ -58,12 +58,12 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public final boolean isValidPosition(Vector3f testPosition) {
-        final int x0 = (int) testPosition.x;
-        final int y0 = (int) testPosition.y;
-        final int z0 = (int) testPosition.z;
-        final int x1 = (int) (testPosition.x + getSize().x);
-        final int y1 = (int) (testPosition.y + getSize().y);
-        final int z1 = (int) (testPosition.z + getSize().z);
+        final int x0 = (int) Math.floor(testPosition.x);
+        final int y0 = (int) Math.floor(testPosition.y);
+        final int z0 = (int) Math.floor(testPosition.z);
+        final int x1 = (int) Math.floor(testPosition.x + getSize().x);
+        final int y1 = (int) Math.floor(testPosition.y + getSize().y);
+        final int z1 = (int) Math.floor(testPosition.z + getSize().z);
         for (int x = x0; x <= x1; x++) {
             for (int y = y0; y <= y1; y++) {
                 for (int z = z0; z <= z1; z++) {
