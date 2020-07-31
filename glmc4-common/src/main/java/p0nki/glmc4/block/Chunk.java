@@ -30,7 +30,6 @@ public class Chunk implements PacketByteBuf.Equivalent {
                 for (int i = y - 1; i > 0; i--) {
                     c.set(x, i, z, Blocks.STONE.getDefaultState());
                 }
-
             }
         }
         return c;

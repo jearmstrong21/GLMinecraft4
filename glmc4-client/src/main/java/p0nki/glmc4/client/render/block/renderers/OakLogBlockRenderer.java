@@ -5,11 +5,11 @@ import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.block.blocks.OakLogBlock;
 import p0nki.glmc4.client.assets.AtlasPosition;
 import p0nki.glmc4.client.assets.TextureQuad;
-import p0nki.glmc4.client.render.block.BakedConstantSidedBlockRenderer;
+import p0nki.glmc4.client.render.block.NoContextConstantSidedBlockRenderer;
 import p0nki.glmc4.utils.Identifier;
 import p0nki.glmc4.utils.math.Axis;
 
-public class OakLogBlockRenderer extends BakedConstantSidedBlockRenderer {
+public class OakLogBlockRenderer extends NoContextConstantSidedBlockRenderer {
 
     public OakLogBlockRenderer() {
         super(Blocks.OAK_LOG);

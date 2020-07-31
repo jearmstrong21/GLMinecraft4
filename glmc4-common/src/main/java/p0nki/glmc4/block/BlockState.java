@@ -4,7 +4,7 @@ import p0nki.glmc4.state.Property;
 
 import javax.annotation.CheckReturnValue;
 
-public class BlockState {
+public final class BlockState {
 
     private final long value;
 
@@ -14,6 +14,21 @@ public class BlockState {
 
     private BlockState(int id, int meta) {
         this.value = (((long) id) << 32) | (meta & 0xffffffffL);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        BlockState that = (BlockState) o;
+
+        return value == that.value;
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) (value ^ (value >>> 32));
     }
 
     @CheckReturnValue

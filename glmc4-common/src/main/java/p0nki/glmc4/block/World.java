@@ -8,19 +8,23 @@ import java.util.List;
 public interface World {
 
     static Vector2i getCoordinateInChunk(Vector2i worldPos) {
-        int x = worldPos.x % 16;
-        int y = worldPos.y % 16;
-        if (x < 0) x += 16;
-        if (y < 0) y += 16;
-        return new Vector2i(x, y);
+        int x = worldPos.x;
+        int z = worldPos.y;
+        while (x < 0) x += 16;
+        while (z < 0) z += 16;
+        while (x >= 16) x -= 16;
+        while (z >= 16) z -= 16;
+        return new Vector2i(x, z);
     }
 
     static Vector2i getChunkCoordinate(Vector2i worldPos) {
-        int cx = worldPos.x / 16;
-        int cz = worldPos.y / 16;
-        if (worldPos.x < 0) cx--;
-        if (worldPos.y < 0) cz--;
-        return new Vector2i(cx, cz);
+        int x = worldPos.x;
+        int z = worldPos.y;
+        while (x < 0) x += 16;
+        while (z < 0) z += 16;
+        while (x >= 16) x -= 16;
+        while (z >= 16) z -= 16;
+        return new Vector2i((worldPos.x - x) / 16, (worldPos.y - z) / 16);
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")

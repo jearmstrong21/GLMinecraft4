@@ -6,10 +6,10 @@ import p0nki.glmc4.block.blocks.GrassBlock;
 import p0nki.glmc4.client.assets.AtlasPosition;
 import p0nki.glmc4.client.assets.TextureQuad;
 import p0nki.glmc4.client.render.Colors;
-import p0nki.glmc4.client.render.block.BakedConstantSidedBlockRenderer;
+import p0nki.glmc4.client.render.block.NoContextConstantSidedBlockRenderer;
 import p0nki.glmc4.utils.Identifier;
 
-public class GrassBlockRenderer extends BakedConstantSidedBlockRenderer {
+public class GrassBlockRenderer extends NoContextConstantSidedBlockRenderer {
 
     public GrassBlockRenderer() {
         super(Blocks.GRASS);
