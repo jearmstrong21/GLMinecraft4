@@ -137,8 +137,8 @@ public class ClientWorld implements World {
 
     @Override
     public void update(Vector3i blockPos, BlockState blockState) {
-        if (get(blockPos).toLong() == blockState.toLong()) return;
         consumerQueue.add(clientWorld -> {
+            if (get(blockPos).toLong() == blockState.toLong()) return;
             Vector2i chunkCoordinate = World.getChunkCoordinate(new Vector2i(blockPos.x, blockPos.z));
             if (!isChunkLoaded(chunkCoordinate))
                 throw new ChunkNotLoadedException(chunkCoordinate.x, chunkCoordinate.y);
