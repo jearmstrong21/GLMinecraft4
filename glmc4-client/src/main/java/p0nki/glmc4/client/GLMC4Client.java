@@ -14,6 +14,8 @@ import org.apache.logging.log4j.MarkerManager;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
+import org.joml.Vector3i;
+import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.block.Chunk;
 import p0nki.glmc4.client.render.DebugRenderer3D;
 import p0nki.glmc4.client.render.TextRenderer;
@@ -55,6 +57,10 @@ public class GLMC4Client {
     private static final Map<UUID, Long> lastReceivedEntityUpdate = new HashMap<>();
     public static DebugRenderer3D debugRenderer3D;
     private static Map<UUID, Entity> entities = new HashMap<>();
+    private static String lastFreeMem = "n/a";
+    private static String lastTotalMem = "n/a";
+    private static String lastMaxMem = "n/a";
+    private static float lastFrameTime = 0;
 
     public static long getLastUpdateTime(UUID uuid) {
         return lastReceivedEntityUpdate.get(uuid);
@@ -83,6 +89,10 @@ public class GLMC4Client {
 
     public static void onLoadChunk(int x, int z, Chunk chunk) {
         clientWorld.loadChunk(new Vector2i(x, z), chunk);
+    }
+
+    public static void onChunkUpdate(Vector3i blockPos, BlockState newState) {
+        clientWorld.update(blockPos, newState);
     }
 
     public static void updateEntity(UUID uuid, CompoundTag newData) {
@@ -122,7 +132,7 @@ public class GLMC4Client {
         Matrix4f perspective = new Matrix4f().perspective((float) Math.toRadians(80), 1.0F, 0.001F, 300);
         Entity thisEntity = entities.get(packetListener.getPlayer().getUuid());
         Matrix4f view = new Matrix4f().lookAt(
-                new Vector3f(thisEntity.getEyePosition()).sub(new Vector3f(thisEntity.getLookingAt()).mul(7)),
+                new Vector3f(thisEntity.getEyePosition()).sub(new Vector3f(thisEntity.getLookingAt()).mul(3)),
                 new Vector3f(thisEntity.getEyePosition()),
                 new Vector3f(0, 1, 0)
         );
@@ -137,9 +147,30 @@ public class GLMC4Client {
             EntityRenderer<?> renderer = EntityRenderers.REGISTRY.get(identifier).getValue();
             renderer.render(worldRenderContext, entity);
         }
-        textRenderer.renderString(-1, 1 - 0.075F, 0.075F, String.format("GLMinecraft4\nFPS: %s\nPosition: %s\nLooking: %s", MCWindow.getFps(), thisEntity.getPosition(), lookDir));
+        System.runFinalization();
+        textRenderer.renderString(-1, 1 - 0.04F, 0.04F, String.format("GLMinecraft4\n" +
+                        "FPS: %s\n" +
+                        "Position: %s\n" +
+                        "Looking: %s\n" +
+                        "World stats: %s\n" +
+                        "Free memory: %s\n" +
+                        "Total memory: %s\n" +
+                        "Maximum memory: %s\n",
+                MCWindow.getFps(),
+                thisEntity.getPosition(),
+                lookDir,
+                clientWorld.worldStats(),
+                lastFreeMem,
+                lastTotalMem,
+                lastMaxMem));
 
         packetListener.tick();
+        if ((int) MCWindow.time() != (int) lastFrameTime) {
+            lastFreeMem = MathUtils.readableBytes(Runtime.getRuntime().freeMemory());
+            lastTotalMem = MathUtils.readableBytes(Runtime.getRuntime().totalMemory());
+            lastMaxMem = MathUtils.readableBytes(Runtime.getRuntime().maxMemory());
+        }
+        lastFrameTime = MCWindow.time();
     }
 
     private static void runRenderer() {

@@ -1,11 +1,21 @@
 package p0nki.glmc4.utils.math;
 
+import java.text.DecimalFormat;
+
 public class MathUtils {
 
     public static final float PI = (float) Math.PI;
 
     private MathUtils() {
 
+    }
+
+    // https://stackoverflow.com/a/5599842/9609025
+    public static String readableBytes(long size) {
+        if (size <= 0) return "0";
+        final String[] units = new String[]{"B", "kB", "MB", "GB", "TB"};
+        int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
+        return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
     }
 
     public static float clamp(float t, float min, float max) {

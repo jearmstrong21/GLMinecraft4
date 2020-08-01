@@ -17,20 +17,42 @@ import p0nki.glmc4.client.render.block.BlockRenderers;
 import p0nki.glmc4.utils.Identifier;
 
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 public class ClientWorld implements World {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private final ReentrantLock chunkLock = new ReentrantLock(true);
-    private final Map<Vector2i, Chunk> chunks = new HashMap<>();
+    private final Map<Vector2i, Chunk> chunks = new ConcurrentHashMap<>();
     private final Map<Vector2i, Mesh> meshes = new HashMap<>();
     private final Shader shader;
     private final Texture texture;
+    private final Queue<Consumer<ClientWorld>> consumerQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<Vector2i> inMeshQueue = new ConcurrentLinkedQueue<>();
+    private final AtomicInteger computeCounter = new AtomicInteger(0);
+
+    private void remesh(Vector2i v) {
+        if (!inMeshQueue.contains(v)) inMeshQueue.add(v);
+    }
+
+    public String worldStats() {
+        return String.format(
+                "\n\tin meshs %s" +
+                        "\n\tconsumers %s" +
+                        "\n\tchunks %s" +
+                        "\n\tmeshes %s" +
+                        "\n\tcomputes %s",
+                inMeshQueue.size(),
+                consumerQueue.size(),
+                chunks.size(),
+                meshes.size(),
+                computeCounter.get());
+    }
 
     public ClientWorld() {
         shader = Shader.create("chunk");
@@ -81,14 +103,17 @@ public class ClientWorld implements World {
 
     public void loadChunk(Vector2i coordinate, Chunk chunk) {
         if (chunks.containsKey(coordinate)) throw new AssertionError(coordinate);
-        chunkLock.lock();
-        chunks.put(coordinate, chunk);
-        chunkLock.unlock();
+        Objects.requireNonNull(chunk);
+        consumerQueue.add(clientWorld -> chunks.put(coordinate, chunk));
     }
 
     @Override
     public boolean isChunkLoaded(Vector2i chunkCoordinate) {
-        return chunks.containsKey(chunkCoordinate);
+        if (chunks.containsKey(chunkCoordinate)) {
+            Objects.requireNonNull(chunks.get(chunkCoordinate));
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -111,6 +136,31 @@ public class ClientWorld implements World {
     }
 
     @Override
+    public void update(Vector3i blockPos, BlockState blockState) {
+        consumerQueue.add(clientWorld -> {
+            if (get(blockPos).toLong() == blockState.toLong()) return;
+            Vector2i chunkCoordinate = World.getChunkCoordinate(new Vector2i(blockPos.x, blockPos.z));
+            if (!isChunkLoaded(chunkCoordinate))
+                throw new ChunkNotLoadedException(chunkCoordinate.x, chunkCoordinate.y);
+            Vector2i coordinateInChunk = World.getCoordinateInChunk(new Vector2i(blockPos.x, blockPos.z));
+            getChunk(chunkCoordinate).set(coordinateInChunk.x, blockPos.y, coordinateInChunk.y, blockState);
+            if (coordinateInChunk.x == 0 && coordinateInChunk.y == 0)
+                remesh(new Vector2i(chunkCoordinate.x - 1, chunkCoordinate.y - 1));
+            if (coordinateInChunk.x == 0 && coordinateInChunk.y == 15)
+                remesh(new Vector2i(chunkCoordinate.x - 1, chunkCoordinate.y + 1));
+            if (coordinateInChunk.x == 15 && coordinateInChunk.y == 0)
+                remesh(new Vector2i(chunkCoordinate.x + 1, chunkCoordinate.y - 1));
+            if (coordinateInChunk.x == 15 && coordinateInChunk.y == 15)
+                remesh(new Vector2i(chunkCoordinate.x + 1, chunkCoordinate.y + 1));
+            if (coordinateInChunk.x == 0) remesh(new Vector2i(chunkCoordinate.x - 1, chunkCoordinate.y));
+            if (coordinateInChunk.x == 15) remesh(new Vector2i(chunkCoordinate.x + 1, chunkCoordinate.y));
+            if (coordinateInChunk.y == 0) remesh(new Vector2i(chunkCoordinate.x, chunkCoordinate.y - 1));
+            if (coordinateInChunk.y == 15) remesh(new Vector2i(chunkCoordinate.x, chunkCoordinate.y + 1));
+            remesh(chunkCoordinate);
+        });
+    }
+
+    @Override
     public List<Vector2i> getLoadedChunks() {
         return List.copyOf(chunks.keySet());
     }
@@ -126,21 +176,37 @@ public class ClientWorld implements World {
             shader.setFloat("z", z);
             chunk.getValue().triangles();
         }
-        if (chunkLock.tryLock()) {
-            for (Vector2i v : chunks.keySet()) {
-                if (!meshes.containsKey(v) &&
-                        chunks.containsKey(new Vector2i(v.x - 1, v.y)) &&
-                        chunks.containsKey(new Vector2i(v.x + 1, v.y)) &&
-                        chunks.containsKey(new Vector2i(v.x, v.y - 1)) &&
-                        chunks.containsKey(new Vector2i(v.x, v.y + 1)) &&
-                        chunks.containsKey(new Vector2i(v.x - 1, v.y - 1)) &&
-                        chunks.containsKey(new Vector2i(v.x + 1, v.y - 1)) &&
-                        chunks.containsKey(new Vector2i(v.x - 1, v.y + 1)) &&
-                        chunks.containsKey(new Vector2i(v.x + 1, v.y + 1))) {
-                    meshes.put(v, new Mesh(mesh(v.x, v.y, chunks.get(v))));
-                }
+        for (Vector2i v : chunks.keySet()) {
+            if (!meshes.containsKey(v)) {
+                remesh(v);
             }
-            chunkLock.unlock();
+        }
+
+        if (!inMeshQueue.isEmpty()) {
+            Vector2i v = inMeshQueue.remove();
+            if (!chunks.containsKey(v) ||
+                    !chunks.containsKey(new Vector2i(v.x - 1, v.y)) ||
+                    !chunks.containsKey(new Vector2i(v.x + 1, v.y)) ||
+                    !chunks.containsKey(new Vector2i(v.x, v.y - 1)) ||
+                    !chunks.containsKey(new Vector2i(v.x, v.y + 1)) ||
+                    !chunks.containsKey(new Vector2i(v.x - 1, v.y - 1)) ||
+                    !chunks.containsKey(new Vector2i(v.x + 1, v.y - 1)) ||
+                    !chunks.containsKey(new Vector2i(v.x - 1, v.y + 1)) ||
+                    !chunks.containsKey(new Vector2i(v.x + 1, v.y + 1))) {
+                inMeshQueue.add(v);
+            } else {
+                CompletableFuture.runAsync(() -> {
+                    computeCounter.incrementAndGet();
+                    Chunk chunk = chunks.get(v);
+                    MeshData meshData = mesh(v.x, v.y, chunk);
+                    consumerQueue.add(clientWorld -> meshes.put(v, new Mesh(meshData)));
+                    computeCounter.decrementAndGet();
+                });
+            }
+        }
+
+        while (!consumerQueue.isEmpty()) {
+            consumerQueue.remove().accept(this);
         }
     }
 }

@@ -1,5 +1,7 @@
 package p0nki.glmc4.client;
 
+import org.joml.Vector2i;
+import org.joml.Vector3i;
 import p0nki.glmc4.network.packet.clientbound.*;
 import p0nki.glmc4.network.packet.serverbound.PacketC2SPingResponse;
 import p0nki.glmc4.network.packet.serverbound.PacketC2SPlayerMovement;
@@ -71,5 +73,10 @@ public class ClientPacketHandler extends ClientPacketListener {
     @Override
     public void onDisconnectReason(PacketS2CDisconnectReason packet) {
         System.out.println("DISCONNECT REASON " + packet.getReason());
+    }
+
+    @Override
+    public void onChunkUpdate(PacketS2CChunkUpdate packet) {
+        GLMC4Client.onChunkUpdate(new Vector3i(packet.getX(), packet.getY(), packet.getZ()), packet.getBlockState());
     }
 }

@@ -36,6 +36,8 @@ public interface World {
 
     Chunk getChunk(Vector2i chunkCoordinate);
 
+    void update(Vector3i blockPos, BlockState blockState);
+
     List<Vector2i> getLoadedChunks();
 
 }

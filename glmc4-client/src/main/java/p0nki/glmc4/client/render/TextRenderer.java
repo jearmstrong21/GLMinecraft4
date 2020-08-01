@@ -65,8 +65,10 @@ public class TextRenderer {
             if (c == '\n') {
                 y -= size;
                 x = x0;
+            } else if (c == '\t') {
+                x += size * 2.0F;
             } else if (c == ' ') {
-                x += size * 0.25F;
+                x += size * 0.5F;
             } else {
                 shader.setFloat("x", x);
                 shader.setFloat("y", y);

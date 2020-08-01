@@ -21,6 +21,7 @@ public class PacketTypes {
     public static PacketType<PacketS2CEntitySpawn> S2C_ENTITY_SPAWN;
     public static PacketType<PacketS2CEntityDespawn> S2C_ENTITY_DESPAWN;
     public static PacketType<PacketS2CDisconnectReason> S2C_DISCONNECT_REASON;
+    public static PacketType<PacketS2CChunkUpdate> S2C_CHUNK_UPDATE;
 
     public static PacketType<PacketC2SPingResponse> C2S_PING_RESPONSE;
     public static PacketType<PacketC2SPlayerMovement> C2S_PLAYER_MOVEMENT;
@@ -42,6 +43,7 @@ public class PacketTypes {
         register("s2c_entity_spawn", S2C_ENTITY_SPAWN = new PacketType<>(PacketS2CEntitySpawn::new));
         register("s2c_entity_despawn", S2C_ENTITY_DESPAWN = new PacketType<>(PacketS2CEntityDespawn::new));
         register("s2c_disconnect_reason", S2C_DISCONNECT_REASON = new PacketType<>(PacketS2CDisconnectReason::new));
+        register("s2c_chunk_update", S2C_CHUNK_UPDATE = new PacketType<>(PacketS2CChunkUpdate::new));
 
         register("c2s_ping_response", C2S_PING_RESPONSE = new PacketType<>(PacketC2SPingResponse::new));
         register("c2s_player_movement", C2S_PLAYER_MOVEMENT = new PacketType<>(PacketC2SPlayerMovement::new));

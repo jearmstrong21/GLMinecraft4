@@ -62,9 +62,18 @@ public class Chunk implements PacketByteBuf.Equivalent {
         }
     }
 
+    private void checkYBounds(int y) {
+        if (y < 0 || y > 255) throw new ArrayIndexOutOfBoundsException("Invalid chunk y coordinate " + y);
+    }
+
     private void checkBounds(int x, int y, int z) {
         if (x < 0 || y < 0 || z < 0 || x >= 16 || y >= 256 || z >= 16)
             throw new ArrayIndexOutOfBoundsException(String.format("Invalid chunk coordinates %d, %d, %d", x, y, z));
+    }
+
+    private void checkXZBounds(int x, int z) {
+        if (x < 0 || z < 0 || x >= 16 || z >= 16)
+            throw new ArrayIndexOutOfBoundsException(String.format("Invalid chunk xz coordinates %d, %d", x, z));
     }
 
     public BlockState get(Vector3i blockPos) {
@@ -72,7 +81,8 @@ public class Chunk implements PacketByteBuf.Equivalent {
     }
 
     public BlockState get(int x, int y, int z) {
-        checkBounds(x, y, z);
+        checkXZBounds(x, z);
+        if (y < 0 || y > 255) return Blocks.AIR.getDefaultState();
         return new BlockState(data[x][y][z]);
     }
 

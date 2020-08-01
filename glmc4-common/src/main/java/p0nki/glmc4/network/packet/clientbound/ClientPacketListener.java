@@ -24,4 +24,6 @@ public abstract class ClientPacketListener extends PacketListener<ClientPacketLi
 
     public abstract void onDisconnectReason(PacketS2CDisconnectReason packet);
 
+    public abstract void onChunkUpdate(PacketS2CChunkUpdate packet);
+
 }
