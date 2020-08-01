@@ -18,8 +18,10 @@ import p0nki.glmc4.utils.Identifier;
 
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public class ClientWorld implements World {
@@ -32,6 +34,7 @@ public class ClientWorld implements World {
     private final Texture texture;
     private final Queue<Consumer<ClientWorld>> consumerQueue = new ConcurrentLinkedQueue<>();
     private final Queue<Vector2i> inMeshQueue = new ConcurrentLinkedQueue<>();
+    private final AtomicInteger computeCounter = new AtomicInteger(0);
 
     private void remesh(Vector2i v) {
         if (!inMeshQueue.contains(v)) inMeshQueue.add(v);
@@ -42,37 +45,18 @@ public class ClientWorld implements World {
                 "\n\tin meshs %s" +
                         "\n\tconsumers %s" +
                         "\n\tchunks %s" +
-                        "\n\tmeshes %s",
+                        "\n\tmeshes %s" +
+                        "\n\tcomputes %s",
                 inMeshQueue.size(),
                 consumerQueue.size(),
                 chunks.size(),
-                meshes.size());
+                meshes.size(),
+                computeCounter.get());
     }
 
     public ClientWorld() {
         shader = Shader.create("chunk");
         texture = new Texture(Path.of("run", "atlas", "block.png"));
-        Thread thread = new Thread(() -> {
-            while (true) {
-                if (!inMeshQueue.isEmpty()) {
-                    Vector2i v = inMeshQueue.remove();
-                    if (!chunks.containsKey(v) ||
-                            !chunks.containsKey(new Vector2i(v.x - 1, v.y)) ||
-                            !chunks.containsKey(new Vector2i(v.x + 1, v.y)) ||
-                            !chunks.containsKey(new Vector2i(v.x, v.y - 1)) ||
-                            !chunks.containsKey(new Vector2i(v.x, v.y + 1)) ||
-                            !chunks.containsKey(new Vector2i(v.x - 1, v.y - 1)) ||
-                            !chunks.containsKey(new Vector2i(v.x + 1, v.y - 1)) ||
-                            !chunks.containsKey(new Vector2i(v.x - 1, v.y + 1)) ||
-                            !chunks.containsKey(new Vector2i(v.x + 1, v.y + 1))) continue;
-                    Chunk chunk = chunks.get(v);
-                    MeshData meshData = mesh(v.x, v.y, chunk);
-                    consumerQueue.add(clientWorld -> meshes.put(v, new Mesh(meshData)));
-                }
-            }
-        }, "Chunk meshing");
-        thread.setDaemon(true);
-        thread.start();
     }
 
     private MeshData mesh(int cx, int cz, Chunk chunk) {
@@ -153,20 +137,25 @@ public class ClientWorld implements World {
 
     @Override
     public void update(Vector3i blockPos, BlockState blockState) {
+        if (get(blockPos).toLong() == blockState.toLong()) return;
         consumerQueue.add(clientWorld -> {
             Vector2i chunkCoordinate = World.getChunkCoordinate(new Vector2i(blockPos.x, blockPos.z));
             if (!isChunkLoaded(chunkCoordinate))
                 throw new ChunkNotLoadedException(chunkCoordinate.x, chunkCoordinate.y);
             Vector2i coordinateInChunk = World.getCoordinateInChunk(new Vector2i(blockPos.x, blockPos.z));
             getChunk(chunkCoordinate).set(coordinateInChunk.x, blockPos.y, coordinateInChunk.y, blockState);
-            remesh(new Vector2i(chunkCoordinate.x - 1, chunkCoordinate.y - 1));
-            remesh(new Vector2i(chunkCoordinate.x - 1, chunkCoordinate.y + 1));
-            remesh(new Vector2i(chunkCoordinate.x + 1, chunkCoordinate.y - 1));
-            remesh(new Vector2i(chunkCoordinate.x + 1, chunkCoordinate.y + 1));
-            remesh(new Vector2i(chunkCoordinate.x - 1, chunkCoordinate.y));
-            remesh(new Vector2i(chunkCoordinate.x + 1, chunkCoordinate.y));
-            remesh(new Vector2i(chunkCoordinate.x, chunkCoordinate.y - 1));
-            remesh(new Vector2i(chunkCoordinate.x, chunkCoordinate.y + 1));
+            if (coordinateInChunk.x == 0 && coordinateInChunk.y == 0)
+                remesh(new Vector2i(chunkCoordinate.x - 1, chunkCoordinate.y - 1));
+            if (coordinateInChunk.x == 0 && coordinateInChunk.y == 15)
+                remesh(new Vector2i(chunkCoordinate.x - 1, chunkCoordinate.y + 1));
+            if (coordinateInChunk.x == 15 && coordinateInChunk.y == 0)
+                remesh(new Vector2i(chunkCoordinate.x + 1, chunkCoordinate.y - 1));
+            if (coordinateInChunk.x == 15 && coordinateInChunk.y == 15)
+                remesh(new Vector2i(chunkCoordinate.x + 1, chunkCoordinate.y + 1));
+            if (coordinateInChunk.x == 0) remesh(new Vector2i(chunkCoordinate.x - 1, chunkCoordinate.y));
+            if (coordinateInChunk.x == 15) remesh(new Vector2i(chunkCoordinate.x + 1, chunkCoordinate.y));
+            if (coordinateInChunk.y == 0) remesh(new Vector2i(chunkCoordinate.x, chunkCoordinate.y - 1));
+            if (coordinateInChunk.y == 15) remesh(new Vector2i(chunkCoordinate.x, chunkCoordinate.y + 1));
             remesh(chunkCoordinate);
         });
     }
@@ -190,6 +179,29 @@ public class ClientWorld implements World {
         for (Vector2i v : chunks.keySet()) {
             if (!meshes.containsKey(v)) {
                 remesh(v);
+            }
+        }
+
+        if (!inMeshQueue.isEmpty()) {
+            Vector2i v = inMeshQueue.remove();
+            if (!chunks.containsKey(v) ||
+                    !chunks.containsKey(new Vector2i(v.x - 1, v.y)) ||
+                    !chunks.containsKey(new Vector2i(v.x + 1, v.y)) ||
+                    !chunks.containsKey(new Vector2i(v.x, v.y - 1)) ||
+                    !chunks.containsKey(new Vector2i(v.x, v.y + 1)) ||
+                    !chunks.containsKey(new Vector2i(v.x - 1, v.y - 1)) ||
+                    !chunks.containsKey(new Vector2i(v.x + 1, v.y - 1)) ||
+                    !chunks.containsKey(new Vector2i(v.x - 1, v.y + 1)) ||
+                    !chunks.containsKey(new Vector2i(v.x + 1, v.y + 1))) {
+                inMeshQueue.add(v);
+            } else {
+                CompletableFuture.runAsync(() -> {
+                    computeCounter.incrementAndGet();
+                    Chunk chunk = chunks.get(v);
+                    MeshData meshData = mesh(v.x, v.y, chunk);
+                    consumerQueue.add(clientWorld -> meshes.put(v, new Mesh(meshData)));
+                    computeCounter.decrementAndGet();
+                });
             }
         }
 

@@ -31,12 +31,12 @@ public class PlayerEntity extends Entity {
     @Override
     public void tick(Random random) {
         super.tick(random);
-        final int x0 = (int) Math.floor(getPosition().x) - 3;
-        final int y0 = (int) Math.floor(getPosition().y) - 3;
-        final int z0 = (int) Math.floor(getPosition().z) - 3;
-        final int x1 = (int) Math.floor(getPosition().x + getSize().x) + 3;
-        final int y1 = (int) Math.floor(getPosition().y + getSize().y) + 3;
-        final int z1 = (int) Math.floor(getPosition().z + getSize().z) + 3;
+        final int x0 = (int) Math.floor(getPosition().x) - 6;
+        final int y0 = (int) Math.floor(getPosition().y) - 6;
+        final int z0 = (int) Math.floor(getPosition().z) - 6;
+        final int x1 = (int) Math.floor(getPosition().x + getSize().x) + 6;
+        final int y1 = (int) Math.floor(getPosition().y + getSize().y) + 6;
+        final int z1 = (int) Math.floor(getPosition().z + getSize().z) + 6;
         for (int y = y0; y <= y1; y++) {
             if (y < 0 || y > 255) continue;
             for (int x = x0; x <= x1; x++) {
