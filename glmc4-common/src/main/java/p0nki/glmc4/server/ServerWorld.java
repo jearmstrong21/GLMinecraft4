@@ -6,6 +6,7 @@ import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.block.Chunk;
 import p0nki.glmc4.block.ChunkNotLoadedException;
 import p0nki.glmc4.block.World;
+import p0nki.glmc4.network.packet.clientbound.PacketS2CChunkUpdate;
 
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +47,15 @@ public class ServerWorld implements World {
     public Chunk getChunk(Vector2i chunkCoordinate) {
         if (!isChunkLoaded(chunkCoordinate)) throw new ChunkNotLoadedException(chunkCoordinate);
         return chunks.get(chunkCoordinate);
+    }
+
+    @Override
+    public void update(Vector3i blockPos, BlockState blockState) {
+        Vector2i chunkCoordinate = World.getChunkCoordinate(new Vector2i(blockPos.x, blockPos.z));
+        if (!isChunkLoaded(chunkCoordinate)) throw new ChunkNotLoadedException(chunkCoordinate.x, chunkCoordinate.y);
+        Vector2i coordinateInChunk = World.getCoordinateInChunk(new Vector2i(blockPos.x, blockPos.z));
+        getChunk(chunkCoordinate).set(coordinateInChunk.x, blockPos.y, coordinateInChunk.y, blockState);
+        MinecraftServer.INSTANCE.writeAll(new PacketS2CChunkUpdate(blockPos.x, blockPos.y, blockPos.z, blockState));
     }
 
     @Override
