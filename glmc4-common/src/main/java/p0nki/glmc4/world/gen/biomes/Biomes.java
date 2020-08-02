@@ -13,6 +13,7 @@ public class Biomes {
 
     public static Biome OCEAN;
     public static Biome PLAINS;
+    public static Biome HIGH_PLAINS;
     public static Biome BEACH;
 
     private static void register(String name, Biome biome) {
@@ -22,13 +23,13 @@ public class Biomes {
     public static final Vector3f BAD = new Vector3f(1, 0, 1);
 
     public static final Vector3f GRASS_COLOR = new Vector3f(0.5F, 0.9F, 0.4F);
-    public static final Vector3f GREEN = new Vector3f(1, 0, 0);
 
     public static void initialize() {
         REGISTRY = new Registry<>();
-        register("ocean", OCEAN = new Biome(Blocks.STONE.getDefaultState(), BAD));
-        register("plains", PLAINS = new Biome(Blocks.GRASS.getDefaultState(), GRASS_COLOR).with(OakTreeFeature.DECORATOR, OakTreeFeature.INSTANCE));
-        register("beach", BEACH = new Biome(Blocks.SAND.getDefaultState(), BAD).with(PalmTreeFeature.DECORATOR, PalmTreeFeature.INSTANCE));
+        register("ocean", OCEAN = new Biome(Blocks.STONE.getDefaultState(), BAD).addNoiseRange(-20));
+        register("plains", PLAINS = new Biome(Blocks.GRASS.getDefaultState(), GRASS_COLOR).with(OakTreeFeature.PLAINS, OakTreeFeature.INSTANCE));
+        register("high_plains", HIGH_PLAINS = new Biome(Blocks.GRASS.getDefaultState(), new Vector3f(0, 0, 1)).with(OakTreeFeature.HIGH_PLAINS, OakTreeFeature.INSTANCE).addNoiseRange(10));
+        register("beach", BEACH = new Biome(Blocks.SAND.getDefaultState(), BAD).with(PalmTreeFeature.DECORATOR, PalmTreeFeature.INSTANCE).addNoiseRange(-10));
     }
 
 }

@@ -190,10 +190,12 @@ public class ClientWorld implements World {
             shader.setFloat("z", z);
             chunk.getValue().triangles();
         }
-        chunks.keySet().forEach(key -> GLMC4Client.debugRenderer3D.renderCube(worldRenderContext, new Vector3f(0, 0, 1), new Vector3f(key.x * 16, 0, key.y * 16), new Vector3f(16, 256, 16)));
-        for (int y = 0; y < 256; y++) {
-            Vector2i chunk = World.getChunkCoordinate(new Vector2i((int) GLMC4Client.getThisEntity().getPosition().x, (int) GLMC4Client.getThisEntity().getPosition().z));
-            GLMC4Client.debugRenderer3D.renderCube(worldRenderContext, new Vector3f(1, 1, 0), new Vector3f(chunk.x * 16, y, chunk.y * 16), new Vector3f(16, 1, 16));
+        if (ClientSettings.CHUNK_BORDERS) {
+            chunks.keySet().forEach(key -> GLMC4Client.debugRenderer3D.renderCube(worldRenderContext, ClientSettings.CHUNK_COLOR, new Vector3f(key.x * 16, 0, key.y * 16), new Vector3f(16, 256, 16)));
+            for (int y = 0; y < 256; y++) {
+                Vector2i chunk = World.getChunkCoordinate(new Vector2i((int) GLMC4Client.getThisEntity().getPosition().x, (int) GLMC4Client.getThisEntity().getPosition().z));
+                GLMC4Client.debugRenderer3D.renderCube(worldRenderContext, ClientSettings.CURRENT_CHUNK_COLOR, new Vector3f(chunk.x * 16, y, chunk.y * 16), new Vector3f(16, 1, 16));
+            }
         }
         for (Vector2i v : chunks.keySet()) {
             if (!meshes.containsKey(v)) {

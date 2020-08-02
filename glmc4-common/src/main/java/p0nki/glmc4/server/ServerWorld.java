@@ -17,7 +17,6 @@ import p0nki.glmc4.world.gen.ctx.ReadWriteWorldContext;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class ServerWorld implements World {
@@ -136,15 +135,15 @@ public class ServerWorld implements World {
         runnableQueue.add(() -> {
             Random random = new Random(v.hashCode());
             ReadWriteWorldContext context = getContext(v);
-            Set<Biome> biomes = IntStream.range(0, 16)
+            IntStream.range(0, 16)
                     .boxed()
                     .flatMap(x -> IntStream.range(0, 16)
                             .mapToObj(z -> new Vector2i(x, z)))
                     .map(p -> chunks.get(v).getValue().getBiome(p.x, p.y))
-                    .collect(Collectors.toSet());
-            biomes.forEach(biome -> biome.getDecoratorFeatures().forEach(pair -> {
-                pair.getFirst().generate(context, new Vector3i(v.x * 16, 0, v.y * 16), random).forEach(position -> pair.getSecond().generate(context, position, random));
-            }));
+                    .forEach(biome -> biome.getDecoratorFeatures()
+                            .forEach(pair -> {
+                                pair.getFirst().generate(context, new Vector3i(v.x * 16, 0, v.y * 16), random).forEach(position -> pair.getSecond().generate(context, position, random));
+                            }));
             chunks.get(v).setGenerationStatus(ChunkGenerationStatus.DECORATED);
         });
         return true;

@@ -16,10 +16,16 @@ public final class Biome extends Registrable<Biome> {
     private final BlockState topBlock;
     private final Vector3f grassColor;
     private final List<Pair<Decorator, Feature>> decoratorFeatures = new ArrayList<>();
+    private Pair<Float, Float> noiseRange;
 
     public Biome(BlockState topBlock, Vector3f grassColor) {
         this.topBlock = topBlock;
         this.grassColor = grassColor;
+        noiseRange = Pair.of(30.0F, 40.0F);
+    }
+
+    public Pair<Float, Float> getNoiseRange() {
+        return noiseRange;
     }
 
     public Vector3f getGrassColor() {
@@ -28,6 +34,16 @@ public final class Biome extends Registrable<Biome> {
 
     public Biome with(Decorator decorator, Feature feature) {
         decoratorFeatures.add(Pair.of(Decorator.filterBiome(this, decorator), feature));
+        return this;
+    }
+
+    public Biome withNoiseRange(float min, float max) {
+        noiseRange = Pair.of(min, max);
+        return this;
+    }
+
+    public Biome addNoiseRange(float offset) {
+        noiseRange = noiseRange.mapFirst(min -> min + offset).mapSecond(max -> max + offset);
         return this;
     }
 

@@ -4,10 +4,13 @@ import org.joml.Vector3i;
 import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.network.PacketByteBuf;
+import p0nki.glmc4.utils.math.MathUtils;
 import p0nki.glmc4.utils.math.SimplexGenerator;
 import p0nki.glmc4.world.gen.biomes.Biome;
 import p0nki.glmc4.world.gen.biomes.BiomeGenerator;
 import p0nki.glmc4.world.gen.biomes.Biomes;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Chunk implements PacketByteBuf.Equivalent {
     private final long[][][] data;
@@ -33,9 +36,21 @@ public class Chunk implements PacketByteBuf.Equivalent {
     private static BiomeGenerator biomeGenerator = null;
     private static SimplexGenerator simplexGenerator = null;
 
+    private static float sampleHeightMap(Biome biome, float x, float z) {
+        x *= 0.01F;
+        z *= 0.01F;
+        float value = simplexGenerator.simplex(x, z) + 0.5F * simplexGenerator.simplex(x * 2, z * 2) + 0.25F * simplexGenerator.simplex(x * 4, z * 4);
+        value /= (1 + 0.5 + 0.25);
+        value = MathUtils.map(value, -1, 1, biome.getNoiseRange().getFirst(), biome.getNoiseRange().getSecond());
+        return value;
+    }
+
     public static Chunk generateHeightMap(int cx, int cz) {
-        if (biomeGenerator == null) biomeGenerator = new BiomeGenerator(System.currentTimeMillis());
-        if (simplexGenerator == null) simplexGenerator = new SimplexGenerator(System.currentTimeMillis() + 1);
+        if (biomeGenerator == null) {
+            AtomicLong seed = new AtomicLong(System.currentTimeMillis());
+            simplexGenerator = new SimplexGenerator(seed);
+            biomeGenerator = new BiomeGenerator(seed);
+        }
 
         Chunk c = new Chunk();
 
@@ -46,14 +61,24 @@ public class Chunk implements PacketByteBuf.Equivalent {
             }
         }
 
+        int cellSize = 16;
+        float[][] samples = new float[16 / cellSize + 1][16 / cellSize + 1];
+        for (int i = 0; i < 16 / cellSize + 1; i++) {
+            for (int j = 0; j < 16 / cellSize + 1; j++) {
+                samples[i][j] = sampleHeightMap(biomes[i * cellSize][j * cellSize], cx * 16 + i * cellSize, cz * 16 + j * cellSize);
+            }
+        }
         int[][] heightmap = new int[16][16];
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
-                float rx = cx * 16 + x;
-                float rz = cz * 16 + z;
-                rx *= 0.01F;
-                rz *= 0.01F;
-                heightmap[x][z] = (int) (8 + 6 * (simplexGenerator.simplex(rx, rz) + 0.5F * simplexGenerator.simplex(rx * 2, rz * 2)));
+                int i = x / cellSize;
+                int j = z / cellSize;
+                float di = (x % cellSize) / (float) cellSize;
+                float dj = (z % cellSize) / (float) cellSize;
+                float minx = MathUtils.lerp(di, samples[i][j], samples[i + 1][j]);
+                float maxx = MathUtils.lerp(di, samples[i][j + 1], samples[i + 1][j + 1]);
+                float value = MathUtils.lerp(dj, minx, maxx);
+                heightmap[x][z] = (int) value;
             }
         }
 
