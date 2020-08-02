@@ -1,7 +1,7 @@
-package p0nki.glmc4.wgen.layer;
+package p0nki.glmc4.world.gen.layer;
 
-import p0nki.glmc4.wgen.Biomes;
-import p0nki.glmc4.wgen.RandomContext;
+import p0nki.glmc4.world.gen.Biomes;
+import p0nki.glmc4.world.gen.RandomContext;
 
 public enum BeachLayer implements ParentedLayer {
     INSTANCE;

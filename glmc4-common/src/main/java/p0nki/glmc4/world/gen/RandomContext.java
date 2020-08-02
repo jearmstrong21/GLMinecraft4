@@ -1,4 +1,4 @@
-package p0nki.glmc4.wgen;
+package p0nki.glmc4.world.gen;
 
 import p0nki.glmc4.utils.math.MathUtils;
 

@@ -1,6 +1,9 @@
 package p0nki.glmc4.utils.math;
 
+import org.joml.Vector2i;
+
 import java.text.DecimalFormat;
+import java.util.stream.Stream;
 
 public class MathUtils {
 
@@ -63,6 +66,33 @@ public class MathUtils {
         seed *= seed * 6364136223846793005L + 1442695040888963407L;
         seed += salt;
         return seed;
+    }
+
+    public static Stream<Vector2i> adjacentNoCenter(Vector2i v) {
+        return Stream.of(
+                new Vector2i(v.x - 1, v.y - 1),
+                new Vector2i(v.x - 1, v.y),
+                new Vector2i(v.x - 1, v.y + 1),
+                new Vector2i(v.x, v.y - 1),
+                new Vector2i(v.x, v.y + 1),
+                new Vector2i(v.x + 1, v.y - 1),
+                new Vector2i(v.x + 1, v.y),
+                new Vector2i(v.x + 1, v.y + 1)
+        );
+    }
+
+    public static Stream<Vector2i> adjacentWithCenter(Vector2i v) {
+        return Stream.of(
+                new Vector2i(v.x - 1, v.y - 1),
+                new Vector2i(v.x - 1, v.y),
+                new Vector2i(v.x - 1, v.y + 1),
+                new Vector2i(v.x, v.y - 1),
+                new Vector2i(v.x, v.y),
+                new Vector2i(v.x, v.y + 1),
+                new Vector2i(v.x + 1, v.y - 1),
+                new Vector2i(v.x + 1, v.y),
+                new Vector2i(v.x + 1, v.y + 1)
+        );
     }
 
 }

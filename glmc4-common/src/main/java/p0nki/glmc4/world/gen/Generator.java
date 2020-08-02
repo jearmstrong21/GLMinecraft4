@@ -1,7 +1,7 @@
-package p0nki.glmc4.wgen;
+package p0nki.glmc4.world.gen;
 
-import p0nki.glmc4.wgen.layer.LayerSampler;
-import p0nki.glmc4.wgen.layer.Layers;
+import p0nki.glmc4.world.gen.layer.LayerSampler;
+import p0nki.glmc4.world.gen.layer.Layers;
 
 public class Generator {
 

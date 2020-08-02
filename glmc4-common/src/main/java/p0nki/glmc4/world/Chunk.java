@@ -1,11 +1,13 @@
-package p0nki.glmc4.block;
+package p0nki.glmc4.world;
 
 import org.joml.Vector3i;
+import p0nki.glmc4.block.BlockState;
+import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.network.PacketByteBuf;
-import p0nki.glmc4.wgen.Biome;
-import p0nki.glmc4.wgen.Biomes;
-import p0nki.glmc4.wgen.Generator;
-import p0nki.glmc4.wgen.SimplexNoiseGenerator;
+import p0nki.glmc4.world.gen.Biome;
+import p0nki.glmc4.world.gen.Biomes;
+import p0nki.glmc4.world.gen.Generator;
+import p0nki.glmc4.world.gen.SimplexNoiseGenerator;
 
 public class Chunk implements PacketByteBuf.Equivalent {
     public static final long seed = System.currentTimeMillis();
@@ -13,6 +15,13 @@ public class Chunk implements PacketByteBuf.Equivalent {
 
     public Chunk() {
         data = new long[16][256][16];
+    }
+
+    public int getHeight(int x, int z) {
+        for (int y = 255; y >= 0; y--) {
+            if (data[x][y][z] != 0) return y;
+        }
+        return 0;
     }
 
     public static Chunk generate(int cx, int cz) {

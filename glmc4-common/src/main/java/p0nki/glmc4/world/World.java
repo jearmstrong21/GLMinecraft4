@@ -1,7 +1,8 @@
-package p0nki.glmc4.block;
+package p0nki.glmc4.world;
 
 import org.joml.Vector2i;
 import org.joml.Vector3i;
+import p0nki.glmc4.block.BlockState;
 
 import java.util.List;
 
@@ -27,7 +28,6 @@ public interface World {
         return new Vector2i((worldPos.x - x) / 16, (worldPos.y - z) / 16);
     }
 
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     boolean isChunkLoaded(Vector2i chunkCoordinate);
 
     boolean isClient();

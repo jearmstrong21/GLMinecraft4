@@ -16,7 +16,6 @@ import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import p0nki.glmc4.block.BlockState;
-import p0nki.glmc4.block.Chunk;
 import p0nki.glmc4.client.render.DebugRenderer3D;
 import p0nki.glmc4.client.render.TextRenderer;
 import p0nki.glmc4.client.render.WorldRenderContext;
@@ -31,6 +30,7 @@ import p0nki.glmc4.network.packet.clientbound.ClientPacketListener;
 import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.utils.Identifier;
 import p0nki.glmc4.utils.math.MathUtils;
+import p0nki.glmc4.world.Chunk;
 
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
@@ -124,13 +124,17 @@ public class GLMC4Client {
         lookDir = new Vector3f(0, 0, 1).rotateX(dx).rotateY(dy);
     }
 
+    public static Entity getThisEntity() {
+        return entities.get(packetListener.getPlayer().getUuid());
+    }
+
     private static void tickRenderer(int frameCount) {
         if (packetListener == null) return;
         if (packetListener.getPlayer() == null) return;
         if (!entities.containsKey(packetListener.getPlayer().getUuid())) return;
 
         Matrix4f perspective = new Matrix4f().perspective((float) Math.toRadians(80), 1.0F, 0.001F, 300);
-        Entity thisEntity = entities.get(packetListener.getPlayer().getUuid());
+        Entity thisEntity = getThisEntity();
         Matrix4f view = new Matrix4f().lookAt(
                 new Vector3f(thisEntity.getEyePosition()).sub(new Vector3f(thisEntity.getLookingAt()).mul(3)),
                 new Vector3f(thisEntity.getEyePosition()),

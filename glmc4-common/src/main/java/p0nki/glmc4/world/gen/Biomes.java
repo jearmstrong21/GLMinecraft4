@@ -1,4 +1,4 @@
-package p0nki.glmc4.wgen;
+package p0nki.glmc4.world.gen;
 
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.registry.Registry;

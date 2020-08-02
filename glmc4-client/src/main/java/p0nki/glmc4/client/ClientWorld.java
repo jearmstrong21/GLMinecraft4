@@ -4,8 +4,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
+import org.joml.Vector3f;
 import org.joml.Vector3i;
-import p0nki.glmc4.block.*;
+import p0nki.glmc4.block.BlockState;
+import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.client.gl.Mesh;
 import p0nki.glmc4.client.gl.Shader;
 import p0nki.glmc4.client.gl.Texture;
@@ -15,6 +17,9 @@ import p0nki.glmc4.client.render.block.BlockRenderContext;
 import p0nki.glmc4.client.render.block.BlockRenderer;
 import p0nki.glmc4.client.render.block.BlockRenderers;
 import p0nki.glmc4.utils.Identifier;
+import p0nki.glmc4.world.Chunk;
+import p0nki.glmc4.world.ChunkNotLoadedException;
+import p0nki.glmc4.world.World;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -175,6 +180,12 @@ public class ClientWorld implements World {
             shader.setFloat("x", x);
             shader.setFloat("z", z);
             chunk.getValue().triangles();
+        }
+        chunks.keySet().forEach(key -> GLMC4Client.debugRenderer3D.renderCube(worldRenderContext, new Vector3f(0, 0, 1), new Vector3f(key.x * 16, 0, key.y * 16), new Vector3f(16, 256, 16)));
+        int H = 4;
+        for (int y = 0; y < 256; y += H) {
+            Vector2i chunk = World.getChunkCoordinate(new Vector2i((int) GLMC4Client.getThisEntity().getPosition().x, (int) GLMC4Client.getThisEntity().getPosition().z));
+            GLMC4Client.debugRenderer3D.renderCube(worldRenderContext, new Vector3f(1, 1, 0), new Vector3f(chunk.x * 16, y, chunk.y * 16), new Vector3f(16, H, 16));
         }
         for (Vector2i v : chunks.keySet()) {
             if (!meshes.containsKey(v)) {

@@ -1,4 +1,4 @@
-package p0nki.glmc4.block;
+package p0nki.glmc4.world;
 
 import org.joml.Vector2i;
 

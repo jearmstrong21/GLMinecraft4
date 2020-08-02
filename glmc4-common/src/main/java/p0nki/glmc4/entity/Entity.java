@@ -1,5 +1,6 @@
 package p0nki.glmc4.entity;
 
+import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import p0nki.glmc4.block.Blocks;
@@ -7,6 +8,7 @@ import p0nki.glmc4.server.MinecraftServer;
 import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.tag.TagEquivalent;
 import p0nki.glmc4.utils.TagUtils;
+import p0nki.glmc4.world.World;
 
 import java.util.Random;
 import java.util.UUID;
@@ -54,6 +56,10 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
             facingTowards.set(new Vector3f(velocity.x, 0, velocity.z).normalize());
         }
         position.add(new Vector3f(verifyMotion(velocity)).mul(0.05F));
+    }
+
+    public boolean canTick() {
+        return MinecraftServer.INSTANCE.getServerWorld().isChunkLoaded(World.getChunkCoordinate(new Vector2i((int) position.x, (int) position.z)));
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")

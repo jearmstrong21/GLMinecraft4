@@ -1,4 +1,4 @@
-package p0nki.glmc4.wgen.layer;
+package p0nki.glmc4.world.gen.layer;
 
 public interface LayerSampler {
 
