@@ -4,17 +4,24 @@ import org.joml.Vector3i;
 import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.network.PacketByteBuf;
-import p0nki.glmc4.world.gen.Biome;
-import p0nki.glmc4.world.gen.Biomes;
-import p0nki.glmc4.world.gen.Generator;
-import p0nki.glmc4.world.gen.SimplexNoiseGenerator;
+import p0nki.glmc4.utils.math.SimplexNoiseGenerator;
+import p0nki.glmc4.world.gen.biomes.Biome;
+import p0nki.glmc4.world.gen.biomes.BiomeGenerator;
+import p0nki.glmc4.world.gen.biomes.Biomes;
 
 public class Chunk implements PacketByteBuf.Equivalent {
     public static final long seed = System.currentTimeMillis();
     private final long[][][] data;
+    private final int[][] biomes;
 
     public Chunk() {
         data = new long[16][256][16];
+        biomes = new int[16][16];
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                biomes[x][z] = Biomes.OCEAN.getIndex();
+            }
+        }
     }
 
     public int getHeight(int x, int z) {
@@ -26,12 +33,13 @@ public class Chunk implements PacketByteBuf.Equivalent {
 
     public static Chunk generate(int cx, int cz) {
         Chunk c = new Chunk();
-        int[][] biomes = Generator.generate(seed, 16, 16, cx, cz);
+        int[][] biomes = BiomeGenerator.generate(seed, 16, 16, cx, cz);
         SimplexNoiseGenerator generator = new SimplexNoiseGenerator(0.05f, seed);
 
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
-                Biome b = Biomes.REGISTRY.get(biomes[x][z]).getValue();
+                c.biomes[x][z] = biomes[x][z];
+                Biome b = Biomes.REGISTRY.get(c.biomes[x][z]).getValue();
                 int genX = x + (16 * cx);
                 int genZ = z + (16 * cz);
                 int y = (int) (8 + 4 * generator.generate(genX, genZ));
@@ -44,13 +52,18 @@ public class Chunk implements PacketByteBuf.Equivalent {
         return c;
     }
 
+    public Biome getBiome(int x, int z) {
+        return Biomes.REGISTRY.get(biomes[x][z]).getValue();
+    }
+
     @Override
     public void read(PacketByteBuf buf) {
         for (int x = 0; x < 16; x++) {
-            for (int y = 0; y < 256; y++) {
-                for (int z = 0; z < 16; z++) {
+            for (int z = 0; z < 16; z++) {
+                for (int y = 0; y < 256; y++) {
                     data[x][y][z] = buf.readLong();
                 }
+                biomes[x][z] = buf.readInt();
             }
         }
     }
@@ -63,10 +76,11 @@ public class Chunk implements PacketByteBuf.Equivalent {
     @Override
     public void write(PacketByteBuf buf) {
         for (int x = 0; x < 16; x++) {
-            for (int y = 0; y < 256; y++) {
-                for (int z = 0; z < 16; z++) {
+            for (int z = 0; z < 16; z++) {
+                for (int y = 0; y < 256; y++) {
                     buf.writeLong(data[x][y][z]);
                 }
+                buf.writeInt(biomes[x][z]);
             }
         }
     }

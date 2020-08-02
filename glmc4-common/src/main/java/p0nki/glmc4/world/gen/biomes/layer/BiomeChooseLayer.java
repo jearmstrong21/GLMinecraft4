@@ -1,8 +1,8 @@
-package p0nki.glmc4.world.gen.layer;
+package p0nki.glmc4.world.gen.biomes.layer;
 
-import p0nki.glmc4.world.gen.Biomes;
-import p0nki.glmc4.world.gen.PerlinNoiseSampler;
-import p0nki.glmc4.world.gen.RandomContext;
+import p0nki.glmc4.utils.math.PerlinNoiseSampler;
+import p0nki.glmc4.utils.math.RandomContext;
+import p0nki.glmc4.world.gen.biomes.Biomes;
 
 import java.util.Random;
 

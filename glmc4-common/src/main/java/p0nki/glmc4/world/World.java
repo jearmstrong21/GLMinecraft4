@@ -3,6 +3,7 @@ package p0nki.glmc4.world;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 import p0nki.glmc4.block.BlockState;
+import p0nki.glmc4.world.gen.biomes.Biome;
 
 import java.util.List;
 
@@ -40,4 +41,5 @@ public interface World {
 
     List<Vector2i> getLoadedChunks();
 
+    Biome getBiome(Vector2i position);
 }

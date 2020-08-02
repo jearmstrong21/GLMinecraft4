@@ -12,6 +12,7 @@ import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.tag.ListTag;
 import p0nki.glmc4.tag.Tag;
 import p0nki.glmc4.utils.TagUtils;
+import p0nki.glmc4.world.gen.biomes.Biomes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,9 +60,10 @@ public class PacketS2CHello extends Packet<ClientPacketListener> {
             allEntities.add(EntityType.from((CompoundTag) tag));
         }
 
-        Blocks.REGISTRY.verify(buf);
-
+        PacketTypes.REGISTRY.verify(buf);
         EntityTypes.REGISTRY.verify(buf);
+        Blocks.REGISTRY.verify(buf);
+        Biomes.REGISTRY.verify(buf);
     }
 
     @Override
@@ -78,9 +80,10 @@ public class PacketS2CHello extends Packet<ClientPacketListener> {
         }
         buf.writeTag(entitiesTag);
 
-        Blocks.REGISTRY.write(buf);
-
+        PacketTypes.REGISTRY.write(buf);
         EntityTypes.REGISTRY.write(buf);
+        Blocks.REGISTRY.write(buf);
+        Biomes.REGISTRY.write(buf);
     }
 
     @Override

@@ -1,6 +1,6 @@
-package p0nki.glmc4.world.gen.layer;
+package p0nki.glmc4.world.gen.biomes.layer;
 
-import p0nki.glmc4.world.gen.RandomContext;
+import p0nki.glmc4.utils.math.RandomContext;
 
 public interface ParentedLayer {
 

@@ -20,6 +20,7 @@ import p0nki.glmc4.utils.Identifier;
 import p0nki.glmc4.world.Chunk;
 import p0nki.glmc4.world.ChunkNotLoadedException;
 import p0nki.glmc4.world.World;
+import p0nki.glmc4.world.gen.biomes.Biome;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -170,6 +171,14 @@ public class ClientWorld implements World {
         return List.copyOf(chunks.keySet());
     }
 
+    @Override
+    public Biome getBiome(Vector2i position) {
+        Vector2i chunkCoordinate = World.getChunkCoordinate(position);
+        if (!isChunkLoaded(chunkCoordinate)) throw new ChunkNotLoadedException(chunkCoordinate);
+        Vector2i coordinateInChunk = World.getCoordinateInChunk(position);
+        return chunks.get(chunkCoordinate).getBiome(coordinateInChunk.x, coordinateInChunk.y);
+    }
+
     public void render(WorldRenderContext worldRenderContext) {
         shader.use();
         shader.set(worldRenderContext);
@@ -182,10 +191,9 @@ public class ClientWorld implements World {
             chunk.getValue().triangles();
         }
         chunks.keySet().forEach(key -> GLMC4Client.debugRenderer3D.renderCube(worldRenderContext, new Vector3f(0, 0, 1), new Vector3f(key.x * 16, 0, key.y * 16), new Vector3f(16, 256, 16)));
-        int H = 4;
-        for (int y = 0; y < 256; y += H) {
+        for (int y = 0; y < 256; y++) {
             Vector2i chunk = World.getChunkCoordinate(new Vector2i((int) GLMC4Client.getThisEntity().getPosition().x, (int) GLMC4Client.getThisEntity().getPosition().z));
-            GLMC4Client.debugRenderer3D.renderCube(worldRenderContext, new Vector3f(1, 1, 0), new Vector3f(chunk.x * 16, y, chunk.y * 16), new Vector3f(16, H, 16));
+            GLMC4Client.debugRenderer3D.renderCube(worldRenderContext, new Vector3f(1, 1, 0), new Vector3f(chunk.x * 16, y, chunk.y * 16), new Vector3f(16, 1, 16));
         }
         for (Vector2i v : chunks.keySet()) {
             if (!meshes.containsKey(v)) {
@@ -218,6 +226,14 @@ public class ClientWorld implements World {
 
         while (!consumerQueue.isEmpty()) {
             consumerQueue.remove().accept(this);
+        }
+    }
+
+    public Optional<Biome> getOptionalBiome(Vector2i position) {
+        try {
+            return Optional.of(getBiome(position));
+        } catch (ChunkNotLoadedException e) {
+            return Optional.empty();
         }
     }
 }

@@ -31,6 +31,7 @@ import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.utils.Identifier;
 import p0nki.glmc4.utils.math.MathUtils;
 import p0nki.glmc4.world.Chunk;
+import p0nki.glmc4.world.gen.biomes.Biome;
 
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
@@ -159,14 +160,17 @@ public class GLMC4Client {
                         "World stats: %s\n" +
                         "Free memory: %s\n" +
                         "Total memory: %s\n" +
-                        "Maximum memory: %s\n",
+                        "Maximum memory: %s\n" +
+                        "Biome: %s",
                 MCWindow.getFps(),
                 thisEntity.getPosition(),
                 lookDir,
                 clientWorld.worldStats(),
                 lastFreeMem,
                 lastTotalMem,
-                lastMaxMem));
+                lastMaxMem,
+                clientWorld.getOptionalBiome(new Vector2i((int) thisEntity.getPosition().x, (int) thisEntity.getPosition().z)).map(Biome::getKey).map(Identifier::toString).orElse("not yet loaded")
+        ));
 
         packetListener.tick();
         if ((int) MCWindow.time() != (int) lastFrameTime) {

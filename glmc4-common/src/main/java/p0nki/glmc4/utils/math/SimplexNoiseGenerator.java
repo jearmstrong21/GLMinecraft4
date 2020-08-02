@@ -1,4 +1,4 @@
-package p0nki.glmc4.world.gen;
+package p0nki.glmc4.utils.math;
 
 import org.joml.Random;
 import org.joml.SimplexNoise;

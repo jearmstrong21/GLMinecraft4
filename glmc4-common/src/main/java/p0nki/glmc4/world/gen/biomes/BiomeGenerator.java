@@ -1,9 +1,9 @@
-package p0nki.glmc4.world.gen;
+package p0nki.glmc4.world.gen.biomes;
 
-import p0nki.glmc4.world.gen.layer.LayerSampler;
-import p0nki.glmc4.world.gen.layer.Layers;
+import p0nki.glmc4.world.gen.biomes.layer.LayerSampler;
+import p0nki.glmc4.world.gen.biomes.layer.Layers;
 
-public class Generator {
+public class BiomeGenerator {
 
     public static int[][] generate(long seed, int w, int h, int cx, int cz) {
         LayerSampler sampler = Layers.build(seed, w, h);

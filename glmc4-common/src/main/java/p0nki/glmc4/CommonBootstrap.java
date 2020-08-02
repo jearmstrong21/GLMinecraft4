@@ -3,7 +3,7 @@ package p0nki.glmc4;
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.entity.EntityTypes;
 import p0nki.glmc4.network.packet.PacketTypes;
-import p0nki.glmc4.world.gen.Biomes;
+import p0nki.glmc4.world.gen.biomes.Biomes;
 
 import java.io.PrintStream;
 

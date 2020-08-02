@@ -5,17 +5,20 @@ import org.apache.logging.log4j.Logger;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 import p0nki.glmc4.block.BlockState;
-import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CChunkUpdate;
 import p0nki.glmc4.utils.math.MathUtils;
 import p0nki.glmc4.world.Chunk;
 import p0nki.glmc4.world.ChunkGenerationStatus;
 import p0nki.glmc4.world.ChunkNotLoadedException;
 import p0nki.glmc4.world.World;
+import p0nki.glmc4.world.gen.biomes.Biome;
+import p0nki.glmc4.world.gen.ctx.ReadWriteWorldContext;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class ServerWorld implements World {
 
@@ -26,6 +29,49 @@ public class ServerWorld implements World {
     private final Queue<Vector2i> inHeightmapQueue = new ConcurrentLinkedQueue<>();
     private final Queue<Vector2i> inDecorateQueue = new ConcurrentLinkedQueue<>();
     private final Queue<Runnable> runnableQueue = new ConcurrentLinkedQueue<>();
+
+    private ReadWriteWorldContext getContext(Vector2i v) {
+        return new ReadWriteWorldContext() {
+
+            @Override
+            public boolean canTouch(Vector2i position) {
+                Vector2i chunkCoordinate = World.getChunkCoordinate(position);
+                return Math.abs(chunkCoordinate.x - v.x) <= 1 && Math.abs(chunkCoordinate.y - v.y) <= 1;
+            }
+
+            @Override
+            public BlockState get(Vector3i position) {
+                if (!canTouch(new Vector2i(position.x, position.z)))
+                    throw new ChunkNotLoadedException(World.getChunkCoordinate(new Vector2i(position.x, position.z)));
+                return ServerWorld.this.get(position);
+            }
+
+            @Override
+            public void set(Vector3i position, BlockState blockState) {
+                if (!canTouch(new Vector2i(position.x, position.z)))
+                    throw new ChunkNotLoadedException(World.getChunkCoordinate(new Vector2i(position.x, position.z)));
+                setBlockInUndecoratedChunk(position.x, position.y, position.z, blockState);
+            }
+
+            @Override
+            public int getGroundHeightMap(Vector2i position) {
+                if (!canTouch(new Vector2i(position.x, position.y)))
+                    throw new ChunkNotLoadedException(World.getChunkCoordinate(new Vector2i(position.x, position.y)));
+                Vector2i chunkCoordinate = World.getChunkCoordinate(position);
+                Vector2i coordinateInChunk = World.getCoordinateInChunk(position);
+                return chunks.get(chunkCoordinate).getGroundHeightMap()[coordinateInChunk.x][coordinateInChunk.y];
+            }
+
+            @Override
+            public Biome getBiome(Vector2i position) {
+                if (!canTouch(new Vector2i(position.x, position.y)))
+                    throw new ChunkNotLoadedException(World.getChunkCoordinate(new Vector2i(position.x, position.y)));
+                Vector2i chunkCoordinate = World.getChunkCoordinate(position);
+                Vector2i coordinateInChunk = World.getCoordinateInChunk(position);
+                return chunks.get(chunkCoordinate).getValue().getBiome(coordinateInChunk.x, coordinateInChunk.y);
+            }
+        };
+    }
 
     public ServerWorld() {
         for (int x = -5; x <= 5; x++) {
@@ -89,20 +135,11 @@ public class ServerWorld implements World {
         if (!ensureHeightmap(new Vector2i(v.x + 1, v.y + 1))) return false;
         runnableQueue.add(() -> {
             Random random = new Random(v.hashCode());
-            for (int i = 0; i < 1; i++) {
-                int x = random.nextInt(16);
-                int z = random.nextInt(16);
-                int y = chunks.get(v).getGroundHeightMap()[x][z];
-                int H = 4 + random.nextInt(3);
-                for (int h = 0; h < H; h++) {
-                    chunks.get(v).getValue().set(x, y + h, z, Blocks.OAK_LOG.getDefaultState());
-                }
-                for (int a = -5; a <= 5; a++) {
-                    for (int b = -5; b <= 5; b++) {
-                        setBlockInUndecoratedChunk(x + v.x * 16 + a, y + H + 1, z + v.y * 16 + b, Blocks.OAK_LEAVES.getDefaultState());
-                    }
-                }
-            }
+            ReadWriteWorldContext context = getContext(v);
+            Set<Biome> biomes = IntStream.range(0, 16).boxed().flatMap(x -> IntStream.range(0, 16).mapToObj(z -> new Vector2i(x, z))).map(p -> chunks.get(v).getValue().getBiome(p.x, p.y)).collect(Collectors.toSet());
+            biomes.forEach(biome -> biome.getDecoratorFeatures().forEach(pair -> {
+                pair.getFirst().generate(context, new Vector3i(v.x * 16, 0, v.y * 16), random).forEach(position -> pair.getSecond().generate(context, position, random));
+            }));
             chunks.get(v).setGenerationStatus(ChunkGenerationStatus.DECORATED);
         });
         return true;
@@ -197,5 +234,13 @@ public class ServerWorld implements World {
     @Override
     public List<Vector2i> getLoadedChunks() {
         return List.copyOf(chunks.keySet());
+    }
+
+    @Override
+    public Biome getBiome(Vector2i position) {
+        Vector2i chunkCoordinate = World.getChunkCoordinate(position);
+        if (!isChunkLoaded(chunkCoordinate)) throw new ChunkNotLoadedException(chunkCoordinate);
+        Vector2i coordinateInChunk = World.getCoordinateInChunk(position);
+        return chunks.get(chunkCoordinate).getValue().getBiome(coordinateInChunk.x, coordinateInChunk.y);
     }
 }
