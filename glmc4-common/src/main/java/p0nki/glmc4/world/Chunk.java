@@ -4,13 +4,12 @@ import org.joml.Vector3i;
 import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.network.PacketByteBuf;
-import p0nki.glmc4.utils.math.SimplexNoiseGenerator;
+import p0nki.glmc4.utils.math.SimplexGenerator;
 import p0nki.glmc4.world.gen.biomes.Biome;
 import p0nki.glmc4.world.gen.biomes.BiomeGenerator;
 import p0nki.glmc4.world.gen.biomes.Biomes;
 
 public class Chunk implements PacketByteBuf.Equivalent {
-    public static final long seed = System.currentTimeMillis();
     private final long[][][] data;
     private final int[][] biomes;
 
@@ -31,24 +30,43 @@ public class Chunk implements PacketByteBuf.Equivalent {
         return 0;
     }
 
-    public static Chunk generate(int cx, int cz) {
+    private static BiomeGenerator biomeGenerator = null;
+    private static SimplexGenerator simplexGenerator = null;
+
+    public static Chunk generateHeightMap(int cx, int cz) {
+        if (biomeGenerator == null) biomeGenerator = new BiomeGenerator(System.currentTimeMillis());
+        if (simplexGenerator == null) simplexGenerator = new SimplexGenerator(System.currentTimeMillis() + 1);
+
         Chunk c = new Chunk();
-        int[][] biomes = BiomeGenerator.generate(seed, 16, 16, cx, cz);
-        SimplexNoiseGenerator generator = new SimplexNoiseGenerator(0.05f, seed);
+
+        Biome[][] biomes = biomeGenerator.generate(cx, cz);
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                c.biomes[x][z] = biomes[x][z].getIndex();
+            }
+        }
+
+        int[][] heightmap = new int[16][16];
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                float rx = cx * 16 + x;
+                float rz = cz * 16 + z;
+                rx *= 0.01F;
+                rz *= 0.01F;
+                heightmap[x][z] = (int) (8 + 6 * (simplexGenerator.simplex(rx, rz) + 0.5F * simplexGenerator.simplex(rx * 2, rz * 2)));
+            }
+        }
 
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
-                c.biomes[x][z] = biomes[x][z];
-                Biome b = Biomes.REGISTRY.get(c.biomes[x][z]).getValue();
-                int genX = x + (16 * cx);
-                int genZ = z + (16 * cz);
-                int y = (int) (8 + 4 * generator.generate(genX, genZ));
-                c.set(x, y, z, b.getTopBlockState());
-                for (int i = y - 1; i > 0; i--) {
-                    c.set(x, i, z, Blocks.STONE.getDefaultState());
+                for (int y = 0; y <= heightmap[x][z]; y++) {
+                    if (y < heightmap[x][z] - 4) c.set(x, y, z, Blocks.STONE.getDefaultState());
+                    else if (y < heightmap[x][z]) c.set(x, y, z, Blocks.DIRT.getDefaultState());
+                    else c.set(x, y, z, biomes[x][z].getTopBlockState());
                 }
             }
         }
+
         return c;
     }
 

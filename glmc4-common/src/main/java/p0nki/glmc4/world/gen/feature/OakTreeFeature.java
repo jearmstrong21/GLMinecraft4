@@ -8,12 +8,12 @@ import p0nki.glmc4.world.gen.decorator.Decorator;
 
 import java.util.Random;
 
-public class TreeFeature extends Feature {
+public class OakTreeFeature extends Feature {
 
     public static final Decorator DECORATOR = new CountHeightMapDecorator(3);
-    public static final TreeFeature INSTANCE = new TreeFeature();
+    public static final OakTreeFeature INSTANCE = new OakTreeFeature();
 
-    private TreeFeature() {
+    private OakTreeFeature() {
 
     }
 

@@ -1,5 +1,6 @@
 package p0nki.glmc4.client.render.block.renderers;
 
+import org.joml.Vector3i;
 import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.client.assets.AtlasPosition;
@@ -14,32 +15,32 @@ public class OakPlanksBlockRenderer extends NoContextConstantSidedBlockRenderer 
     }
 
     @Override
-    protected TextureQuad xmiTexture(BlockState blockState) {
+    protected TextureQuad xmiTexture(Vector3i blockPos, BlockState blockState) {
         return AtlasPosition.block(new Identifier("minecraft:oak_planks")).layer().quad();
     }
 
     @Override
-    protected TextureQuad xplTexture(BlockState blockState) {
+    protected TextureQuad xplTexture(Vector3i blockPos, BlockState blockState) {
         return AtlasPosition.block(new Identifier("minecraft:oak_planks")).layer().quad();
     }
 
     @Override
-    protected TextureQuad ymiTexture(BlockState blockState) {
+    protected TextureQuad ymiTexture(Vector3i blockPos, BlockState blockState) {
         return AtlasPosition.block(new Identifier("minecraft:oak_planks")).layer().quad();
     }
 
     @Override
-    protected TextureQuad yplTexture(BlockState blockState) {
+    protected TextureQuad yplTexture(Vector3i blockPos, BlockState blockState) {
         return AtlasPosition.block(new Identifier("minecraft:oak_planks")).layer().quad();
     }
 
     @Override
-    protected TextureQuad zmiTexture(BlockState blockState) {
+    protected TextureQuad zmiTexture(Vector3i blockPos, BlockState blockState) {
         return AtlasPosition.block(new Identifier("minecraft:oak_planks")).layer().quad();
     }
 
     @Override
-    protected TextureQuad zplTexture(BlockState blockState) {
+    protected TextureQuad zplTexture(Vector3i blockPos, BlockState blockState) {
         return AtlasPosition.block(new Identifier("minecraft:oak_planks")).layer().quad();
     }
 }

@@ -13,45 +13,45 @@ public abstract class NoContextConstantSidedBlockRenderer extends NoContextSided
         super(block);
     }
 
-    protected abstract TextureQuad xmiTexture(BlockState blockState);
+    protected abstract TextureQuad xmiTexture(Vector3i blockPos, BlockState blockState);
 
-    protected abstract TextureQuad xplTexture(BlockState blockState);
+    protected abstract TextureQuad xplTexture(Vector3i blockPos, BlockState blockState);
 
-    protected abstract TextureQuad ymiTexture(BlockState blockState);
+    protected abstract TextureQuad ymiTexture(Vector3i blockPos, BlockState blockState);
 
-    protected abstract TextureQuad yplTexture(BlockState blockState);
+    protected abstract TextureQuad yplTexture(Vector3i blockPos, BlockState blockState);
 
-    protected abstract TextureQuad zmiTexture(BlockState blockState);
+    protected abstract TextureQuad zmiTexture(Vector3i blockPos, BlockState blockState);
 
-    protected abstract TextureQuad zplTexture(BlockState blockState);
+    protected abstract TextureQuad zplTexture(Vector3i blockPos, BlockState blockState);
 
     @Override
     protected MeshData renderXmi(Vector3i blockPos, BlockState blockState) {
-        return MeshData.chunk().addXmiQuad(blockPos, new Vector3f(0, 0, 0), xmiTexture(blockState));
+        return MeshData.chunk().addXmiQuad(blockPos, new Vector3f(0, 0, 0), xmiTexture(blockPos, blockState));
     }
 
     @Override
     protected MeshData renderXpl(Vector3i blockPos, BlockState blockState) {
-        return MeshData.chunk().addXplQuad(blockPos, new Vector3f(0, 0, 0), xplTexture(blockState));
+        return MeshData.chunk().addXplQuad(blockPos, new Vector3f(0, 0, 0), xplTexture(blockPos, blockState));
     }
 
     @Override
     protected MeshData renderYmi(Vector3i blockPos, BlockState blockState) {
-        return MeshData.chunk().addYmiQuad(blockPos, new Vector3f(0, 0, 0), ymiTexture(blockState));
+        return MeshData.chunk().addYmiQuad(blockPos, new Vector3f(0, 0, 0), ymiTexture(blockPos, blockState));
     }
 
     @Override
     protected MeshData renderYpl(Vector3i blockPos, BlockState blockState) {
-        return MeshData.chunk().addYplQuad(blockPos, new Vector3f(0, 0, 0), yplTexture(blockState));
+        return MeshData.chunk().addYplQuad(blockPos, new Vector3f(0, 0, 0), yplTexture(blockPos, blockState));
     }
 
     @Override
     protected MeshData renderZmi(Vector3i blockPos, BlockState blockState) {
-        return MeshData.chunk().addZmiQuad(blockPos, new Vector3f(0, 0, 0), zmiTexture(blockState));
+        return MeshData.chunk().addZmiQuad(blockPos, new Vector3f(0, 0, 0), zmiTexture(blockPos, blockState));
     }
 
     @Override
     protected MeshData renderZpl(Vector3i blockPos, BlockState blockState) {
-        return MeshData.chunk().addZplQuad(blockPos, new Vector3f(0, 0, 0), zplTexture(blockState));
+        return MeshData.chunk().addZplQuad(blockPos, new Vector3f(0, 0, 0), zplTexture(blockPos, blockState));
     }
 }

@@ -99,7 +99,7 @@ public class ServerWorld implements World {
     private boolean heightmap(Vector2i v) {
         if (getChunkStatus(v) >= ChunkGenerationStatus.HEIGHTMAP) return false;
         CompletableFuture.runAsync(() -> {
-            Chunk chunk = Chunk.generate(v.x, v.y);
+            Chunk chunk = Chunk.generateHeightMap(v.x, v.y);
             runnableQueue.add(() -> chunks.put(v, new ServerChunkEntry(chunk)));
         });
         return true;
@@ -108,7 +108,7 @@ public class ServerWorld implements World {
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private boolean ensureHeightmap(Vector2i v) {
         if (getChunkStatus(v) < ChunkGenerationStatus.HEIGHTMAP) {
-            Chunk chunk = Chunk.generate(v.x, v.y);
+            Chunk chunk = Chunk.generateHeightMap(v.x, v.y);
             runnableQueue.add(() -> chunks.put(v, new ServerChunkEntry(chunk)));
             return false;
         }
@@ -136,7 +136,12 @@ public class ServerWorld implements World {
         runnableQueue.add(() -> {
             Random random = new Random(v.hashCode());
             ReadWriteWorldContext context = getContext(v);
-            Set<Biome> biomes = IntStream.range(0, 16).boxed().flatMap(x -> IntStream.range(0, 16).mapToObj(z -> new Vector2i(x, z))).map(p -> chunks.get(v).getValue().getBiome(p.x, p.y)).collect(Collectors.toSet());
+            Set<Biome> biomes = IntStream.range(0, 16)
+                    .boxed()
+                    .flatMap(x -> IntStream.range(0, 16)
+                            .mapToObj(z -> new Vector2i(x, z)))
+                    .map(p -> chunks.get(v).getValue().getBiome(p.x, p.y))
+                    .collect(Collectors.toSet());
             biomes.forEach(biome -> biome.getDecoratorFeatures().forEach(pair -> {
                 pair.getFirst().generate(context, new Vector3i(v.x * 16, 0, v.y * 16), random).forEach(position -> pair.getSecond().generate(context, position, random));
             }));
