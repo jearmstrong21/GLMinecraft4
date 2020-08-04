@@ -58,7 +58,7 @@ public class MCWindow {
             glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         }
-        ptr = glfwCreateWindow(750, 750, "Minecraft", 0, 0);
+        ptr = glfwCreateWindow(1000, 1000, "Minecraft", 0, 0);
         glfwSetCursorPosCallback(ptr, new GLFWCursorPosCallback() {
             @Override
             public void invoke(long window, double x, double y) {

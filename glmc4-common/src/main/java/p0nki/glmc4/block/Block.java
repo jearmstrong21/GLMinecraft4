@@ -50,6 +50,10 @@ public abstract class Block extends Registrable<Block> implements AfterRegisterC
 
     }
 
+    public boolean isFullBlock(BlockState blockState) {
+        return true;
+    }
+
     public PropertySchema getSchema() {
         return schema;
     }
@@ -60,5 +64,9 @@ public abstract class Block extends Registrable<Block> implements AfterRegisterC
 
     public List<BlockState> getStates() {
         return states;
+    }
+
+    public float getAOContribution() {
+        return 0;
     }
 }

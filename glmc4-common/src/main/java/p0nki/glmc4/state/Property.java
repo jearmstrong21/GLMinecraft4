@@ -14,7 +14,7 @@ public abstract class Property<T> {
         if (values.size() == 0) throw new AssertionError("Cannot create empty property.");
     }
 
-    public String name() {
+    public String getName() {
         return name;
     }
 

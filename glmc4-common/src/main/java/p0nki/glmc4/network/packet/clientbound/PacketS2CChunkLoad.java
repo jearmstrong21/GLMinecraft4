@@ -1,9 +1,9 @@
 package p0nki.glmc4.network.packet.clientbound;
 
-import p0nki.glmc4.block.Chunk;
 import p0nki.glmc4.network.PacketByteBuf;
 import p0nki.glmc4.network.packet.Packet;
 import p0nki.glmc4.network.packet.PacketTypes;
+import p0nki.glmc4.world.Chunk;
 
 public class PacketS2CChunkLoad extends Packet<ClientPacketListener> {
 

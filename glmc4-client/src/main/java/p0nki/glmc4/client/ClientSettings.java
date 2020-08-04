@@ -7,6 +7,10 @@ public class ClientSettings {
     public static final boolean RENDER_HITBOXES = true;
     public static final Vector3f HITBOX_COLOR = new Vector3f(1, 0, 0);
 
+    public static final boolean CHUNK_BORDERS = false;
+    public static final Vector3f CHUNK_COLOR = new Vector3f(0, 0, 1);
+    public static final Vector3f CURRENT_CHUNK_COLOR = new Vector3f(1, 1, 0);
+
     private ClientSettings() {
 
     }

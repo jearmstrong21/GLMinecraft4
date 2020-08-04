@@ -10,6 +10,10 @@ import p0nki.glmc4.network.packet.serverbound.PacketC2SPlayerMovement;
 import p0nki.glmc4.network.packet.serverbound.ServerPacketListener;
 import p0nki.glmc4.utils.math.MathUtils;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Consumer;
+
 public class ServerPacketHandler extends ServerPacketListener {
 
     private final static long TIMEOUT = 500;
@@ -39,15 +43,22 @@ public class ServerPacketHandler extends ServerPacketListener {
         lookAt = packet.getLookAt();
     }
 
+    private final Set<Vector2i> clientChunks = new HashSet<>();
+    private final int viewDistance = 3;
+
+    private void forViewDistance(Consumer<Vector2i> consumer) {
+        for (int x = -viewDistance; x <= viewDistance; x++) {
+            for (int z = -viewDistance; z <= viewDistance; z++) {
+                consumer.accept(new Vector2i(x, z));
+            }
+        }
+    }
+
     @Override
     public void onConnected() {
         MinecraftServer.INSTANCE.onJoin(this);
         lastPingResponse = System.currentTimeMillis();
-        for (int x = -3; x <= 3; x++) {
-            for (int z = -3; z <= 3; z++) {
-                getConnection().write(new PacketS2CChunkLoad(x, z, MinecraftServer.INSTANCE.getServerWorld().getChunk(new Vector2i(x, z))));
-            }
-        }
+        forViewDistance(MinecraftServer.INSTANCE.getServerWorld()::queueLoad);
     }
 
     @Override
@@ -61,6 +72,13 @@ public class ServerPacketHandler extends ServerPacketListener {
             getConnection().close();
         }
         tickMovement();
+        forViewDistance(v -> {
+            if (clientChunks.contains(v)) return;
+            if (MinecraftServer.INSTANCE.getServerWorld().isChunkLoaded(v)) {
+                clientChunks.add(v);
+                getConnection().write(new PacketS2CChunkLoad(v.x, v.y, MinecraftServer.INSTANCE.getServerWorld().getChunk(v)));
+            }
+        });
     }
 
     private void tickMovement() {

@@ -7,8 +7,12 @@ import p0nki.glmc4.client.render.MeshData;
 
 public abstract class NoContextSidedBlockRenderer extends SidedBlockRenderer {
 
-    public NoContextSidedBlockRenderer(Block block) {
+    protected NoContextSidedBlockRenderer(Block block) {
         super(block);
+    }
+
+    protected NoContextSidedBlockRenderer(Block block, RenderLayer renderLayer) {
+        super(block, renderLayer);
     }
 
     protected abstract MeshData renderXmi(Vector3i blockPos, BlockState blockState);
