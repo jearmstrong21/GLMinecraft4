@@ -6,7 +6,6 @@ import org.joml.Vector2i;
 import org.joml.Vector3i;
 import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CChunkUpdate;
-import p0nki.glmc4.utils.math.MathUtils;
 import p0nki.glmc4.world.Chunk;
 import p0nki.glmc4.world.ChunkGenerationStatus;
 import p0nki.glmc4.world.ChunkNotLoadedException;
@@ -27,7 +26,16 @@ public class ServerWorld implements World {
 
     private final Queue<Vector2i> inHeightmapQueue = new ConcurrentLinkedQueue<>();
     private final Queue<Vector2i> inDecorateQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<Vector2i> inLoadQueue = new ConcurrentLinkedQueue<>();
     private final Queue<Runnable> runnableQueue = new ConcurrentLinkedQueue<>();
+
+    public ServerWorld() {
+        for (int x = -5; x <= 5; x++) {
+            for (int z = -5; z <= 5; z++) {
+                queueLoad(new Vector2i(x, z));
+            }
+        }
+    }
 
     private ReadWriteWorldContext getContext(Vector2i v) {
         return new ReadWriteWorldContext() {
@@ -47,9 +55,13 @@ public class ServerWorld implements World {
 
             @Override
             public void set(Vector3i position, BlockState blockState) {
+                Vector2i chunkCoordinate = World.getChunkCoordinate(new Vector2i(position.x, position.z));
                 if (!canTouch(new Vector2i(position.x, position.z)))
-                    throw new ChunkNotLoadedException(World.getChunkCoordinate(new Vector2i(position.x, position.z)));
-                setBlockInUndecoratedChunk(position.x, position.y, position.z, blockState);
+                    throw new ChunkNotLoadedException(chunkCoordinate);
+                if (getChunkStatus(chunkCoordinate) < ChunkGenerationStatus.HEIGHTMAP)
+                    throw new ChunkNotLoadedException(chunkCoordinate.x, chunkCoordinate.y);
+                Vector2i coordinateInChunk = World.getCoordinateInChunk(new Vector2i(position.x, position.z));
+                chunks.get(chunkCoordinate).getValue().set(coordinateInChunk.x, position.y, coordinateInChunk.y, blockState);
             }
 
             @Override
@@ -72,20 +84,16 @@ public class ServerWorld implements World {
         };
     }
 
-    public ServerWorld() {
-        for (int x = -5; x <= 5; x++) {
-            for (int z = -5; z <= 5; z++) {
-                decorate(new Vector2i(x, z));
-            }
-        }
-    }
-
     private void queueHeightmap(Vector2i v) {
         if (!inHeightmapQueue.contains(v)) inHeightmapQueue.add(v);
     }
 
     private void queueDecorate(Vector2i v) {
         if (!inDecorateQueue.contains(v)) inDecorateQueue.add(v);
+    }
+
+    public void queueLoad(Vector2i v) {
+        if (!inLoadQueue.contains(v)) inLoadQueue.add(v);
     }
 
     private byte getChunkStatus(Vector2i v) {
@@ -99,7 +107,8 @@ public class ServerWorld implements World {
         if (getChunkStatus(v) >= ChunkGenerationStatus.HEIGHTMAP) return false;
         CompletableFuture.runAsync(() -> {
             Chunk chunk = Chunk.generateHeightMap(v.x, v.y);
-            runnableQueue.add(() -> chunks.put(v, new ServerChunkEntry(chunk)));
+            ServerChunkEntry entry = new ServerChunkEntry(chunk);
+            runnableQueue.add(() -> chunks.put(v, entry));
         });
         return true;
     }
@@ -107,22 +116,14 @@ public class ServerWorld implements World {
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private boolean ensureHeightmap(Vector2i v) {
         if (getChunkStatus(v) < ChunkGenerationStatus.HEIGHTMAP) {
-            Chunk chunk = Chunk.generateHeightMap(v.x, v.y);
-            runnableQueue.add(() -> chunks.put(v, new ServerChunkEntry(chunk)));
+            queueHeightmap(v);
             return false;
         }
         return true;
     }
 
-    private void setBlockInUndecoratedChunk(int x, int y, int z, BlockState blockState) {
-        Vector2i chunkCoordinate = World.getChunkCoordinate(new Vector2i(x, z));
-        if (getChunkStatus(chunkCoordinate) < ChunkGenerationStatus.HEIGHTMAP)
-            throw new ChunkNotLoadedException(chunkCoordinate.x, chunkCoordinate.y);
-        Vector2i coordinateInChunk = World.getCoordinateInChunk(new Vector2i(x, z));
-        chunks.get(chunkCoordinate).getValue().set(coordinateInChunk.x, y, coordinateInChunk.y, blockState);
-    }
-
     private boolean decorate(Vector2i v) {
+        if (getChunkStatus(v) >= ChunkGenerationStatus.DECORATED) return false;
         if (!ensureHeightmap(v)) return false;
         if (!ensureHeightmap(new Vector2i(v.x - 1, v.y))) return false;
         if (!ensureHeightmap(new Vector2i(v.x + 1, v.y))) return false;
@@ -132,7 +133,7 @@ public class ServerWorld implements World {
         if (!ensureHeightmap(new Vector2i(v.x + 1, v.y - 1))) return false;
         if (!ensureHeightmap(new Vector2i(v.x - 1, v.y + 1))) return false;
         if (!ensureHeightmap(new Vector2i(v.x + 1, v.y + 1))) return false;
-        runnableQueue.add(() -> {
+        CompletableFuture.runAsync(() -> {
             Random random = new Random(v.hashCode());
             ReadWriteWorldContext context = getContext(v);
             IntStream.range(0, 16)
@@ -140,12 +141,37 @@ public class ServerWorld implements World {
                     .flatMap(x -> IntStream.range(0, 16)
                             .mapToObj(z -> new Vector2i(x, z)))
                     .map(p -> chunks.get(v).getValue().getBiome(p.x, p.y))
+                    .distinct()
                     .forEach(biome -> biome.getDecoratorFeatures()
                             .forEach(pair -> {
                                 pair.getFirst().generate(context, new Vector3i(v.x * 16, 0, v.y * 16), random).forEach(position -> pair.getSecond().generate(context, position, random));
                             }));
-            chunks.get(v).setGenerationStatus(ChunkGenerationStatus.DECORATED);
+            runnableQueue.add(() -> chunks.get(v).setGenerationStatus(ChunkGenerationStatus.DECORATED));
         });
+        return true;
+    }
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    private boolean ensureDecorate(Vector2i v) {
+        if (getChunkStatus(v) < ChunkGenerationStatus.DECORATED) {
+            queueDecorate(v);
+            return false;
+        }
+        return true;
+    }
+
+    private boolean load(Vector2i v) {
+        if (getChunkStatus(v) >= ChunkGenerationStatus.LOADED) return false;
+        if (!ensureDecorate(v)) return false;
+        if (!ensureDecorate(new Vector2i(v.x - 1, v.y))) return false;
+        if (!ensureDecorate(new Vector2i(v.x + 1, v.y))) return false;
+        if (!ensureDecorate(new Vector2i(v.x, v.y - 1))) return false;
+        if (!ensureDecorate(new Vector2i(v.x, v.y + 1))) return false;
+        if (!ensureDecorate(new Vector2i(v.x - 1, v.y - 1))) return false;
+        if (!ensureDecorate(new Vector2i(v.x + 1, v.y - 1))) return false;
+        if (!ensureDecorate(new Vector2i(v.x - 1, v.y + 1))) return false;
+        if (!ensureDecorate(new Vector2i(v.x + 1, v.y + 1))) return false;
+        runnableQueue.add(() -> chunks.get(v).setGenerationStatus(ChunkGenerationStatus.LOADED));
         return true;
     }
 
@@ -158,6 +184,10 @@ public class ServerWorld implements World {
             if (decorate(inDecorateQueue.peek())) inDecorateQueue.remove();
             else inDecorateQueue.add(inDecorateQueue.remove());
         }
+        for (int i = 0; i < 10 && !inLoadQueue.isEmpty(); i++) {
+            if (load(inLoadQueue.peek())) inLoadQueue.remove();
+            else inLoadQueue.add(inLoadQueue.remove());
+        }
         while (!runnableQueue.isEmpty()) {
             runnableQueue.remove().run();
         }
@@ -165,7 +195,7 @@ public class ServerWorld implements World {
 
     @Override
     public boolean isChunkLoaded(Vector2i chunkCoordinate) {
-        return chunks.containsKey(chunkCoordinate) && chunks.get(chunkCoordinate).getGenerationStatus() >= ChunkGenerationStatus.DECORATED;
+        return chunks.containsKey(chunkCoordinate) && chunks.get(chunkCoordinate).getGenerationStatus() >= ChunkGenerationStatus.LOADED;
     }
 
     @Override
@@ -185,10 +215,6 @@ public class ServerWorld implements World {
     public Chunk getChunk(Vector2i chunkCoordinate) {
         if (!isChunkLoaded(chunkCoordinate)) throw new ChunkNotLoadedException(chunkCoordinate);
         return chunks.get(chunkCoordinate).getValue();
-    }
-
-    public void loadChunk(Vector2i v) {
-        MathUtils.adjacentWithCenter(v).forEach(this::queueDecorate);
     }
 
     @Override

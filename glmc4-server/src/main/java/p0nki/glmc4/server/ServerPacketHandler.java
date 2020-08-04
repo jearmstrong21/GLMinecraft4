@@ -58,7 +58,7 @@ public class ServerPacketHandler extends ServerPacketListener {
     public void onConnected() {
         MinecraftServer.INSTANCE.onJoin(this);
         lastPingResponse = System.currentTimeMillis();
-        forViewDistance(MinecraftServer.INSTANCE.getServerWorld()::loadChunk);
+        forViewDistance(MinecraftServer.INSTANCE.getServerWorld()::queueLoad);
     }
 
     @Override
