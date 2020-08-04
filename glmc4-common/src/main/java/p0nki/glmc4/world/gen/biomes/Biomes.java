@@ -28,7 +28,7 @@ public class Biomes {
         REGISTRY = new Registry<>();
         register("ocean", OCEAN = new Biome(Blocks.STONE.getDefaultState(), BAD).addNoiseRange(-20));
         register("plains", PLAINS = new Biome(Blocks.GRASS.getDefaultState(), GRASS_COLOR).with(OakTreeFeature.PLAINS, OakTreeFeature.INSTANCE));
-        register("high_plains", HIGH_PLAINS = new Biome(Blocks.GRASS.getDefaultState(), new Vector3f(0, 0, 1)).with(OakTreeFeature.HIGH_PLAINS, OakTreeFeature.INSTANCE).addNoiseRange(10));
+        register("high_plains", HIGH_PLAINS = new Biome(Blocks.GRASS.getDefaultState(), new Vector3f(GRASS_COLOR).add(0.3F, 0.05F, 0)).with(OakTreeFeature.HIGH_PLAINS, OakTreeFeature.INSTANCE).addNoiseRange(10));
         register("beach", BEACH = new Biome(Blocks.SAND.getDefaultState(), BAD).with(PalmTreeFeature.DECORATOR, PalmTreeFeature.INSTANCE).addNoiseRange(-10));
     }
 

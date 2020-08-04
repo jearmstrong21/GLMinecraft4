@@ -8,7 +8,7 @@ public final class AtlasPosition {
     public final float x;
     public final float y;
     public final float w;
-    public final float h;
+    public float h;
 
     public AtlasPosition(int x, int y, int w, int h, int tw, int th) {
         this.x = (float) x / tw;

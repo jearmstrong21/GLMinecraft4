@@ -8,9 +8,19 @@ import p0nki.glmc4.registry.Registry;
 public abstract class BlockRenderer extends Registrable<BlockRenderer> {
 
     private final Block block;
+    private final RenderLayer renderLayer;
 
-    public BlockRenderer(Block block) {
+    protected BlockRenderer(Block block) {
+        this(block, RenderLayer.MAIN);
+    }
+
+    protected BlockRenderer(Block block, RenderLayer renderLayer) {
         this.block = block;
+        this.renderLayer = renderLayer;
+    }
+
+    public RenderLayer getRenderLayer() {
+        return renderLayer;
     }
 
     public final Block getBlock() {

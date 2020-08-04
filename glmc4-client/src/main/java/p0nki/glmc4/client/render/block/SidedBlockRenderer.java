@@ -1,13 +1,16 @@
 package p0nki.glmc4.client.render.block;
 
 import p0nki.glmc4.block.Block;
-import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.client.render.MeshData;
 
 public abstract class SidedBlockRenderer extends BlockRenderer {
 
     public SidedBlockRenderer(Block block) {
         super(block);
+    }
+
+    public SidedBlockRenderer(Block block, RenderLayer renderLayer) {
+        super(block, renderLayer);
     }
 
     protected abstract MeshData renderXmi(BlockRenderContext context);
@@ -25,12 +28,12 @@ public abstract class SidedBlockRenderer extends BlockRenderer {
     @Override
     public MeshData render(BlockRenderContext context) {
         MeshData data = MeshData.chunk();
-        if (context.getXmi().getBlock() == Blocks.AIR) data.append(renderXmi(context));
-        if (context.getXpl().getBlock() == Blocks.AIR) data.append(renderXpl(context));
-        if (context.getYmi().getBlock() == Blocks.AIR) data.append(renderYmi(context));
-        if (context.getYpl().getBlock() == Blocks.AIR) data.append(renderYpl(context));
-        if (context.getZmi().getBlock() == Blocks.AIR) data.append(renderZmi(context));
-        if (context.getZpl().getBlock() == Blocks.AIR) data.append(renderZpl(context));
+        if (context.showXmi()) data.append(renderXmi(context));
+        if (context.showXpl()) data.append(renderXpl(context));
+        if (context.showYmi()) data.append(renderYmi(context));
+        if (context.showYpl()) data.append(renderYpl(context));
+        if (context.showZmi()) data.append(renderZmi(context));
+        if (context.showZpl()) data.append(renderZpl(context));
         return data;
     }
 }

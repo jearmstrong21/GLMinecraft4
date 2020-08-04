@@ -18,6 +18,7 @@ public class Blocks {
     public static Block SAND;
     public static Block OAK_LEAVES;
     public static Block OAK_PLANKS;
+    public static Block WATER;
 
     private static void register(String name, Block block) {
         REGISTRY.register(new Identifier("minecraft", name), block);
@@ -35,6 +36,7 @@ public class Blocks {
         register("sand", SAND = new SandBlock());
         register("oak_leaves", OAK_LEAVES = new OakLeavesBlock());
         register("oak_planks", OAK_PLANKS = new OakPlanksBlock());
+        register("water", WATER = new WaterBlock());
     }
 
 }

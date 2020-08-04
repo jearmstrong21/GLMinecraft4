@@ -21,7 +21,7 @@ public final class Biome extends Registrable<Biome> {
     public Biome(BlockState topBlock, Vector3f grassColor) {
         this.topBlock = topBlock;
         this.grassColor = grassColor;
-        noiseRange = Pair.of(30.0F, 40.0F);
+        noiseRange = Pair.of(64.0F, 84.0F);
     }
 
     public Pair<Float, Float> getNoiseRange() {

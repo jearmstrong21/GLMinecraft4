@@ -5,6 +5,7 @@ import p0nki.glmc4.block.BlockState;
 
 public class BlockRenderContext {
 
+    private final RenderLayer renderLayer;
     private final Vector3i blockPos;
     private final BlockState xmi;
     private final BlockState xpl;
@@ -14,7 +15,8 @@ public class BlockRenderContext {
     private final BlockState zpl;
     private final BlockState cur;
 
-    public BlockRenderContext(Vector3i blockPos, BlockState xmi, BlockState xpl, BlockState ymi, BlockState ypl, BlockState zmi, BlockState zpl, BlockState cur) {
+    public BlockRenderContext(RenderLayer renderLayer, Vector3i blockPos, BlockState xmi, BlockState xpl, BlockState ymi, BlockState ypl, BlockState zmi, BlockState zpl, BlockState cur) {
+        this.renderLayer = renderLayer;
         this.blockPos = blockPos;
         this.xmi = xmi;
         this.xpl = xpl;
@@ -23,6 +25,10 @@ public class BlockRenderContext {
         this.zmi = zmi;
         this.zpl = zpl;
         this.cur = cur;
+    }
+
+    public RenderLayer getRenderLayer() {
+        return renderLayer;
     }
 
     public Vector3i getBlockPos() {
@@ -55,6 +61,34 @@ public class BlockRenderContext {
 
     public BlockState getCur() {
         return cur;
+    }
+
+    private boolean show(BlockState blockState) {
+        return !blockState.getBlock().isFullBlock(blockState) || BlockRenderers.REGISTRY.get(blockState.getBlock().getKey()).getValue().getRenderLayer().showsTo(renderLayer);
+    }
+
+    public boolean showXmi() {
+        return show(xmi);
+    }
+
+    public boolean showXpl() {
+        return show(xpl);
+    }
+
+    public boolean showYmi() {
+        return show(ymi);
+    }
+
+    public boolean showYpl() {
+        return show(ypl);
+    }
+
+    public boolean showZmi() {
+        return show(zmi);
+    }
+
+    public boolean showZpl() {
+        return show(zpl);
     }
 
 }

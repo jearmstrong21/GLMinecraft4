@@ -6,6 +6,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
+import org.lwjgl.opengl.GL41;
 import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.client.gl.Mesh;
@@ -16,6 +17,7 @@ import p0nki.glmc4.client.render.WorldRenderContext;
 import p0nki.glmc4.client.render.block.BlockRenderContext;
 import p0nki.glmc4.client.render.block.BlockRenderer;
 import p0nki.glmc4.client.render.block.BlockRenderers;
+import p0nki.glmc4.client.render.block.RenderLayer;
 import p0nki.glmc4.utils.Identifier;
 import p0nki.glmc4.world.Chunk;
 import p0nki.glmc4.world.ChunkNotLoadedException;
@@ -29,16 +31,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class ClientWorld implements World {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
     private final Map<Vector2i, Chunk> chunks = new ConcurrentHashMap<>();
-    private final Map<Vector2i, Mesh> meshes = new HashMap<>();
+    private final Map<Vector2i, Map<RenderLayer, Mesh>> meshes = new HashMap<>();
     private final Shader shader;
     private final Texture texture;
-    private final Queue<Consumer<ClientWorld>> consumerQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<Runnable> runnableQueue = new ConcurrentLinkedQueue<>();
     private final Queue<Vector2i> inMeshQueue = new ConcurrentLinkedQueue<>();
     private final AtomicInteger computeCounter = new AtomicInteger(0);
 
@@ -49,12 +52,12 @@ public class ClientWorld implements World {
     public String worldStats() {
         return String.format(
                 "\n\tin meshs %s" +
-                        "\n\tconsumers %s" +
+                        "\n\trunnables %s" +
                         "\n\tchunks %s" +
                         "\n\tmeshes %s" +
                         "\n\tcomputes %s",
                 inMeshQueue.size(),
-                consumerQueue.size(),
+                runnableQueue.size(),
                 chunks.size(),
                 meshes.size(),
                 computeCounter.get());
@@ -65,20 +68,23 @@ public class ClientWorld implements World {
         texture = new Texture(Path.of("run", "atlas", "block.png"));
     }
 
-    private MeshData mesh(int cx, int cz, Chunk chunk) {
+    private MeshData mesh(int cx, int cz, Chunk chunk, RenderLayer renderLayer) {
         MeshData data = MeshData.chunk();
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 256; y++) {
                 for (int z = 0; z < 16; z++) {
                     BlockState state = chunk.get(x, y, z);
-                    BlockState testState = get(new Vector3i(x + cx * 16, y, z + cz * 16));
+                    int rx = x + cx * 16;
+                    int rz = z + cz * 16;
+                    BlockState testState = get(rx, y, rz);
                     if (!state.equals(testState)) {
                         LOGGER.error("Expected {} at {},{},{}, got {}", state, x, y, z, testState);
                     }
                     if (state.getBlock() == Blocks.AIR) continue;
                     Identifier identifier = Blocks.REGISTRY.get(state.getBlock()).getKey();
                     BlockRenderer renderer = BlockRenderers.REGISTRY.get(identifier).getValue();
-                    BlockRenderContext context = new BlockRenderContext(new Vector3i(x + cx * 16, y, z + cz * 16), chunk.getOrAir(x - 1, y, z), chunk.getOrAir(x + 1, y, z), chunk.getOrAir(x, y - 1, z), chunk.getOrAir(x, y + 1, z), chunk.getOrAir(x, y, z - 1), chunk.getOrAir(x, y, z + 1), state);
+                    if (renderer.getRenderLayer() != renderLayer) continue;
+                    BlockRenderContext context = new BlockRenderContext(renderLayer, new Vector3i(x + cx * 16, y, z + cz * 16), get(rx - 1, y, rz), get(rx + 1, y, rz), get(rx, y - 1, rz), get(rx, y + 1, rz), get(rx, y, rz - 1), get(rx, y, rz + 1), state);
                     MeshData rendered = renderer.render(context);
                     rendered.multiply4f(0, new Matrix4f().translate(x, y, z));
                     data.append(rendered);
@@ -94,13 +100,7 @@ public class ClientWorld implements World {
             for (int j = -1; j <= 0; j++) {
                 for (int k = -1; k <= 0; k++) {
                     Vector3i v = new Vector3i(position.x + i, position.y + j, position.z + k);
-                    float f = 1;
-                    if (v.y >= 0 && v.y <= 255) {
-                        if (get(v).getBlock() != Blocks.AIR) {
-                            f = 0;
-                        }
-                    }
-                    total += f;
+                    total += get(v).getBlock().getAOContribution();
                 }
             }
         }
@@ -110,7 +110,7 @@ public class ClientWorld implements World {
     public void loadChunk(Vector2i coordinate, Chunk chunk) {
         if (chunks.containsKey(coordinate)) throw new AssertionError(coordinate);
         Objects.requireNonNull(chunk);
-        consumerQueue.add(clientWorld -> chunks.put(coordinate, chunk));
+        runnableQueue.add(() -> chunks.put(coordinate, chunk));
     }
 
     @Override
@@ -143,7 +143,7 @@ public class ClientWorld implements World {
 
     @Override
     public void update(Vector3i blockPos, BlockState blockState) {
-        consumerQueue.add(clientWorld -> {
+        runnableQueue.add(() -> {
             if (get(blockPos).toLong() == blockState.toLong()) return;
             Vector2i chunkCoordinate = World.getChunkCoordinate(new Vector2i(blockPos.x, blockPos.z));
             if (!isChunkLoaded(chunkCoordinate))
@@ -183,13 +183,18 @@ public class ClientWorld implements World {
         shader.use();
         shader.set(worldRenderContext);
         shader.setTexture("tex", texture, 0);
-        for (Map.Entry<Vector2i, Mesh> chunk : meshes.entrySet()) {
-            int x = 16 * chunk.getKey().x;
-            int z = 16 * chunk.getKey().y;
-            shader.setFloat("x", x);
-            shader.setFloat("z", z);
-            chunk.getValue().triangles();
-        }
+        Consumer<RenderLayer> applyLayer = renderLayer -> meshes.forEach((pos, map) -> {
+            shader.setFloat("x", pos.x * 16);
+            shader.setFloat("z", pos.y * 16);
+            map.get(renderLayer).triangles();
+        });
+        applyLayer.accept(RenderLayer.MAIN);
+
+        GL41.glEnable(GL41.GL_BLEND);
+        GL41.glBlendFunc(GL41.GL_SRC_ALPHA, GL41.GL_ONE_MINUS_SRC_ALPHA);
+        applyLayer.accept(RenderLayer.TRANSPARENT);
+        GL41.glDisable(GL41.GL_BLEND);
+
         if (ClientSettings.CHUNK_BORDERS) {
             chunks.keySet().forEach(key -> GLMC4Client.debugRenderer3D.renderCube(worldRenderContext, ClientSettings.CHUNK_COLOR, new Vector3f(key.x * 16, 0, key.y * 16), new Vector3f(16, 256, 16)));
             for (int y = 0; y < 256; y++) {
@@ -219,16 +224,20 @@ public class ClientWorld implements World {
                 CompletableFuture.runAsync(() -> {
                     computeCounter.incrementAndGet();
                     Chunk chunk = chunks.get(v);
-                    MeshData meshData = mesh(v.x, v.y, chunk);
-                    consumerQueue.add(clientWorld -> meshes.put(v, new Mesh(meshData)));
+                    Map<RenderLayer, MeshData> map = new EnumMap<>(RenderLayer.class);
+                    for (RenderLayer renderLayer : RenderLayer.values()) {
+                        map.put(renderLayer, mesh(v.x, v.y, chunk, renderLayer));
+                    }
+                    runnableQueue.add(() -> meshes.put(v, map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> new Mesh(e.getValue())))));
                     computeCounter.decrementAndGet();
                 });
             }
         }
 
-        while (!consumerQueue.isEmpty()) {
-            consumerQueue.remove().accept(this);
+        while (!runnableQueue.isEmpty()) {
+            runnableQueue.remove().run();
         }
+
     }
 
     public Optional<Biome> getOptionalBiome(Vector2i position) {

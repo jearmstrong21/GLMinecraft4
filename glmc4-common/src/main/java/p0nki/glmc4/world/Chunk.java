@@ -89,6 +89,11 @@ public class Chunk implements PacketByteBuf.Equivalent {
                     else if (y < heightmap[x][z]) c.set(x, y, z, Blocks.DIRT.getDefaultState());
                     else c.set(x, y, z, biomes[x][z].getTopBlockState());
                 }
+                if (heightmap[x][z] <= 64) {
+                    for (int y = heightmap[x][z] + 1; y <= 64; y++) {
+                        c.set(x, y, z, Blocks.WATER.getDefaultState());
+                    }
+                }
             }
         }
 

@@ -27,12 +27,12 @@ public abstract class NoContextConstantSidedBlockRenderer extends NoContextSided
 
     @Override
     protected MeshData renderXmi(Vector3i blockPos, BlockState blockState) {
-        return MeshData.chunk().addXmiQuad(blockPos, new Vector3f(0, 0, 0), xmiTexture(blockPos, blockState));
+        return MeshData.chunk().addXmiQuad(blockPos, new Vector3f(0, 0, 0), xmiTexture(blockPos, blockState), 1);
     }
 
     @Override
     protected MeshData renderXpl(Vector3i blockPos, BlockState blockState) {
-        return MeshData.chunk().addXplQuad(blockPos, new Vector3f(0, 0, 0), xplTexture(blockPos, blockState));
+        return MeshData.chunk().addXplQuad(blockPos, new Vector3f(0, 0, 0), xplTexture(blockPos, blockState), 1);
     }
 
     @Override
@@ -47,11 +47,11 @@ public abstract class NoContextConstantSidedBlockRenderer extends NoContextSided
 
     @Override
     protected MeshData renderZmi(Vector3i blockPos, BlockState blockState) {
-        return MeshData.chunk().addZmiQuad(blockPos, new Vector3f(0, 0, 0), zmiTexture(blockPos, blockState));
+        return MeshData.chunk().addZmiQuad(blockPos, new Vector3f(0, 0, 0), zmiTexture(blockPos, blockState), 1);
     }
 
     @Override
     protected MeshData renderZpl(Vector3i blockPos, BlockState blockState) {
-        return MeshData.chunk().addZplQuad(blockPos, new Vector3f(0, 0, 0), zplTexture(blockPos, blockState));
+        return MeshData.chunk().addZplQuad(blockPos, new Vector3f(0, 0, 0), zplTexture(blockPos, blockState), 1);
     }
 }

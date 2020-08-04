@@ -6,8 +6,6 @@ import java.util.function.Consumer;
 
 public class PropertySchema {
 
-    private static final IllegalArgumentException INVALID_PROPERTY = new IllegalArgumentException("Invalid property");
-    private static final IllegalArgumentException INVALID_VALUE = new IllegalArgumentException("Invalid value");
     private final List<Property<?>> properties;
     private final Map<Property<?>, Integer> bitStart;
     private int currentUsedBits = 0;
@@ -21,7 +19,8 @@ public class PropertySchema {
         properties.add(property);
         bitStart.put(property, currentUsedBits);
         currentUsedBits += property.bits();
-        if (currentUsedBits >= 32) throw INVALID_PROPERTY;
+        if (currentUsedBits >= 32)
+            throw new IllegalArgumentException(String.format("Invalid property %s", property.getName()));
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
@@ -34,8 +33,10 @@ public class PropertySchema {
     }
 
     public <T> int set(int state, Property<T> property, T value) {
-        if (!hasProperty(property)) throw INVALID_PROPERTY;
-        if (!property.supportsValue(value)) throw INVALID_VALUE;
+        if (!hasProperty(property))
+            throw new IllegalArgumentException(String.format("Invalid property %s", property.getName()));
+        if (!property.supportsValue(value))
+            throw new IllegalArgumentException(String.format("Invalid value %s", value));
         int mask = mask(property);
         state &= ~mask;
         state |= mask & property.getIndex(value) << 32 - bitStart.get(property) - property.bits();
@@ -44,10 +45,12 @@ public class PropertySchema {
 
     @Nonnull
     public <T> T get(int state, Property<T> property) {
-        if (!hasProperty(property)) throw INVALID_PROPERTY;
+        if (!hasProperty(property))
+            throw new IllegalArgumentException(String.format("Invalid property %s", property.getName()));
         int mask = mask(property);
         int index = (state & mask) >>> 32 - bitStart.get(property) - property.bits();
-        if (index < 0 || index >= property.values().size()) throw INVALID_VALUE;
+        if (index < 0 || index >= property.values().size())
+            throw new IllegalArgumentException(String.format("Invalid index %s", index));
         return Objects.requireNonNull(property.values().get(index));
     }
 
@@ -58,9 +61,9 @@ public class PropertySchema {
     public String toString(int state) {
         if (properties.size() == 0) return "{}";
         StringBuilder builder = new StringBuilder("{");
-        builder.append(properties.get(0).name()).append(": ").append(get(state, properties.get(0)));
+        builder.append(properties.get(0).getName()).append(": ").append(get(state, properties.get(0)));
         for (int i = 1; i < properties.size(); i++) {
-            builder.append(", ").append(properties.get(i).name()).append(": ").append(get(state, properties.get(i)));
+            builder.append(", ").append(properties.get(i).getName()).append(": ").append(get(state, properties.get(i)));
         }
         builder.append("}");
         return builder.toString();

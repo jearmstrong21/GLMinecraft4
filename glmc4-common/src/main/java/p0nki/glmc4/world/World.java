@@ -35,6 +35,10 @@ public interface World {
 
     BlockState get(Vector3i blockPos);
 
+    default BlockState get(int x, int y, int z) {
+        return get(new Vector3i(x, y, z));
+    }
+
     Chunk getChunk(Vector2i chunkCoordinate);
 
     void update(Vector3i blockPos, BlockState blockState);

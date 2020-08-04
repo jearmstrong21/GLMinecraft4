@@ -24,6 +24,7 @@ public class BlockRenderers {
     public static BlockRenderer OAK_LOG;
     public static BlockRenderer OAK_PLANKS;
     public static BlockRenderer SAND;
+    public static BlockRenderer WATER;
 
     private static void register(String name, BlockRenderer blockRenderer) {
         REGISTRY.register(new Identifier("minecraft", name), blockRenderer);
@@ -39,6 +40,7 @@ public class BlockRenderers {
         register("oak_log", OAK_LOG = new OakLogBlockRenderer());
         register("oak_planks", OAK_PLANKS = new OakPlanksBlockRenderer());
         register("sand", SAND = new SandBlockRenderer());
+        register("water", WATER = new WaterBlockRenderer());
 
         Set<Identifier> identifiers = new HashSet<>();
         Blocks.REGISTRY.getEntries().forEach(entry -> {
