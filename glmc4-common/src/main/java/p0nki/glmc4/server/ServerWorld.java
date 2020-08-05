@@ -28,6 +28,7 @@ public class ServerWorld implements World {
 
     public ServerWorld() {
         chunkGenerator = new OverworldChunkGenerator(pair -> chunks.put(pair.getFirst(), pair.getSecond()), this);
+//        chunkGenerator = new DebugChunkGenerator(pair -> chunks.put(pair.getFirst(), pair.getSecond()), this);
     }
 
     public void tick() {
