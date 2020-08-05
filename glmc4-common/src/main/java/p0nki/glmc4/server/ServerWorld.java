@@ -176,7 +176,7 @@ public class ServerWorld implements World {
                     for (int y = 0; y <= heightmap[x][z]; y++) {
                         chunk.set(x, y, z, Blocks.STONE.getDefaultState());
                     }
-                    if (heightmap[x][z] <= 64) {
+                    if (heightmap[x][z] < 64) {
                         for (int y = heightmap[x][z] + 1; y <= 64; y++) {
                             chunk.set(x, y, z, Blocks.WATER.getDefaultState());
                         }
