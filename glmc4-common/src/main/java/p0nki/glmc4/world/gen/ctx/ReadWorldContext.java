@@ -16,10 +16,10 @@ public interface ReadWorldContext {
         return get(new Vector3i(x, y, z));
     }
 
-    int getGroundHeightMap(Vector2i position);
+    int getHeight(Vector2i position);
 
-    default int getGroundHeightMap(int x, int z) {
-        return getGroundHeightMap(new Vector2i(x, z));
+    default int getHeight(int x, int z) {
+        return getHeight(new Vector2i(x, z));
     }
 
     Biome getBiome(Vector2i position);

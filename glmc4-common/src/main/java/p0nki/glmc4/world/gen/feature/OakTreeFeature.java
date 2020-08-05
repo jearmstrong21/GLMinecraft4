@@ -1,6 +1,7 @@
 package p0nki.glmc4.world.gen.feature;
 
 import org.joml.Vector3i;
+import p0nki.glmc4.block.Block;
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.world.gen.ctx.ReadWriteWorldContext;
 import p0nki.glmc4.world.gen.decorator.CountHeightMapDecorator;
@@ -20,8 +21,11 @@ public class OakTreeFeature extends Feature {
 
     @Override
     public void generate(ReadWriteWorldContext world, Vector3i position, Random random) {
+        Block underBlock = world.get(position).getBlock();
+        if (underBlock != Blocks.GRASS && underBlock != Blocks.DIRT) return;
+        world.set(position, Blocks.DIRT.getDefaultState());
         int H = 4 + random.nextInt(5);
-        for (int h = 0; h < H; h++) {
+        for (int h = 1; h < H; h++) {
             world.set(new Vector3i(position.x, position.y + h, position.z), Blocks.OAK_LOG.getDefaultState());
         }
         for (int a = -1; a <= 1; a++) {

@@ -3,6 +3,7 @@ package p0nki.glmc4.utils.math;
 import org.joml.Vector2i;
 
 import java.text.DecimalFormat;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class MathUtils {
@@ -11,6 +12,10 @@ public class MathUtils {
 
     private MathUtils() {
 
+    }
+
+    public static Stream<Vector2i> streamCoordinatesInChunk() {
+        return IntStream.range(0, 16).boxed().flatMap(x -> IntStream.range(0, 16).mapToObj(z -> new Vector2i(x, z)));
     }
 
     // https://stackoverflow.com/a/5599842/9609025
@@ -33,8 +38,8 @@ public class MathUtils {
         return (t - a) / (b - a);
     }
 
-    public static float map(float t, float a1, float b1, float a2, float b2) {
-        return lerp(norm(t, a1, b1), a2, b2);
+    public static float map(float t, float a1, float a2, float b1, float b2) {
+        return lerp(norm(t, a1, a2), b1, b2);
     }
 
     public static long hash(int x, int z) {
