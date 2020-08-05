@@ -8,10 +8,9 @@ import p0nki.glmc4.block.blocks.GrassBlock;
 import p0nki.glmc4.client.GLMC4Client;
 import p0nki.glmc4.client.assets.AtlasPosition;
 import p0nki.glmc4.client.assets.TextureQuad;
-import p0nki.glmc4.client.render.block.NoContextConstantSidedBlockRenderer;
 import p0nki.glmc4.utils.Identifier;
 
-public class GrassBlockRenderer extends NoContextConstantSidedBlockRenderer {
+public class GrassBlockRenderer extends NoContextTexturedSidedBlockRenderer {
 
     public GrassBlockRenderer() {
         super(Blocks.GRASS);

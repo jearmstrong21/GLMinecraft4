@@ -4,7 +4,7 @@ import p0nki.glmc4.block.Block;
 import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.utils.math.VoxelShape;
 
-public class AirBlock extends Block {
+public class FlowerBlock extends Block {
 
     @Override
     public boolean isFullBlock(BlockState blockState) {

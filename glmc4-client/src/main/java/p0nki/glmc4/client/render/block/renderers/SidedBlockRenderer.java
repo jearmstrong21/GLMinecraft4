@@ -1,7 +1,10 @@
-package p0nki.glmc4.client.render.block;
+package p0nki.glmc4.client.render.block.renderers;
 
 import p0nki.glmc4.block.Block;
 import p0nki.glmc4.client.render.MeshData;
+import p0nki.glmc4.client.render.block.BlockRenderContext;
+import p0nki.glmc4.client.render.block.BlockRenderer;
+import p0nki.glmc4.client.render.block.RenderLayer;
 
 public abstract class SidedBlockRenderer extends BlockRenderer {
 

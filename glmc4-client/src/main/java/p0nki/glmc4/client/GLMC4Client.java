@@ -11,12 +11,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
-import org.joml.Matrix4f;
-import org.joml.Vector2i;
-import org.joml.Vector3f;
-import org.joml.Vector3i;
+import org.joml.*;
 import p0nki.glmc4.block.BlockState;
+import p0nki.glmc4.block.Blocks;
+import p0nki.glmc4.client.gl.Framebuffer;
+import p0nki.glmc4.client.gl.Mesh;
+import p0nki.glmc4.client.gl.Shader;
 import p0nki.glmc4.client.render.DebugRenderer3D;
+import p0nki.glmc4.client.render.MeshData;
 import p0nki.glmc4.client.render.TextRenderer;
 import p0nki.glmc4.client.render.WorldRenderContext;
 import p0nki.glmc4.client.render.entity.EntityRenderer;
@@ -33,10 +35,14 @@ import p0nki.glmc4.utils.math.MathUtils;
 import p0nki.glmc4.world.Chunk;
 import p0nki.glmc4.world.gen.biomes.Biome;
 
+import java.lang.Math;
+import java.lang.Runtime;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class GLMC4Client {
 
@@ -62,6 +68,9 @@ public class GLMC4Client {
     private static String lastTotalMem = "n/a";
     private static String lastMaxMem = "n/a";
     private static float lastFrameTime = 0;
+    private static Framebuffer gameFramebuffer;
+    private static Shader postprocessShader;
+    private static Mesh postprocessMesh;
 
     public static long getLastUpdateTime(UUID uuid) {
         return lastReceivedEntityUpdate.get(uuid);
@@ -109,6 +118,13 @@ public class GLMC4Client {
         clientWorld = new ClientWorld();
         textRenderer = new TextRenderer();
         debugRenderer3D = new DebugRenderer3D();
+        gameFramebuffer = new Framebuffer();
+        postprocessShader = Shader.create("postprocess");
+        MeshData postprocessMeshData = new MeshData();
+        postprocessMeshData.addBuffer(2);
+        postprocessMeshData.appendBuffer2f(0, List.of(new Vector2f(0, 0), new Vector2f(1, 0), new Vector2f(0, 1), new Vector2f(1, 1)));
+        postprocessMeshData.appendTri(List.of(0, 1, 2, 1, 2, 3));
+        postprocessMesh = new Mesh(postprocessMeshData);
         LOGGER.info(RENDER, "Renderer initialized");
         EntityRenderers.REGISTRY.getEntries().forEach(entry -> entry.getValue().initialize());
         new Thread(GLMC4Client::runNetty, "Netty Main Thread").start();
@@ -136,15 +152,20 @@ public class GLMC4Client {
 
         Matrix4f perspective = new Matrix4f().perspective((float) Math.toRadians(80), 1.0F, 0.001F, 300);
         Entity thisEntity = getThisEntity();
+        Vector3f cameraPosition = new Vector3f(thisEntity.getEyePosition()).sub(new Vector3f(thisEntity.getLookingAt()).mul(3));
         Matrix4f view = new Matrix4f().lookAt(
-                new Vector3f(thisEntity.getEyePosition()).sub(new Vector3f(thisEntity.getLookingAt()).mul(3)),
+                cameraPosition,
                 new Vector3f(thisEntity.getEyePosition()),
                 new Vector3f(0, 1, 0)
         );
 
+        gameFramebuffer.start();
+        glClearColor(0, 0, 0, 1);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
         WorldRenderContext worldRenderContext = new WorldRenderContext(perspective, view);
         clientWorld.render(worldRenderContext);
-
         for (Entity entity : entities.values()) {
 //            if (entity.getUuid().equals(packetListener.getPlayer().getUuid())) continue;
             EntityType<?> type = entity.getType();
@@ -152,7 +173,15 @@ public class GLMC4Client {
             EntityRenderer<?> renderer = EntityRenderers.REGISTRY.get(identifier).getValue();
             renderer.render(worldRenderContext, entity);
         }
-        System.runFinalization();
+        gameFramebuffer.end();
+
+        glDisable(GL_DEPTH_TEST);
+
+        postprocessShader.use();
+        postprocessShader.setFramebuffer("tex", gameFramebuffer, 0);
+        postprocessShader.setBoolean("underwater", clientWorld.getOrAir(new Vector3i((int) cameraPosition.x, (int) cameraPosition.y, (int) cameraPosition.z)).getBlock() == Blocks.WATER);
+        postprocessMesh.triangles();
+
         textRenderer.renderString(-1, 1 - 0.04F, 0.04F, String.format("GLMinecraft4\n" +
                         "FPS: %s\n" +
                         "Position: %s\n" +
@@ -173,6 +202,7 @@ public class GLMC4Client {
         ));
 
         packetListener.tick();
+
         if ((int) MCWindow.time() != (int) lastFrameTime) {
             lastFreeMem = MathUtils.readableBytes(Runtime.getRuntime().freeMemory());
             lastTotalMem = MathUtils.readableBytes(Runtime.getRuntime().totalMemory());
