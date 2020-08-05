@@ -227,7 +227,7 @@ public class ServerWorld implements World {
         MinecraftServer.INSTANCE.writeAll(new PacketS2CChunkUpdate(blockPos.x, blockPos.y, blockPos.z, blockState));
     }
 
-    public static class ServerChunkEntry {
+    private static class ServerChunkEntry {
 
         private final int[][] groundHeightMap;
         private final Chunk value;
