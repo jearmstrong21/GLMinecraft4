@@ -150,7 +150,7 @@ public class ServerWorld implements World {
                 }
             }
 
-            int cellSize = 16;
+            int cellSize = 4;
             float[][] samples = new float[16 / cellSize + 1][16 / cellSize + 1];
             for (int i = 0; i < 16 / cellSize + 1; i++) {
                 for (int j = 0; j < 16 / cellSize + 1; j++) {
