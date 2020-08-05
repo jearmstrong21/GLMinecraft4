@@ -1,5 +1,6 @@
 package p0nki.glmc4.client.render.block;
 
+import org.joml.Random;
 import org.joml.Vector3i;
 import p0nki.glmc4.block.BlockState;
 
@@ -14,6 +15,7 @@ public class BlockRenderContext {
     private final BlockState zmi;
     private final BlockState zpl;
     private final BlockState cur;
+    private final Random random;
 
     public BlockRenderContext(RenderLayer renderLayer, Vector3i blockPos, BlockState xmi, BlockState xpl, BlockState ymi, BlockState ypl, BlockState zmi, BlockState zpl, BlockState cur) {
         this.renderLayer = renderLayer;
@@ -25,6 +27,11 @@ public class BlockRenderContext {
         this.zmi = zmi;
         this.zpl = zpl;
         this.cur = cur;
+        random = new Random(blockPos.hashCode());
+    }
+
+    public Random getRandom() {
+        return random;
     }
 
     public RenderLayer getRenderLayer() {

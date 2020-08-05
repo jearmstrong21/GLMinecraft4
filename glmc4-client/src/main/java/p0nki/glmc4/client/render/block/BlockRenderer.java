@@ -19,7 +19,7 @@ public abstract class BlockRenderer extends Registrable<BlockRenderer> {
         this.renderLayer = renderLayer;
     }
 
-    public RenderLayer getRenderLayer() {
+    public final RenderLayer getRenderLayer() {
         return renderLayer;
     }
 
@@ -28,12 +28,12 @@ public abstract class BlockRenderer extends Registrable<BlockRenderer> {
     }
 
     @Override
-    public Registry<BlockRenderer> getRegistry() {
+    public final Registry<BlockRenderer> getRegistry() {
         return BlockRenderers.REGISTRY;
     }
 
     @Override
-    public BlockRenderer getValue() {
+    public final BlockRenderer getValue() {
         return this;
     }
 

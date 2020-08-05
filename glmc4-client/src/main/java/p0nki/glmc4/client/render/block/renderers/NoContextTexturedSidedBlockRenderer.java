@@ -1,4 +1,4 @@
-package p0nki.glmc4.client.render.block;
+package p0nki.glmc4.client.render.block.renderers;
 
 import org.joml.Vector3f;
 import org.joml.Vector3i;
@@ -7,9 +7,9 @@ import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.client.assets.TextureQuad;
 import p0nki.glmc4.client.render.MeshData;
 
-public abstract class NoContextConstantSidedBlockRenderer extends NoContextSidedBlockRenderer {
+public abstract class NoContextTexturedSidedBlockRenderer extends NoContextSidedBlockRenderer {
 
-    public NoContextConstantSidedBlockRenderer(Block block) {
+    public NoContextTexturedSidedBlockRenderer(Block block) {
         super(block);
     }
 

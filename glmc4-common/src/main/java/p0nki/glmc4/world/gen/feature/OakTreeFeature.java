@@ -13,7 +13,7 @@ public class OakTreeFeature extends Feature {
 
     public static final Decorator PLAINS = new CountHeightMapDecorator(3);
     public static final Decorator HIGH_PLAINS = new CountHeightMapDecorator(10);
-    public static final OakTreeFeature INSTANCE = new OakTreeFeature();
+    public static final Feature INSTANCE = new OakTreeFeature();
 
     private OakTreeFeature() {
 

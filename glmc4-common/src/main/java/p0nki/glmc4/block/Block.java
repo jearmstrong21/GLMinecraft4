@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class Block extends Registrable<Block> implements AfterRegisterCallback {
+public class Block extends Registrable<Block> implements AfterRegisterCallback {
 
     private final PropertySchema schema;
     private List<BlockState> states;

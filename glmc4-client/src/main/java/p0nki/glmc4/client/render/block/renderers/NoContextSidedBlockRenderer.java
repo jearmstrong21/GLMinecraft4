@@ -1,9 +1,11 @@
-package p0nki.glmc4.client.render.block;
+package p0nki.glmc4.client.render.block.renderers;
 
 import org.joml.Vector3i;
 import p0nki.glmc4.block.Block;
 import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.client.render.MeshData;
+import p0nki.glmc4.client.render.block.BlockRenderContext;
+import p0nki.glmc4.client.render.block.RenderLayer;
 
 public abstract class NoContextSidedBlockRenderer extends SidedBlockRenderer {
 

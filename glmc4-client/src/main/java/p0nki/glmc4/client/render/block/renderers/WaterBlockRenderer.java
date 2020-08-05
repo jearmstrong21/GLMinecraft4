@@ -8,7 +8,6 @@ import p0nki.glmc4.block.blocks.WaterBlock;
 import p0nki.glmc4.client.assets.AtlasPosition;
 import p0nki.glmc4.client.assets.TextureQuad;
 import p0nki.glmc4.client.render.MeshData;
-import p0nki.glmc4.client.render.block.NoContextSidedBlockRenderer;
 import p0nki.glmc4.client.render.block.RenderLayer;
 import p0nki.glmc4.utils.Identifier;
 

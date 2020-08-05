@@ -6,10 +6,9 @@ import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.client.assets.AtlasPosition;
 import p0nki.glmc4.client.assets.TextureQuad;
 import p0nki.glmc4.client.render.Colors;
-import p0nki.glmc4.client.render.block.NoContextConstantSidedBlockRenderer;
 import p0nki.glmc4.utils.Identifier;
 
-public class OakLeavesBlockRenderer extends NoContextConstantSidedBlockRenderer {
+public class OakLeavesBlockRenderer extends NoContextTexturedSidedBlockRenderer {
 
     public OakLeavesBlockRenderer() {
         super(Blocks.OAK_LEAVES);

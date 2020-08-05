@@ -12,7 +12,7 @@ import java.util.Random;
 public class LakeFeature extends Feature {
 
     public static final Decorator DECORATOR = new CountHeightMapDecorator(0.25F);
-    public static final LakeFeature FEATURE = new LakeFeature();
+    public static final Feature FEATURE = new LakeFeature();
 
     private LakeFeature() {
 
