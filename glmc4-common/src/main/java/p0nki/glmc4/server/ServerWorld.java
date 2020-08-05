@@ -11,7 +11,7 @@ import p0nki.glmc4.world.ChunkGenerationStatus;
 import p0nki.glmc4.world.ChunkNotLoadedException;
 import p0nki.glmc4.world.World;
 import p0nki.glmc4.world.gen.ChunkGenerator;
-import p0nki.glmc4.world.gen.OverworldChunkGenerator;
+import p0nki.glmc4.world.gen.DebugChunkGenerator;
 import p0nki.glmc4.world.gen.biomes.Biome;
 
 import java.util.HashMap;
@@ -27,7 +27,8 @@ public class ServerWorld implements World {
     private final ChunkGenerator chunkGenerator;
 
     public ServerWorld() {
-        chunkGenerator = new OverworldChunkGenerator(pair -> chunks.put(pair.getFirst(), pair.getSecond()), this);
+//        chunkGenerator = new OverworldChunkGenerator(pair -> chunks.put(pair.getFirst(), pair.getSecond()), this);
+        chunkGenerator = new DebugChunkGenerator(pair -> chunks.put(pair.getFirst(), pair.getSecond()), this);
     }
 
     public void tick() {
