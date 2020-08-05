@@ -2,6 +2,7 @@ package p0nki.glmc4.block.blocks;
 
 import p0nki.glmc4.block.Block;
 import p0nki.glmc4.block.BlockState;
+import p0nki.glmc4.utils.math.VoxelShape;
 
 public class AirBlock extends Block {
 
@@ -13,5 +14,10 @@ public class AirBlock extends Block {
     @Override
     public float getAOContribution() {
         return 1;
+    }
+
+    @Override
+    public VoxelShape getShape(BlockState blockState) {
+        return VoxelShape.EMPTY;
     }
 }

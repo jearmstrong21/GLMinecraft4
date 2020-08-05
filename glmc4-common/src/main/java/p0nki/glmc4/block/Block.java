@@ -1,10 +1,12 @@
 package p0nki.glmc4.block;
 
+import org.joml.AABBf;
 import p0nki.glmc4.registry.AfterRegisterCallback;
 import p0nki.glmc4.registry.Registrable;
 import p0nki.glmc4.registry.Registry;
 import p0nki.glmc4.state.PropertySchema;
 import p0nki.glmc4.utils.Identifier;
+import p0nki.glmc4.utils.math.VoxelShape;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,6 +20,10 @@ public class Block extends Registrable<Block> implements AfterRegisterCallback {
     protected Block() {
         schema = new PropertySchema();
         initProperties();
+    }
+
+    public VoxelShape getShape(BlockState blockState) {
+        return VoxelShape.of(new AABBf(0, 0, 0, 1, 1, 1), "1x1x1 cube");
     }
 
     @Override

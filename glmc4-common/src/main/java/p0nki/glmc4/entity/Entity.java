@@ -1,13 +1,15 @@
 package p0nki.glmc4.entity;
 
+import org.joml.AABBf;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
-import p0nki.glmc4.block.Blocks;
+import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.server.MinecraftServer;
 import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.tag.TagEquivalent;
 import p0nki.glmc4.utils.TagUtils;
+import p0nki.glmc4.utils.math.VoxelShape;
 import p0nki.glmc4.world.World;
 
 import java.util.Random;
@@ -73,8 +75,14 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
         for (int x = x0; x <= x1; x++) {
             for (int y = y0; y <= y1; y++) {
                 for (int z = z0; z <= z1; z++) {
-                    if (MinecraftServer.INSTANCE.getServerWorld().get(new Vector3i(x, y, z)).getBlock() != Blocks.AIR)
+                    BlockState blockState = MinecraftServer.INSTANCE.getServerWorld().get(new Vector3i(x, y, z));
+                    VoxelShape shape = blockState.getBlock().getShape(blockState);
+                    if (shape.collidesWith(new AABBf(
+                            testPosition.x, testPosition.y, testPosition.z,
+                            testPosition.x + getSize().x, testPosition.y + getSize().y, testPosition.z + getSize().z
+                    ).translate(-x, -y, -z))) {
                         return false;
+                    }
                 }
             }
         }

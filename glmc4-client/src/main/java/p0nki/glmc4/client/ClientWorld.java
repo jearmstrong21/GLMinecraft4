@@ -63,6 +63,12 @@ public class ClientWorld implements World {
                 computeCounter.get());
     }
 
+    public BlockState getOrAir(Vector3i position) {
+        if (!isChunkLoaded(World.getChunkCoordinate(new Vector2i(position.x, position.z))))
+            return Blocks.AIR.getDefaultState();
+        return get(position);
+    }
+
     public ClientWorld() {
         shader = Shader.create("chunk");
         texture = new Texture(Path.of("run", "atlas", "block.png"));

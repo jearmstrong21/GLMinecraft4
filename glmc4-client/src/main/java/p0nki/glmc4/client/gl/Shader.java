@@ -81,4 +81,12 @@ public final class Shader {
         glUniform1f(glGetUniformLocation(shader, name), value);
     }
 
+    public void setFramebuffer(String name, Framebuffer gameFramebuffer, int unit) {
+        setInt(name, unit);
+        gameFramebuffer.use(unit);
+    }
+
+    public void setBoolean(String name, boolean value) {
+        glUniform1i(glGetUniformLocation(shader, name), value ? 1 : 0);
+    }
 }
