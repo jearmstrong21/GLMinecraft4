@@ -19,15 +19,22 @@ public class TwoLayerSurfaceBuilder extends SurfaceBuilder {
 
 
     @Override
-    public void generate(Random random, Chunk chunk, Biome biome, int x, int z, int height, int surfaceDepth) {
+    public void generate(Random random, Chunk chunk, Biome biome, int x, int z, int surfaceDepth) {
         BlockState realTop = top;
         BlockState realMiddle = middle;
-        if (height <= 64) {
-            realTop = realMiddle = Blocks.SAND.getDefaultState();
-        }
-        chunk.set(x, height, z, realTop);
-        for (int y = height - surfaceDepth; y < height; y++) {
-            chunk.set(x, y, z, realMiddle);
+        for (int y = 255; y >= 0; y--) {
+            BlockState b = chunk.get(x, y, z);
+            if (b.getBlock() != Blocks.AIR) {
+                if (b.getBlock() == Blocks.WATER) {
+                    realTop = realMiddle = Blocks.SAND.getDefaultState();
+                } else {
+                    chunk.set(x, y, z, realTop);
+                    for (int i = 0; i < surfaceDepth; i++) {
+                        chunk.set(x, y - i - 1, z, realMiddle);
+                    }
+                    return;
+                }
+            }
         }
     }
 

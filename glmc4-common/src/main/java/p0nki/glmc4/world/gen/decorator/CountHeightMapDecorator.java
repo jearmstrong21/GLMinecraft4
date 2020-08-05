@@ -17,10 +17,11 @@ public class CountHeightMapDecorator extends Decorator {
 
     @Override
     public Stream<Vector3i> generate(ReadWorldContext world, Vector3i position, Random random) {
-        return IntStream.range(0, (int) count + ((random.nextFloat() < count - (int) count) ? 1 : 0)).mapToObj(__ -> {
-            int x = position.x + random.nextInt(16);
-            int z = position.z + random.nextInt(16);
-            return new Vector3i(x, world.getHeight(x, z), z);
-        });
+        return IntStream.range(0, (int) (Math.floor(count) + ((random.nextFloat() < count - Math.floor(count) ? 1 : 0))))
+                .mapToObj(__ -> {
+                    int x = position.x + random.nextInt(16);
+                    int z = position.z + random.nextInt(16);
+                    return new Vector3i(x, world.getHeight(x, z), z);
+                });
     }
 }

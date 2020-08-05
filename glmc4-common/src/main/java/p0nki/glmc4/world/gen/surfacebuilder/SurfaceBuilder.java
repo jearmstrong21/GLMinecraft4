@@ -7,6 +7,6 @@ import java.util.Random;
 
 public abstract class SurfaceBuilder {
 
-    public abstract void generate(Random random, Chunk chunk, Biome biome, int x, int z, int height, int surfaceDepth);
+    public abstract void generate(Random random, Chunk chunk, Biome biome, int x, int z, int surfaceDepth);
 
 }

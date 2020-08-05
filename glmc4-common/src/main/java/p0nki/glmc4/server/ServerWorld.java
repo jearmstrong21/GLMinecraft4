@@ -31,6 +31,7 @@ public class ServerWorld implements World {
 
     private final Queue<Vector2i> inHeightmapQueue = new ConcurrentLinkedQueue<>();
     private final Queue<Vector2i> inDecorate1Queue = new ConcurrentLinkedQueue<>();
+    private final Queue<Vector2i> inSurfaceBuildQueue = new ConcurrentLinkedQueue<>();
     private final Queue<Vector2i> inDecorate2Queue = new ConcurrentLinkedQueue<>();
     private final Queue<Vector2i> inLoadQueue = new ConcurrentLinkedQueue<>();
     private final Queue<Runnable> runnableQueue = new ConcurrentLinkedQueue<>();
@@ -39,12 +40,14 @@ public class ServerWorld implements World {
     private final SimplexGenerator heightMapGenerator;
     private final BiomeGenerator biomeGenerator;
     private final SimplexGenerator surfaceDepthGenerator;
+    private final long featureSeed;
 
     public ServerWorld() {
-        AtomicLong seed = new AtomicLong(System.currentTimeMillis());
+        final AtomicLong seed = new AtomicLong(System.currentTimeMillis());
         heightMapGenerator = new SimplexGenerator(seed);
         biomeGenerator = new BiomeGenerator(seed);
         surfaceDepthGenerator = new SimplexGenerator(seed);
+        featureSeed = seed.incrementAndGet();
         for (int x = -5; x <= 5; x++) {
             for (int z = -5; z <= 5; z++) {
                 queueLoad(new Vector2i(x, z));
@@ -180,19 +183,6 @@ public class ServerWorld implements World {
                     }
                 }
             }
-            Random random = new Random(v.hashCode() * 2);
-            MathUtils.streamCoordinatesInChunk().forEach(c -> {
-                Biome biome = chunk.getBiome(c.x, c.y);
-                int rx = v.x * 16 + c.x;
-                int rz = v.y * 16 + c.y;
-                float zoom = 0.01F;
-                biome.getSurfaceBuilder().generate(random,
-                        chunk,
-                        biome, c.x, c.y,
-                        heightmap[c.x][c.y],
-                        (int) MathUtils.map(surfaceDepthGenerator.simplex(rx * zoom, rz * zoom),
-                                -1, 1, 3, 10));
-            });
             ServerChunkEntry entry = new ServerChunkEntry(chunk);
             runnableQueue.add(() -> chunks.put(v, entry));
         });
@@ -220,7 +210,8 @@ public class ServerWorld implements World {
         if (!ensureHeightmap(new Vector2i(v.x - 1, v.y + 1))) return false;
         if (!ensureHeightmap(new Vector2i(v.x + 1, v.y + 1))) return false;
         CompletableFuture.runAsync(() -> {
-            Random random = new Random(v.hashCode() * 2 + 1);
+            Random random = new Random(featureSeed + v.hashCode() * 2 + 1);
+            random.nextBytes(new byte[10]);
             ReadWriteWorldContext context = getContext(v, ChunkGenerationStatus.HEIGHTMAP);
             MathUtils.streamCoordinatesInChunk()
                     .map(p -> chunks.get(v).getValue().getBiome(p.x, p.y))
@@ -243,8 +234,8 @@ public class ServerWorld implements World {
         return true;
     }
 
-    private boolean decorate2(Vector2i v) {
-        if (getChunkStatus(v) >= ChunkGenerationStatus.DECORATED2) return false;
+    private boolean surfaceBuild(Vector2i v) {
+        if (getChunkStatus(v) >= ChunkGenerationStatus.SURFACE_BUILD) return false;
         if (!ensureDecorate1(v)) return false;
         if (!ensureDecorate1(new Vector2i(v.x - 1, v.y))) return false;
         if (!ensureDecorate1(new Vector2i(v.x + 1, v.y))) return false;
@@ -255,7 +246,52 @@ public class ServerWorld implements World {
         if (!ensureDecorate1(new Vector2i(v.x - 1, v.y + 1))) return false;
         if (!ensureDecorate1(new Vector2i(v.x + 1, v.y + 1))) return false;
         CompletableFuture.runAsync(() -> {
-            Random random = new Random(v.hashCode() * 2 + 1);
+            chunks.get(v).calculateWorldGenHeightMap();
+            Random random = new Random(featureSeed + v.hashCode() * 2);
+            random.nextBytes(new byte[10]);
+            MathUtils.streamCoordinatesInChunk().forEach(c -> {
+                Biome biome = chunks.get(v).getValue().getBiome(c.x, c.y);
+                int rx = v.x * 16 + c.x;
+                int rz = v.y * 16 + c.y;
+                float zoom = 0.01F;
+                biome.getSurfaceBuilder().generate(random,
+                        chunks.get(v).getValue(),
+                        biome, c.x, c.y,
+                        (int) MathUtils.map(surfaceDepthGenerator.simplex(rx * zoom, rz * zoom),
+                                -1, 1, 3, 10));
+            });
+            runnableQueue.add(() -> chunks.get(v).setGenerationStatus(ChunkGenerationStatus.SURFACE_BUILD));
+        });
+        return true;
+    }
+
+    private void queueSurfaceBuild(Vector2i v) {
+        if (!inSurfaceBuildQueue.contains(v)) inSurfaceBuildQueue.add(v);
+    }
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    private boolean ensureSurfaceBuild(Vector2i v) {
+        if (getChunkStatus(v) < ChunkGenerationStatus.SURFACE_BUILD) {
+            queueSurfaceBuild(v);
+            return false;
+        }
+        return true;
+    }
+
+    private boolean decorate2(Vector2i v) {
+        if (getChunkStatus(v) >= ChunkGenerationStatus.DECORATED2) return false;
+        if (!ensureSurfaceBuild(v)) return false;
+        if (!ensureSurfaceBuild(new Vector2i(v.x - 1, v.y))) return false;
+        if (!ensureSurfaceBuild(new Vector2i(v.x + 1, v.y))) return false;
+        if (!ensureSurfaceBuild(new Vector2i(v.x, v.y - 1))) return false;
+        if (!ensureSurfaceBuild(new Vector2i(v.x, v.y + 1))) return false;
+        if (!ensureSurfaceBuild(new Vector2i(v.x - 1, v.y - 1))) return false;
+        if (!ensureSurfaceBuild(new Vector2i(v.x + 1, v.y - 1))) return false;
+        if (!ensureSurfaceBuild(new Vector2i(v.x - 1, v.y + 1))) return false;
+        if (!ensureSurfaceBuild(new Vector2i(v.x + 1, v.y + 1))) return false;
+        CompletableFuture.runAsync(() -> {
+            Random random = new Random(featureSeed + v.hashCode() * 2 + 2);
+            random.nextBytes(new byte[10]);
             ReadWriteWorldContext context = getContext(v, ChunkGenerationStatus.DECORATED1);
             MathUtils.streamCoordinatesInChunk()
                     .map(p -> chunks.get(v).getValue().getBiome(p.x, p.y))
@@ -304,6 +340,10 @@ public class ServerWorld implements World {
         for (int i = 0; i < 100 && !inDecorate1Queue.isEmpty(); i++) {
             if (decorate1(inDecorate1Queue.peek())) inDecorate1Queue.remove();
             else inDecorate1Queue.add(inDecorate1Queue.remove());
+        }
+        for (int i = 0; i < 100 && !inSurfaceBuildQueue.isEmpty(); i++) {
+            if (surfaceBuild(inSurfaceBuildQueue.peek())) inSurfaceBuildQueue.remove();
+            else inSurfaceBuildQueue.add(inSurfaceBuildQueue.remove());
         }
         for (int i = 0; i < 100 && !inDecorate2Queue.isEmpty(); i++) {
             if (decorate2(inDecorate2Queue.peek())) inDecorate2Queue.remove();
@@ -362,6 +402,10 @@ public class ServerWorld implements World {
             generationStatus = ChunkGenerationStatus.HEIGHTMAP;
             this.value = value;
             worldGenHeightMap = new int[16][16];
+            calculateWorldGenHeightMap();
+        }
+
+        public void calculateWorldGenHeightMap() {
             for (int x = 0; x < 16; x++) {
                 for (int z = 0; z < 16; z++) {
                     for (int y = 255; y >= 0; y--) {

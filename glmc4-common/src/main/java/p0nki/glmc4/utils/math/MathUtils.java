@@ -1,8 +1,11 @@
 package p0nki.glmc4.utils.math;
 
 import org.joml.Vector2i;
+import org.joml.Vector3i;
 
 import java.text.DecimalFormat;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -16,6 +19,15 @@ public class MathUtils {
 
     public static Stream<Vector2i> streamCoordinatesInChunk() {
         return IntStream.range(0, 16).boxed().flatMap(x -> IntStream.range(0, 16).mapToObj(z -> new Vector2i(x, z)));
+    }
+
+    public static Stream<Vector3i> streamSphere(int radius) {
+        return IntStream.range(-radius, radius).boxed().flatMap(x -> IntStream.range(-radius, radius).boxed().flatMap(y -> IntStream.range(-radius, radius).mapToObj(z -> new Vector3i(x, y, z)))).filter(pos -> pos.x * pos.x + pos.y * pos.y + pos.z * pos.z < radius * radius);
+    }
+
+    public static Stream<Vector3i> streamSphereBorder(int radius) {
+        List<Vector3i> insideSphere = streamSphere(radius).collect(Collectors.toList());
+        return streamSphere(radius + 1).filter(pos -> !insideSphere.contains(pos));
     }
 
     // https://stackoverflow.com/a/5599842/9609025

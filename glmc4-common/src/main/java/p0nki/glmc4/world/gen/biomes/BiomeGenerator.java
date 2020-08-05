@@ -31,6 +31,7 @@ public class BiomeGenerator {
                 } else {
                     data[x][z] = Biomes.OCEAN;
                 }
+                data[x][z] = Biomes.PLAINS;
             }
         }
         return data;
