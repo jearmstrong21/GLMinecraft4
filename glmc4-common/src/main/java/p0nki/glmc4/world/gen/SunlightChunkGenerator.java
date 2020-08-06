@@ -85,14 +85,7 @@ public class SunlightChunkGenerator extends ChunkGenerator {
                     }
                 }
                 while (!list.isEmpty()) {
-//                    System.out.println(list.size());
-                    int i = 0;
-//                    for (int n = 1; n < list.size(); n++) {
-//                        if (list.get(n).getSecond() > list.get(i).getSecond()) {
-//                            i = n;
-//                        }
-//                    }
-                    Pair<Vector3i, Byte> pair = list.remove(i);
+                    Pair<Vector3i, Byte> pair = list.remove(0);
                     byte light = pair.getSecond();
                     Vector2i chunkCoordinate = World.getChunkCoordinate(new Vector2i(pair.getFirst().x, pair.getFirst().z));
                     Vector2i coordinateInChunk = World.getCoordinateInChunk(new Vector2i(pair.getFirst().x, pair.getFirst().z));

@@ -12,7 +12,7 @@ import p0nki.glmc4.world.ChunkGenerationStatus;
 import p0nki.glmc4.world.ChunkNotLoadedException;
 import p0nki.glmc4.world.World;
 import p0nki.glmc4.world.gen.ChunkGenerator;
-import p0nki.glmc4.world.gen.DebugChunkGenerator;
+import p0nki.glmc4.world.gen.OverworldChunkGenerator;
 import p0nki.glmc4.world.gen.SunlightChunkGenerator;
 import p0nki.glmc4.world.gen.biomes.Biome;
 
@@ -31,7 +31,7 @@ public class ServerWorld implements World {
 
     public ServerWorld() {
         Consumer<Pair<Vector2i, Chunk>> pairConsumer = pair -> chunks.put(pair.getFirst(), pair.getSecond());
-        chunkGenerator = new SunlightChunkGenerator(pairConsumer, this, DebugChunkGenerator::new);
+        chunkGenerator = new SunlightChunkGenerator(pairConsumer, this, OverworldChunkGenerator::new);
         for (int x = -5; x <= 5; x++) {
             for (int z = -5; z <= 5; z++) {
                 chunkGenerator.requestLoadChunk(new Vector2i(x, z));

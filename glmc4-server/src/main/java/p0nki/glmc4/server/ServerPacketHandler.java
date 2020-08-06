@@ -9,6 +9,7 @@ import p0nki.glmc4.network.packet.serverbound.PacketC2SPingResponse;
 import p0nki.glmc4.network.packet.serverbound.PacketC2SPlayerMovement;
 import p0nki.glmc4.network.packet.serverbound.ServerPacketListener;
 import p0nki.glmc4.utils.math.MathUtils;
+import p0nki.glmc4.world.World;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -26,6 +27,8 @@ public class ServerPacketHandler extends ServerPacketListener {
     private boolean back = false;
     private boolean left = false;
     private boolean right = false;
+    private boolean jump = false;
+    private boolean sprint = false;
     private Vector3f lookAt = new Vector3f(0, 0, -1);
 
     @Override
@@ -40,6 +43,8 @@ public class ServerPacketHandler extends ServerPacketListener {
         back = packet.isBack();
         left = packet.isLeft();
         right = packet.isRight();
+        jump = packet.isJump();
+        sprint = packet.isSprint();
         lookAt = packet.getLookAt();
     }
 
@@ -47,9 +52,10 @@ public class ServerPacketHandler extends ServerPacketListener {
     private final int viewDistance = 3;
 
     private void forViewDistance(Consumer<Vector2i> consumer) {
+        Vector2i startChunkCoordinate = World.getChunkCoordinate(new Vector2i((int) getPlayerEntity().getPosition().x, (int) getPlayerEntity().getPosition().z));
         for (int x = -viewDistance; x <= viewDistance; x++) {
             for (int z = -viewDistance; z <= viewDistance; z++) {
-                consumer.accept(new Vector2i(x, z));
+                consumer.accept(new Vector2i(x, z).add(startChunkCoordinate));
             }
         }
     }
@@ -77,6 +83,8 @@ public class ServerPacketHandler extends ServerPacketListener {
             if (MinecraftServer.INSTANCE.getServerWorld().isChunkLoaded(v)) {
                 clientChunks.add(v);
                 getConnection().write(new PacketS2CChunkLoad(v.x, v.y, MinecraftServer.INSTANCE.getServerWorld().getChunk(v)));
+            } else {
+                MinecraftServer.INSTANCE.getServerWorld().queueLoad(v);
             }
         });
     }
@@ -84,15 +92,21 @@ public class ServerPacketHandler extends ServerPacketListener {
     private void tickMovement() {
         lookAt.normalize();
         float speed = 5.0F;
-        Vector3f left2d = new Vector3f(lookAt);
-        left2d.y = 0;
-        left2d.normalize();
+        Vector3f look2d = new Vector3f(lookAt);
+        look2d.y = 0;
+        look2d.normalize();
+        Vector3f left2d = new Vector3f(look2d);
         left2d.rotateY(MathUtils.PI * 0.5F);
-        getPlayerEntity().getVelocity().set(0, 0, 0);
-        if (forward) getPlayerEntity().getVelocity().add(new Vector3f(lookAt).mul(speed));
-        if (back) getPlayerEntity().getVelocity().add(new Vector3f(lookAt).mul(-speed));
-        if (left) getPlayerEntity().getVelocity().add(new Vector3f(left2d).mul(speed));
-        if (right) getPlayerEntity().getVelocity().add(new Vector3f(left2d).mul(-speed));
+        getPlayerEntity().getMotion().set(0, 0, 0);
+        if (forward) getPlayerEntity().getMotion().add(new Vector3f(look2d).mul(speed).mul(sprint ? 4 : 1));
+        if (back) getPlayerEntity().getMotion().add(new Vector3f(look2d).mul(-speed));
+        if (left) getPlayerEntity().getMotion().add(new Vector3f(left2d).mul(speed));
+        if (right) getPlayerEntity().getMotion().add(new Vector3f(left2d).mul(-speed));
+        if (jump) {
+            if (getPlayerEntity().isGrounded())
+                getPlayerEntity().getVelocity().add(0, getPlayerEntity().getJumpPower(), 0);
+            jump = false;
+        }
         getPlayerEntity().getLookingAt().set(lookAt);
     }
 

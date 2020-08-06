@@ -5,6 +5,7 @@ import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import p0nki.glmc4.block.BlockState;
+import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.server.MinecraftServer;
 import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.tag.TagEquivalent;
@@ -23,11 +24,13 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
     private Vector3f facingTowards;
     private Vector3f lookingAt;
     private UUID uuid;
+    private Vector3f motion;
 
     public Entity(EntityType<?> type, Vector3f position, UUID uuid) {
         this.type = type;
         this.position = position;
         this.velocity = new Vector3f(0);
+        this.motion = new Vector3f(0);
         this.facingTowards = new Vector3f(0, 0, -1);
         this.lookingAt = new Vector3f(0, 0, -1);
         this.uuid = uuid;
@@ -54,10 +57,40 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
     }
 
     public void tick(Random random) {
-        if (velocity.x != 0 || velocity.z != 0) {
-            facingTowards.set(new Vector3f(velocity.x, 0, velocity.z).normalize());
+        if (motion.x != 0 || motion.z != 0) {
+            facingTowards.set(new Vector3f(motion.x, 0, motion.z).normalize());
         }
-        position.add(new Vector3f(verifyMotion(velocity)).mul(0.05F));
+        Vector3f effectiveVel = verifyMotion(velocity);
+        Vector3f effectiveMotion = verifyMotion(motion);
+        position.add(new Vector3f(effectiveVel).add(effectiveMotion).mul(0.05F));
+        if (!isGrounded()) {
+            velocity.y += getGravity() * 0.05F;
+        }
+        velocity = verifyMotion(velocity);
+    }
+
+    public final BlockState getEyeBlock() {
+        return MinecraftServer.INSTANCE.getServerWorld().get((int) getEyePosition().x, (int) getEyePosition().y, (int) getEyePosition().z);
+    }
+
+    public final boolean isGrounded() {
+        return getFootBlock().getBlock() == Blocks.WATER || !isValidPosition(new Vector3f(position.x, position.y - 0.1F, position.z));
+    }
+
+    public final float getGravity() {
+        return getFootBlock().getBlock() == Blocks.WATER ? -2 : -40;
+    }
+
+    public final float getJumpPower() {
+        return getFootBlock().getBlock() == Blocks.WATER ? 0.1F : 10;
+    }
+
+    public final BlockState getFootBlock() {
+        return MinecraftServer.INSTANCE.getServerWorld().get((int) getFootPosition().x, (int) getFootPosition().y, (int) getFootPosition().z);
+    }
+
+    public final Vector3f getFootPosition() {
+        return new Vector3f(position.x + getSize().x / 2, position.y, position.z + getSize().z / 2);
     }
 
     public boolean canTick() {
@@ -87,6 +120,10 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
             }
         }
         return true;
+    }
+
+    public final Vector3f getMotion() {
+        return motion;
     }
 
     public final EntityType<?> getType() {

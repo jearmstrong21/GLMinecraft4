@@ -51,7 +51,7 @@ public class Biomes {
                 BAD,
                 new TwoLayerSurfaceBuilder(Blocks.SAND.getDefaultState(), Blocks.SAND.getDefaultState()))
                 .postsurface(PalmTreeFeature.DECORATOR, PalmTreeFeature.INSTANCE)
-                .addNoiseRange(-2));
+                .addNoiseRange(-8));
     }
 
 }

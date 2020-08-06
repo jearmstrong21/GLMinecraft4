@@ -1,7 +1,7 @@
 package p0nki.glmc4.client;
 
-import org.joml.Vector2i;
 import org.joml.Vector3i;
+import org.lwjgl.glfw.GLFW;
 import p0nki.glmc4.network.packet.clientbound.*;
 import p0nki.glmc4.network.packet.serverbound.PacketC2SPingResponse;
 import p0nki.glmc4.network.packet.serverbound.PacketC2SPlayerMovement;
@@ -61,7 +61,14 @@ public class ClientPacketHandler extends ClientPacketListener {
 
     @Override
     public void tick() {
-        getConnection().write(new PacketC2SPlayerMovement(MCWindow.getKey('W'), MCWindow.getKey('S'), MCWindow.getKey('A'), MCWindow.getKey('D'), GLMC4Client.lookDir));
+        getConnection().write(new PacketC2SPlayerMovement(
+                MCWindow.getKey('W'),
+                MCWindow.getKey('S'),
+                MCWindow.getKey('A'),
+                MCWindow.getKey('D'),
+                MCWindow.getKey(' '),
+                MCWindow.getKey((char) GLFW.GLFW_KEY_LEFT_CONTROL),
+                GLMC4Client.lookDir));
     }
 
     @Override
