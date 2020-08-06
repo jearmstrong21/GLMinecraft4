@@ -11,7 +11,7 @@ public class ClientSettings {
     public static final Vector3f CHUNK_COLOR = new Vector3f(0, 0, 1);
     public static final Vector3f CURRENT_CHUNK_COLOR = new Vector3f(1, 1, 0);
 
-    public static final boolean SMOOTH_LIGHTING = false;
+    public static final boolean SMOOTH_LIGHTING = true;
 
     private ClientSettings() {
 

@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
-import p0nki.glmc4.block.Block;
 import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.server.ServerWorld;
@@ -19,7 +18,9 @@ import p0nki.glmc4.world.gen.biomes.Biome;
 import p0nki.glmc4.world.gen.biomes.BiomeGenerator;
 import p0nki.glmc4.world.gen.ctx.ReadWriteWorldContext;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -37,7 +38,6 @@ public class OverworldChunkGenerator extends ChunkGenerator {
     private final Queue<Vector2i> inDecorate1Queue;
     private final Queue<Vector2i> inSurfaceBuildQueue;
     private final Queue<Vector2i> inDecorate2Queue;
-    private final Queue<Vector2i> inSunlightQueue;
     private final Queue<Vector2i> inLoadQueue;
     private final Queue<Runnable> runnableQueue;
     private final AtomicInteger loadedChunks;
@@ -59,15 +59,9 @@ public class OverworldChunkGenerator extends ChunkGenerator {
         inDecorate1Queue = new ConcurrentLinkedQueue<>();
         inSurfaceBuildQueue = new ConcurrentLinkedQueue<>();
         inDecorate2Queue = new ConcurrentLinkedQueue<>();
-        inSunlightQueue = new ConcurrentLinkedQueue<>();
         inLoadQueue = new ConcurrentLinkedQueue<>();
         runnableQueue = new ConcurrentLinkedQueue<>();
         loadedChunks = new AtomicInteger(0);
-        for (int x = -5; x <= 5; x++) {
-            for (int z = -5; z <= 5; z++) {
-                queueLoad(new Vector2i(x, z));
-            }
-        }
     }
 
 
@@ -139,10 +133,6 @@ public class OverworldChunkGenerator extends ChunkGenerator {
         if (!inDecorate2Queue.contains(v)) inDecorate2Queue.add(v);
     }
 
-    private void queueSunlight(Vector2i v) {
-        if (!inSunlightQueue.contains(v)) inSunlightQueue.add(v);
-    }
-
     public void queueLoad(Vector2i v) {
         if (!inLoadQueue.contains(v)) inLoadQueue.add(v);
     }
@@ -187,15 +177,6 @@ public class OverworldChunkGenerator extends ChunkGenerator {
     private boolean ensureDecorate2(Vector2i v) {
         if (getChunkStatus(v) < ChunkGenerationStatus.DECORATED2) {
             queueDecorate2(v);
-            return false;
-        }
-        return true;
-    }
-
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    private boolean ensureSunlight(Vector2i v) {
-        if (getChunkStatus(v) < ChunkGenerationStatus.SUNLIGHT) {
-            queueSunlight(v);
             return false;
         }
         return true;
@@ -354,8 +335,8 @@ public class OverworldChunkGenerator extends ChunkGenerator {
         return true;
     }
 
-    private boolean sunlight(Vector2i v) {
-        if (getChunkStatus(v) >= ChunkGenerationStatus.SUNLIGHT) return false;
+    private boolean load(Vector2i v) {
+        if (getChunkStatus(v) >= ChunkGenerationStatus.LOADED) return false;
         if (!ensureDecorate2(v)) return false;
         if (!ensureDecorate2(new Vector2i(v.x - 1, v.y))) return false;
         if (!ensureDecorate2(new Vector2i(v.x + 1, v.y))) return false;
@@ -365,59 +346,6 @@ public class OverworldChunkGenerator extends ChunkGenerator {
         if (!ensureDecorate2(new Vector2i(v.x + 1, v.y - 1))) return false;
         if (!ensureDecorate2(new Vector2i(v.x - 1, v.y + 1))) return false;
         if (!ensureDecorate2(new Vector2i(v.x + 1, v.y + 1))) return false;
-        CompletableFuture.runAsync(() -> {
-            try {
-                List<Pair<Vector3i, Byte>> list = new ArrayList<>();
-                for (int x = 0; x < 16; x++) {
-                    for (int z = 0; z < 16; z++) {
-                        list.add(Pair.of(new Vector3i(v.x * 16 + x, 255, v.y * 16 + z), (byte) 15));
-                    }
-                }
-                while (!list.isEmpty()) {
-//                    System.out.println(list.size());
-                    int i = 0;
-//                    for (int n = 1; n < list.size(); n++) {
-//                        if (list.get(n).getSecond() > list.get(i).getSecond()) {
-//                            i = n;
-//                        }
-//                    }
-                    Pair<Vector3i, Byte> pair = list.remove(i);
-                    byte light = pair.getSecond();
-                    Vector2i chunkCoordinate = World.getChunkCoordinate(new Vector2i(pair.getFirst().x, pair.getFirst().z));
-                    Vector2i coordinateInChunk = World.getCoordinateInChunk(new Vector2i(pair.getFirst().x, pair.getFirst().z));
-                    Block block = chunks.get(chunkCoordinate).getValue().get(coordinateInChunk.x, pair.getFirst().y, coordinateInChunk.y).getBlock();
-                    light -= block.getBlockedSunlight();
-                    if (light <= 0) continue;
-                    byte curLight = chunks.get(chunkCoordinate).getValue().getSunlight()[coordinateInChunk.x][pair.getFirst().y][coordinateInChunk.y];
-                    if (light > curLight) {
-                        chunks.get(chunkCoordinate).getValue().getSunlight()[coordinateInChunk.x][pair.getFirst().y][coordinateInChunk.y] = light;
-                        list.add(Pair.of(new Vector3i(pair.getFirst()).add(0, -1, 0), light));
-                        list.add(Pair.of(new Vector3i(pair.getFirst()).add(-1, 0, 0), (byte) (light - 1)));
-                        list.add(Pair.of(new Vector3i(pair.getFirst()).add(1, 0, 0), (byte) (light - 1)));
-                        list.add(Pair.of(new Vector3i(pair.getFirst()).add(0, 0, -1), (byte) (light - 1)));
-                        list.add(Pair.of(new Vector3i(pair.getFirst()).add(0, 0, 1), (byte) (light - 1)));
-                    }
-                }
-                runnableQueue.add(() -> chunks.get(v).setGenerationStatus(ChunkGenerationStatus.SUNLIGHT));
-            } catch (Throwable t) {
-                t.printStackTrace();
-                throw new RuntimeException(t);
-            }
-        });
-        return true;
-    }
-
-    private boolean load(Vector2i v) {
-        if (getChunkStatus(v) >= ChunkGenerationStatus.LOADED) return false;
-        if (!ensureSunlight(v)) return false;
-        if (!ensureSunlight(new Vector2i(v.x - 1, v.y))) return false;
-        if (!ensureSunlight(new Vector2i(v.x + 1, v.y))) return false;
-        if (!ensureSunlight(new Vector2i(v.x, v.y - 1))) return false;
-        if (!ensureSunlight(new Vector2i(v.x, v.y + 1))) return false;
-        if (!ensureSunlight(new Vector2i(v.x - 1, v.y - 1))) return false;
-        if (!ensureSunlight(new Vector2i(v.x + 1, v.y - 1))) return false;
-        if (!ensureSunlight(new Vector2i(v.x - 1, v.y + 1))) return false;
-        if (!ensureSunlight(new Vector2i(v.x + 1, v.y + 1))) return false;
         runnableQueue.add(() -> {
             chunks.get(v).setGenerationStatus(ChunkGenerationStatus.LOADED);
             onLoad.accept(Pair.of(v, chunks.get(v).getValue()));
@@ -443,10 +371,6 @@ public class OverworldChunkGenerator extends ChunkGenerator {
         for (int i = 0; i < 100 && !inDecorate2Queue.isEmpty(); i++) {
             if (decorate2(inDecorate2Queue.peek())) inDecorate2Queue.remove();
             else inDecorate2Queue.add(inDecorate2Queue.remove());
-        }
-        for (int i = 0; i < 100 && !inSunlightQueue.isEmpty(); i++) {
-            if (sunlight(inSunlightQueue.peek())) inSunlightQueue.remove();
-            else inSunlightQueue.add(inSunlightQueue.remove());
         }
         for (int i = 0; i < 100 && !inLoadQueue.isEmpty(); i++) {
             if (load(inLoadQueue.peek())) inLoadQueue.remove();
