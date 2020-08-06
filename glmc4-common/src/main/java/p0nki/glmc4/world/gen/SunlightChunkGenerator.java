@@ -23,11 +23,13 @@ public class SunlightChunkGenerator extends ChunkGenerator {
     private final static byte UNKNOWN = 0;
     private final static byte GENERATED = 1;
     private final static byte SUNLIGHT = 2;
+    private final static byte LOADED = 3;
     private final ChunkGenerator child;
     private final Map<Vector2i, Pair<Chunk, Byte>> chunks;
 
     private final Queue<Vector2i> inGenerateQueue;
     private final Queue<Vector2i> inSunlightQueue;
+    private final Queue<Vector2i> inLoadQueue;
     private final Queue<Runnable> runnableQueue;
 
     public SunlightChunkGenerator(Consumer<Pair<Vector2i, Chunk>> onLoad, ServerWorld serverWorld, BiFunction<Consumer<Pair<Vector2i, Chunk>>, ServerWorld, ChunkGenerator> creator) {
@@ -35,6 +37,7 @@ public class SunlightChunkGenerator extends ChunkGenerator {
         chunks = new ConcurrentHashMap<>();
         inGenerateQueue = new ConcurrentLinkedQueue<>();
         inSunlightQueue = new ConcurrentLinkedQueue<>();
+        inLoadQueue = new ConcurrentLinkedQueue<>();
         runnableQueue = new ConcurrentLinkedQueue<>();
         this.child = creator.apply(pair -> chunks.put(pair.getFirst(), Pair.of(pair.getSecond(), GENERATED)), serverWorld);
     }
@@ -102,14 +105,42 @@ public class SunlightChunkGenerator extends ChunkGenerator {
                         list.add(Pair.of(new Vector3i(pair.getFirst()).add(0, 0, 1), (byte) (light - 1)));
                     }
                 }
-                runnableQueue.add(() -> {
-                    chunks.put(v, chunks.get(v).mapSecond(previousStage -> SUNLIGHT));
-                    onLoad.accept(chunks.get(v).swap().mapFirst(previousStage -> v));
-                });
+                runnableQueue.add(() -> chunks.put(v, chunks.get(v).mapSecond(previousStage -> SUNLIGHT)));
             } catch (Throwable t) {
                 t.printStackTrace();
                 throw new RuntimeException(t);
             }
+        });
+        return true;
+    }
+
+    private void queueSunlight(Vector2i v) {
+        if (!inSunlightQueue.contains(v)) inSunlightQueue.add(v);
+    }
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    private boolean ensureSunlight(Vector2i v) {
+        if (getChunkStatus(v) < SUNLIGHT) {
+            queueSunlight(v);
+            return false;
+        }
+        return true;
+    }
+
+    private boolean load(Vector2i v) {
+        if (getChunkStatus(v) >= LOADED) return false;
+        if (!ensureSunlight(v)) return false;
+        if (!ensureSunlight(new Vector2i(v.x - 1, v.y))) return false;
+        if (!ensureSunlight(new Vector2i(v.x + 1, v.y))) return false;
+        if (!ensureSunlight(new Vector2i(v.x, v.y - 1))) return false;
+        if (!ensureSunlight(new Vector2i(v.x, v.y + 1))) return false;
+        if (!ensureSunlight(new Vector2i(v.x - 1, v.y - 1))) return false;
+        if (!ensureSunlight(new Vector2i(v.x + 1, v.y - 1))) return false;
+        if (!ensureSunlight(new Vector2i(v.x - 1, v.y + 1))) return false;
+        if (!ensureSunlight(new Vector2i(v.x + 1, v.y + 1))) return false;
+        runnableQueue.add(() -> {
+            chunks.put(v, chunks.get(v).mapSecond(previousStage -> LOADED));
+            onLoad.accept(chunks.get(v).swap().mapFirst(previousStage -> v));
         });
         return true;
     }
@@ -125,6 +156,10 @@ public class SunlightChunkGenerator extends ChunkGenerator {
             if (sunlight(inSunlightQueue.peek())) inSunlightQueue.remove();
             else inSunlightQueue.add(inSunlightQueue.remove());
         }
+        for (int i = 0; i < 100 && !inLoadQueue.isEmpty(); i++) {
+            if (load(inLoadQueue.peek())) inLoadQueue.remove();
+            else inLoadQueue.add(inLoadQueue.remove());
+        }
         while (!runnableQueue.isEmpty()) {
             runnableQueue.remove().run();
         }
@@ -132,6 +167,6 @@ public class SunlightChunkGenerator extends ChunkGenerator {
 
     @Override
     public void requestLoadChunk(Vector2i v) {
-        if (!inSunlightQueue.contains(v)) inSunlightQueue.add(v);
+        if (!inLoadQueue.contains(v)) inLoadQueue.add(v);
     }
 }

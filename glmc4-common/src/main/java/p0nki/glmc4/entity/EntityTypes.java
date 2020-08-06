@@ -1,5 +1,6 @@
 package p0nki.glmc4.entity;
 
+
 import org.joml.Vector3f;
 import p0nki.glmc4.registry.Registry;
 import p0nki.glmc4.utils.Identifier;

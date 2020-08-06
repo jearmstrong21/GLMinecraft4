@@ -165,6 +165,7 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
         facingTowards = tag.get3f("facingTowards");
         lookingAt = tag.get3f("lookingAt");
         uuid = tag.getUUID("uuid");
+        motion = tag.get3f("motion");
         if (!EntityTypes.REGISTRY.get(type).getKey().equals(tag.getIdentifier("type")))
             throw new IllegalStateException(tag.getString("type").asString());
         return this;
@@ -178,6 +179,7 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
                 .insert("facingTowards", TagUtils.of(facingTowards))
                 .insert("lookingAt", TagUtils.of(lookingAt))
                 .insert("uuid", TagUtils.of(uuid))
-                .insert("type", EntityTypes.REGISTRY.get(type).getKey().toTag());
+                .insert("type", EntityTypes.REGISTRY.get(type).getKey().toTag())
+                .insert("motion", TagUtils.of(motion));
     }
 }
