@@ -43,6 +43,7 @@ public class ClientWorld implements World {
     private final Texture texture;
     private final Queue<Runnable> runnableQueue = new ConcurrentLinkedQueue<>();
     private final Queue<Vector2i> inMeshQueue = new ConcurrentLinkedQueue<>();
+    private final Set<Vector2i> currentlyMeshingChunks = new HashSet<>();
     private final AtomicInteger computeCounter = new AtomicInteger(0);
 
     private void remesh(Vector2i v) {
@@ -101,22 +102,29 @@ public class ClientWorld implements World {
     }
 
     public float calculateAO(Vector3i position) {
-        float total = 0;
-        for (int i = -1; i <= 0; i++) {
-            for (int j = -1; j <= 0; j++) {
-                for (int k = -1; k <= 0; k++) {
-                    Vector3i v = new Vector3i(position.x + i, position.y + j, position.z + k);
-                    total += get(v).getBlock().getAOContribution();
+        if (ClientSettings.SMOOTH_LIGHTING) {
+            float total = 0;
+            for (int i = -1; i <= 0; i++) {
+                for (int j = -1; j <= 0; j++) {
+                    for (int k = -1; k <= 0; k++) {
+                        Vector3i v = new Vector3i(position.x + i, position.y + j, position.z + k);
+                        total += get(v).getBlock().getAOContribution();
+                    }
                 }
             }
+            return total / 8.0F;
+        } else {
+            return 1;
         }
-        return total / 8.0F;
     }
 
     public void loadChunk(Vector2i coordinate, Chunk chunk) {
         if (chunks.containsKey(coordinate)) throw new AssertionError(coordinate);
         Objects.requireNonNull(chunk);
-        runnableQueue.add(() -> chunks.put(coordinate, chunk));
+        runnableQueue.add(() -> {
+            chunks.put(coordinate, chunk);
+            remesh(coordinate);
+        });
     }
 
     @Override
@@ -139,6 +147,14 @@ public class ClientWorld implements World {
         if (!isChunkLoaded(chunkCoordinate)) throw new ChunkNotLoadedException(chunkCoordinate);
         Vector2i coordinateInChunk = World.getCoordinateInChunk(new Vector2i(blockPos.x, blockPos.z));
         return chunks.get(chunkCoordinate).get(coordinateInChunk.x, blockPos.y, coordinateInChunk.y);
+    }
+
+    @Override
+    public byte getSunlight(Vector3i blockPos) {
+        Vector2i chunkCoordinate = World.getChunkCoordinate(new Vector2i(blockPos.x, blockPos.z));
+        if (!isChunkLoaded(chunkCoordinate)) throw new ChunkNotLoadedException(chunkCoordinate);
+        Vector2i coordinateInChunk = World.getCoordinateInChunk(new Vector2i(blockPos.x, blockPos.z));
+        return chunks.get(chunkCoordinate).getSunlight(coordinateInChunk.x, blockPos.y, coordinateInChunk.y);
     }
 
     @Override
@@ -208,14 +224,15 @@ public class ClientWorld implements World {
                 GLMC4Client.debugRenderer3D.renderCube(worldRenderContext, ClientSettings.CURRENT_CHUNK_COLOR, new Vector3f(chunk.x * 16, y, chunk.y * 16), new Vector3f(16, 1, 16));
             }
         }
-        for (Vector2i v : chunks.keySet()) {
-            if (!meshes.containsKey(v)) {
-                remesh(v);
-            }
-        }
+//        for (Vector2i v : chunks.keySet()) {
+//            if (!meshes.containsKey(v)) {
+//                remesh(v);
+//            }
+//        }
 
         if (!inMeshQueue.isEmpty()) {
             Vector2i v = inMeshQueue.remove();
+            if (currentlyMeshingChunks.contains(v)) return;
             if (!chunks.containsKey(v) ||
                     !chunks.containsKey(new Vector2i(v.x - 1, v.y)) ||
                     !chunks.containsKey(new Vector2i(v.x + 1, v.y)) ||
@@ -228,14 +245,21 @@ public class ClientWorld implements World {
                 inMeshQueue.add(v);
             } else {
                 CompletableFuture.runAsync(() -> {
-                    computeCounter.incrementAndGet();
-                    Chunk chunk = chunks.get(v);
-                    Map<RenderLayer, MeshData> map = new EnumMap<>(RenderLayer.class);
-                    for (RenderLayer renderLayer : RenderLayer.values()) {
-                        map.put(renderLayer, mesh(v.x, v.y, chunk, renderLayer));
+                    currentlyMeshingChunks.add(v);
+                    try {
+                        computeCounter.incrementAndGet();
+                        Chunk chunk = chunks.get(v);
+                        Map<RenderLayer, MeshData> map = new EnumMap<>(RenderLayer.class);
+                        for (RenderLayer renderLayer : RenderLayer.values()) {
+                            map.put(renderLayer, mesh(v.x, v.y, chunk, renderLayer));
+                        }
+                        runnableQueue.add(() -> meshes.put(v, map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> new Mesh(e.getValue())))));
+//                        computeCounter.decrementAndGet();
+                    } catch (Throwable t) {
+                        t.printStackTrace();
+                        throw new RuntimeException(t);
                     }
-                    runnableQueue.add(() -> meshes.put(v, map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> new Mesh(e.getValue())))));
-                    computeCounter.decrementAndGet();
+                    currentlyMeshingChunks.remove(v);
                 });
             }
         }

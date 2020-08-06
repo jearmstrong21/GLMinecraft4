@@ -17,6 +17,10 @@ public abstract class ChunkGenerator {
         this.serverWorld = serverWorld;
     }
 
+    public ServerWorld getServerWorld() {
+        return serverWorld;
+    }
+
     public abstract void tick();
 
     public abstract void requestLoadChunk(Vector2i v);

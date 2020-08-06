@@ -38,13 +38,13 @@ public class DebugChunkGenerator extends ChunkGenerator {
                 Chunk chunk = new Chunk();
                 for (int x = 0; x < 16; x++) {
                     for (int z = 0; z < 16; z++) {
-                        for (int y = 0; y <= 64; y++) {
+                        for (int y = 0; y <= 84; y++) {
                             chunk.set(x, y, z, Blocks.STONE.getDefaultState());
                         }
-                        for (int y = 65; y <= 70; y++) {
+                        for (int y = 85; y <= 90; y++) {
                             chunk.set(x, y, z, (x < 8 ? Blocks.DIRT : Blocks.WATER).getDefaultState());
                         }
-                        if (x < 8) chunk.set(x, 71, z, Blocks.GRASS.getDefaultState());
+                        if (x < 8) chunk.set(x, 91, z, Blocks.GRASS.getDefaultState());
                     }
                 }
                 onLoad.accept(Pair.of(v, chunk));

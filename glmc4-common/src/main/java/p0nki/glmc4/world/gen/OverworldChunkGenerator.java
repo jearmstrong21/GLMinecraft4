@@ -18,11 +18,11 @@ import p0nki.glmc4.world.gen.biomes.Biome;
 import p0nki.glmc4.world.gen.biomes.BiomeGenerator;
 import p0nki.glmc4.world.gen.ctx.ReadWriteWorldContext;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -32,15 +32,15 @@ public class OverworldChunkGenerator extends ChunkGenerator {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private final Map<Vector2i, ServerWorld.ServerChunkEntry> chunks = new HashMap<>();
+    private final Map<Vector2i, ServerWorld.ServerChunkEntry> chunks;
 
-    private final Queue<Vector2i> inHeightmapQueue = new ConcurrentLinkedQueue<>();
-    private final Queue<Vector2i> inDecorate1Queue = new ConcurrentLinkedQueue<>();
-    private final Queue<Vector2i> inSurfaceBuildQueue = new ConcurrentLinkedQueue<>();
-    private final Queue<Vector2i> inDecorate2Queue = new ConcurrentLinkedQueue<>();
-    private final Queue<Vector2i> inLoadQueue = new ConcurrentLinkedQueue<>();
-    private final Queue<Runnable> runnableQueue = new ConcurrentLinkedQueue<>();
-    private final AtomicInteger loadedChunks = new AtomicInteger(0);
+    private final Queue<Vector2i> inHeightmapQueue;
+    private final Queue<Vector2i> inDecorate1Queue;
+    private final Queue<Vector2i> inSurfaceBuildQueue;
+    private final Queue<Vector2i> inDecorate2Queue;
+    private final Queue<Vector2i> inLoadQueue;
+    private final Queue<Runnable> runnableQueue;
+    private final AtomicInteger loadedChunks;
 
     private final SimplexGenerator heightMapGenerator;
     private final BiomeGenerator biomeGenerator;
@@ -54,11 +54,14 @@ public class OverworldChunkGenerator extends ChunkGenerator {
         biomeGenerator = new BiomeGenerator(seed);
         surfaceDepthGenerator = new SimplexGenerator(seed);
         featureSeed = seed.incrementAndGet();
-        for (int x = -5; x <= 5; x++) {
-            for (int z = -5; z <= 5; z++) {
-                queueLoad(new Vector2i(x, z));
-            }
-        }
+        chunks = new ConcurrentHashMap<>();
+        inHeightmapQueue = new ConcurrentLinkedQueue<>();
+        inDecorate1Queue = new ConcurrentLinkedQueue<>();
+        inSurfaceBuildQueue = new ConcurrentLinkedQueue<>();
+        inDecorate2Queue = new ConcurrentLinkedQueue<>();
+        inLoadQueue = new ConcurrentLinkedQueue<>();
+        runnableQueue = new ConcurrentLinkedQueue<>();
+        loadedChunks = new AtomicInteger(0);
     }
 
 
@@ -113,12 +116,17 @@ public class OverworldChunkGenerator extends ChunkGenerator {
         };
     }
 
+
     private void queueHeightmap(Vector2i v) {
         if (!inHeightmapQueue.contains(v)) inHeightmapQueue.add(v);
     }
 
     private void queueDecorate1(Vector2i v) {
         if (!inDecorate1Queue.contains(v)) inDecorate1Queue.add(v);
+    }
+
+    private void queueSurfaceBuild(Vector2i v) {
+        if (!inSurfaceBuildQueue.contains(v)) inSurfaceBuildQueue.add(v);
     }
 
     private void queueDecorate2(Vector2i v) {
@@ -129,11 +137,49 @@ public class OverworldChunkGenerator extends ChunkGenerator {
         if (!inLoadQueue.contains(v)) inLoadQueue.add(v);
     }
 
+
     private byte getChunkStatus(Vector2i v) {
         if (chunks.containsKey(v)) {
             return chunks.get(v).getGenerationStatus();
         }
         return ChunkGenerationStatus.UNKNOWN;
+    }
+
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    private boolean ensureHeightmap(Vector2i v) {
+        if (getChunkStatus(v) < ChunkGenerationStatus.HEIGHTMAP) {
+            queueHeightmap(v);
+            return false;
+        }
+        return true;
+    }
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    private boolean ensureDecorate1(Vector2i v) {
+        if (getChunkStatus(v) < ChunkGenerationStatus.DECORATED1) {
+            queueDecorate1(v);
+            return false;
+        }
+        return true;
+    }
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    private boolean ensureSurfaceBuild(Vector2i v) {
+        if (getChunkStatus(v) < ChunkGenerationStatus.SURFACE_BUILD) {
+            queueSurfaceBuild(v);
+            return false;
+        }
+        return true;
+    }
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    private boolean ensureDecorate2(Vector2i v) {
+        if (getChunkStatus(v) < ChunkGenerationStatus.DECORATED2) {
+            queueDecorate2(v);
+            return false;
+        }
+        return true;
     }
 
     private float sampleHeightMap(Biome biome, float x, float z) {
@@ -190,18 +236,17 @@ public class OverworldChunkGenerator extends ChunkGenerator {
                     }
                 }
             }
+
+//            for (int x = 0; x < 16; x++) {
+//                for (int z = 0; z < 16; z++) {
+//                    for (int y = 64; y < 75; y++) {
+//                        chunk.set(x, y, z, Blocks.AIR.getDefaultState());
+//                    }
+//                }
+//            }
             ServerWorld.ServerChunkEntry entry = new ServerWorld.ServerChunkEntry(chunk);
             runnableQueue.add(() -> chunks.put(v, entry));
         });
-        return true;
-    }
-
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    private boolean ensureHeightmap(Vector2i v) {
-        if (getChunkStatus(v) < ChunkGenerationStatus.HEIGHTMAP) {
-            queueHeightmap(v);
-            return false;
-        }
         return true;
     }
 
@@ -229,15 +274,6 @@ public class OverworldChunkGenerator extends ChunkGenerator {
                             }));
             runnableQueue.add(() -> chunks.get(v).setGenerationStatus(ChunkGenerationStatus.DECORATED1));
         });
-        return true;
-    }
-
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    private boolean ensureDecorate1(Vector2i v) {
-        if (getChunkStatus(v) < ChunkGenerationStatus.DECORATED1) {
-            queueDecorate1(v);
-            return false;
-        }
         return true;
     }
 
@@ -272,19 +308,6 @@ public class OverworldChunkGenerator extends ChunkGenerator {
         return true;
     }
 
-    private void queueSurfaceBuild(Vector2i v) {
-        if (!inSurfaceBuildQueue.contains(v)) inSurfaceBuildQueue.add(v);
-    }
-
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    private boolean ensureSurfaceBuild(Vector2i v) {
-        if (getChunkStatus(v) < ChunkGenerationStatus.SURFACE_BUILD) {
-            queueSurfaceBuild(v);
-            return false;
-        }
-        return true;
-    }
-
     private boolean decorate2(Vector2i v) {
         if (getChunkStatus(v) >= ChunkGenerationStatus.DECORATED2) return false;
         if (!ensureSurfaceBuild(v)) return false;
@@ -309,15 +332,6 @@ public class OverworldChunkGenerator extends ChunkGenerator {
                             }));
             runnableQueue.add(() -> chunks.get(v).setGenerationStatus(ChunkGenerationStatus.DECORATED2));
         });
-        return true;
-    }
-
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    private boolean ensureDecorate2(Vector2i v) {
-        if (getChunkStatus(v) < ChunkGenerationStatus.DECORATED2) {
-            queueDecorate2(v);
-            return false;
-        }
         return true;
     }
 

@@ -32,14 +32,14 @@ public abstract class EntityRenderer<E extends Entity> extends Registrable<Entit
         AtlasPosition front = new AtlasPosition(x + depth, y - height, width, height, texWidth, texHeight);
         AtlasPosition back = new AtlasPosition(x + depth + width + depth, y - height, width, height, texWidth, texHeight);
 
-        data.addXmiQuad(new Vector3f(0), right.layer().quad(), 1, 1, 1, 1, 1);
-        data.addXplQuad(new Vector3f(0), left.layer().quad(), 1, 1, 1, 1, 1);
+        data.addXmiQuad(new Vector3f(0), right.layer().quad(), 1, 1, 1, 1, 1, 1);
+        data.addXplQuad(new Vector3f(0), left.layer().quad(), 1, 1, 1, 1, 1, 1);
 
-        data.addYmiQuad(new Vector3f(0), bottom.layer().quad(), 1, 1, 1, 1);
-        data.addYplQuad(new Vector3f(0), top.layer().quad(), 1, 1, 1, 1);
+        data.addYmiQuad(new Vector3f(0), bottom.layer().quad(), 1, 1, 1, 1, 1);
+        data.addYplQuad(new Vector3f(0), top.layer().quad(), 1, 1, 1, 1, 1);
 
-        data.addZmiQuad(new Vector3f(0), back.layer().quad(), 1, 1, 1, 1, 1);
-        data.addZplQuad(new Vector3f(0), front.layer().quad(), 1, 1, 1, 1, 1);
+        data.addZmiQuad(new Vector3f(0), back.layer().quad(), 1, 1, 1, 1, 1, 1);
+        data.addZplQuad(new Vector3f(0), front.layer().quad(), 1, 1, 1, 1, 1, 1);
 
         for (int i = 0; i < data.getBuffer(0).size(); i += 3) {
             data.getBuffer(0).set(i, data.getBuffer(0).get(i) - 0.5F);

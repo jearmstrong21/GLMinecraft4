@@ -23,10 +23,10 @@ public abstract class CrossBlockRenderer extends BlockRenderer {
         if (context.showXmi() || context.showXpl() || context.showYmi() || context.showYpl() || context.showZmi() || context.showZpl()) {
             TextureQuad quad = getQuad(context.getCur());
             MeshData data = MeshData.chunk();
-            data.addXmiQuad(new Vector3f(0, 0, 0), quad, 1, 1, 1, 1, 1);
+            data.addXmiQuad(new Vector3f(0, 0, 0), quad, 1, 1, 1, 1, 1, 1);
             data.multiply4f(0, new Matrix4f().rotateY(MathUtils.PI / 4).scale((float) Math.sqrt(2)));
             MeshData newData = MeshData.chunk();
-            newData.addXplQuad(new Vector3f(0, 0, 0), quad, 1, 1, 1, 1, 1);
+            newData.addXplQuad(new Vector3f(0, 0, 0), quad, 1, 1, 1, 1, 1, 1);
             newData.multiply4f(0, new Matrix4f().rotateY(-MathUtils.PI / 4).scale((float) Math.sqrt(2)));
             newData.multiply4f(0, new Matrix4f().translate(0, 0, -1));
             return data.append(newData);

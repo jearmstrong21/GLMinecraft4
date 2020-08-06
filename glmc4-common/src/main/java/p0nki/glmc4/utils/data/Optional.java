@@ -1,5 +1,6 @@
 package p0nki.glmc4.utils.data;
 
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -8,27 +9,29 @@ import java.util.stream.Stream;
 public class Optional<T> {
 
     private final T value;
-    private final boolean hasValue;
 
-    private Optional(T value, boolean hasValue) {
+    private Optional(T value) {
         this.value = value;
-        this.hasValue = hasValue;
     }
 
     public static <T> Optional<T> of(T value) {
-        return new Optional<>(value, true);
+        return new Optional<>(Objects.requireNonNull(value));
+    }
+
+    public static <T> Optional<T> ofNullable(T value) {
+        return value == null ? empty() : of(value);
     }
 
     public static <T> Optional<T> empty() {
-        return new Optional<>(null, false);
+        return new Optional<>(null);
     }
 
     public void assertPresent() {
-        if (!hasValue) throw new UnsupportedOperationException("Empty optional");
+        if (value == null) throw new UnsupportedOperationException("Empty optional");
     }
 
     public boolean isPresent() {
-        return hasValue;
+        return value != null;
     }
 
     public T get() {
@@ -37,23 +40,23 @@ public class Optional<T> {
     }
 
     public T orElse(T defaultValue) {
-        return hasValue ? value : defaultValue;
+        return value == null ? defaultValue : value;
     }
 
     public <R> Optional<R> map(Function<T, Optional<R>> function) {
-        return hasValue ? function.apply(value) : empty();
+        return value == null ? empty() : function.apply(value);
     }
 
     public Optional<T> filter(Predicate<T> predicate) {
-        return hasValue && predicate.test(value) ? of(value) : empty();
+        return value != null && predicate.test(value) ? of(value) : empty();
     }
 
     public T orElse(Supplier<T> supplier) {
-        return hasValue ? value : supplier.get();
+        return value == null ? supplier.get() : value;
     }
 
     public Stream<T> stream() {
-        return hasValue ? Stream.of(value) : Stream.empty();
+        return value == null ? Stream.empty() : Stream.of(value);
     }
 
 }

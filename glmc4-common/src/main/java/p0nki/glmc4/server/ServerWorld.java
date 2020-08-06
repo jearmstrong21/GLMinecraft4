@@ -6,17 +6,20 @@ import org.joml.Vector2i;
 import org.joml.Vector3i;
 import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CChunkUpdate;
+import p0nki.glmc4.utils.data.Pair;
 import p0nki.glmc4.world.Chunk;
 import p0nki.glmc4.world.ChunkGenerationStatus;
 import p0nki.glmc4.world.ChunkNotLoadedException;
 import p0nki.glmc4.world.World;
 import p0nki.glmc4.world.gen.ChunkGenerator;
-import p0nki.glmc4.world.gen.OverworldChunkGenerator;
+import p0nki.glmc4.world.gen.DebugChunkGenerator;
+import p0nki.glmc4.world.gen.SunlightChunkGenerator;
 import p0nki.glmc4.world.gen.biomes.Biome;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class ServerWorld implements World {
 
@@ -27,8 +30,13 @@ public class ServerWorld implements World {
     private final ChunkGenerator chunkGenerator;
 
     public ServerWorld() {
-        chunkGenerator = new OverworldChunkGenerator(pair -> chunks.put(pair.getFirst(), pair.getSecond()), this);
-//        chunkGenerator = new DebugChunkGenerator(pair -> chunks.put(pair.getFirst(), pair.getSecond()), this);
+        Consumer<Pair<Vector2i, Chunk>> pairConsumer = pair -> chunks.put(pair.getFirst(), pair.getSecond());
+        chunkGenerator = new SunlightChunkGenerator(pairConsumer, this, DebugChunkGenerator::new);
+        for (int x = -5; x <= 5; x++) {
+            for (int z = -5; z <= 5; z++) {
+                chunkGenerator.requestLoadChunk(new Vector2i(x, z));
+            }
+        }
     }
 
     public void tick() {
@@ -46,6 +54,14 @@ public class ServerWorld implements World {
         if (!isChunkLoaded(chunkCoordinate)) throw new ChunkNotLoadedException(chunkCoordinate);
         Vector2i coordinateInChunk = World.getCoordinateInChunk(new Vector2i(blockPos.x, blockPos.z));
         return chunks.get(chunkCoordinate).get(coordinateInChunk.x, blockPos.y, coordinateInChunk.y);
+    }
+
+    @Override
+    public byte getSunlight(Vector3i blockPos) {
+        Vector2i chunkCoordinate = World.getChunkCoordinate(new Vector2i(blockPos.x, blockPos.z));
+        if (!isChunkLoaded(chunkCoordinate)) throw new ChunkNotLoadedException(chunkCoordinate);
+        Vector2i coordinateInChunk = World.getCoordinateInChunk(new Vector2i(blockPos.x, blockPos.z));
+        return chunks.get(chunkCoordinate).getSunlight(coordinateInChunk.x, blockPos.y, coordinateInChunk.y);
     }
 
     @Override
