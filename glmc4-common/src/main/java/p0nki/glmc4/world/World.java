@@ -39,6 +39,8 @@ public interface World {
         return get(new Vector3i(x, y, z));
     }
 
+    byte getSunlight(Vector3i blockPos);
+
     Chunk getChunk(Vector2i chunkCoordinate);
 
     void update(Vector3i blockPos, BlockState blockState);

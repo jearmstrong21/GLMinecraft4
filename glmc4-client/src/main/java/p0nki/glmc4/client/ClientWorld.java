@@ -142,6 +142,14 @@ public class ClientWorld implements World {
     }
 
     @Override
+    public byte getSunlight(Vector3i blockPos) {
+        Vector2i chunkCoordinate = World.getChunkCoordinate(new Vector2i(blockPos.x, blockPos.z));
+        if (!isChunkLoaded(chunkCoordinate)) throw new ChunkNotLoadedException(chunkCoordinate);
+        Vector2i coordinateInChunk = World.getCoordinateInChunk(new Vector2i(blockPos.x, blockPos.z));
+        return chunks.get(chunkCoordinate).getSunlight(coordinateInChunk.x, blockPos.y, coordinateInChunk.y);
+    }
+
+    @Override
     public Chunk getChunk(Vector2i chunkCoordinate) {
         if (!isChunkLoaded(chunkCoordinate)) throw new ChunkNotLoadedException(chunkCoordinate);
         return chunks.get(chunkCoordinate);
@@ -228,14 +236,19 @@ public class ClientWorld implements World {
                 inMeshQueue.add(v);
             } else {
                 CompletableFuture.runAsync(() -> {
-                    computeCounter.incrementAndGet();
-                    Chunk chunk = chunks.get(v);
-                    Map<RenderLayer, MeshData> map = new EnumMap<>(RenderLayer.class);
-                    for (RenderLayer renderLayer : RenderLayer.values()) {
-                        map.put(renderLayer, mesh(v.x, v.y, chunk, renderLayer));
+                    try {
+                        computeCounter.incrementAndGet();
+                        Chunk chunk = chunks.get(v);
+                        Map<RenderLayer, MeshData> map = new EnumMap<>(RenderLayer.class);
+                        for (RenderLayer renderLayer : RenderLayer.values()) {
+                            map.put(renderLayer, mesh(v.x, v.y, chunk, renderLayer));
+                        }
+                        runnableQueue.add(() -> meshes.put(v, map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> new Mesh(e.getValue())))));
+                        computeCounter.decrementAndGet();
+                    } catch (Throwable t) {
+                        t.printStackTrace();
+                        throw new RuntimeException(t);
                     }
-                    runnableQueue.add(() -> meshes.put(v, map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> new Mesh(e.getValue())))));
-                    computeCounter.decrementAndGet();
                 });
             }
         }

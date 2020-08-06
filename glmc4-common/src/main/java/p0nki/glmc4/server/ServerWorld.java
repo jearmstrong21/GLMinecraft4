@@ -49,6 +49,14 @@ public class ServerWorld implements World {
     }
 
     @Override
+    public byte getSunlight(Vector3i blockPos) {
+        Vector2i chunkCoordinate = World.getChunkCoordinate(new Vector2i(blockPos.x, blockPos.z));
+        if (!isChunkLoaded(chunkCoordinate)) throw new ChunkNotLoadedException(chunkCoordinate);
+        Vector2i coordinateInChunk = World.getCoordinateInChunk(new Vector2i(blockPos.x, blockPos.z));
+        return chunks.get(chunkCoordinate).getSunlight(coordinateInChunk.x, blockPos.y, coordinateInChunk.y);
+    }
+
+    @Override
     public boolean isClient() {
         return false;
     }

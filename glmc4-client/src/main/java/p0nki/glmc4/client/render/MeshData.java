@@ -18,6 +18,7 @@ public class MeshData {
     private final static int COLOR_BUFFER_INDEX = 2;
     private final static int AO_BUFFER_INDEX = 3;
     private final static int FAKE_LIGHT_BUFFER_INDEX = 4;
+    private final static int SUNLIGHT_BUFFER_INDEX = 5;
 
     private final static float FAKE_LIGHT_SIDE_TOP = 1.0F;
     private final static float FAKE_LIGHT_SIDE_1 = 0.6F;
@@ -40,7 +41,7 @@ public class MeshData {
     }
 
     public static MeshData chunk() {
-        return new MeshData().addBuffer(3).addBuffer(2).addBuffer(3).addBuffer(1).addBuffer(1);
+        return new MeshData().addBuffer(3).addBuffer(2).addBuffer(3).addBuffer(1).addBuffer(1).addBuffer(1);
     }
 
     public int size() {
@@ -125,13 +126,15 @@ public class MeshData {
                 GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y + 1, blockPos.z)),
                 GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y + 1, blockPos.z + 1)),
                 GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y, blockPos.z)),
-                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y, blockPos.z + 1)), height);
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y, blockPos.z + 1)), height,
+                GLMC4Client.getClientWorld().getSunlight(new Vector3i(blockPos.x - 1, blockPos.y, blockPos.z)) / 16.0F);
     }
 
-    public MeshData addXmiQuad(Vector3f origin, TextureQuad textureQuad, float ao0, float ao1, float ao2, float ao3, float height) {
+    public MeshData addXmiQuad(Vector3f origin, TextureQuad textureQuad, float ao0, float ao1, float ao2, float ao3, float height, float sunlight) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
         addQuad(POS_BUFFER_INDEX, new Vector3f(0, height, 0).add(origin), new Vector3f(0, 0, 1), new Vector3f(0, -height, 0));
         addQuad(textureQuad.layer1, ao0, ao1, ao2, ao3, FAKE_LIGHT_SIDE_1);
+        appendBuffer(SUNLIGHT_BUFFER_INDEX, List.of(sunlight, sunlight, sunlight, sunlight));
         return this;
     }
 
@@ -140,13 +143,15 @@ public class MeshData {
                 GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y + 1, blockPos.z + 1)),
                 GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y + 1, blockPos.z)),
                 GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y, blockPos.z + 1)),
-                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y, blockPos.z)), height);
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y, blockPos.z)), height,
+                GLMC4Client.getClientWorld().getSunlight(new Vector3i(blockPos.x + 1, blockPos.y, blockPos.z)) / 16.0F);
     }
 
-    public MeshData addXplQuad(Vector3f origin, TextureQuad textureQuad, float ao0, float ao1, float ao2, float ao3, float height) {
+    public MeshData addXplQuad(Vector3f origin, TextureQuad textureQuad, float ao0, float ao1, float ao2, float ao3, float height, float sunlight) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
         addQuad(POS_BUFFER_INDEX, new Vector3f(1, height, 1).add(origin), new Vector3f(0, 0, -1), new Vector3f(0, -height, 0));
         addQuad(textureQuad.layer1, ao0, ao1, ao2, ao3, FAKE_LIGHT_SIDE_2);
+        appendBuffer(SUNLIGHT_BUFFER_INDEX, List.of(sunlight, sunlight, sunlight, sunlight));
         return this;
     }
 
@@ -155,13 +160,15 @@ public class MeshData {
                 GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y, blockPos.z)),
                 GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y, blockPos.z)),
                 GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y, blockPos.z + 1)),
-                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y, blockPos.z + 1)));
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y, blockPos.z + 1)),
+                GLMC4Client.getClientWorld().getSunlight(new Vector3i(blockPos.x, blockPos.y - 1, blockPos.z)) / 16.0F);
     }
 
-    public MeshData addYmiQuad(Vector3f origin, TextureQuad textureQuad, float ao0, float ao1, float ao2, float ao3) {
+    public MeshData addYmiQuad(Vector3f origin, TextureQuad textureQuad, float ao0, float ao1, float ao2, float ao3, float sunlight) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
         addQuad(POS_BUFFER_INDEX, new Vector3f(0, 0, 0).add(origin), new Vector3f(1, 0, 0), new Vector3f(0, 0, 1));
         addQuad(textureQuad.layer1, ao0, ao1, ao2, ao3, FAKE_LIGHT_SIDE_BOTTOM);
+        appendBuffer(SUNLIGHT_BUFFER_INDEX, List.of(sunlight, sunlight, sunlight, sunlight));
         return this;
     }
 
@@ -170,13 +177,15 @@ public class MeshData {
                 GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y + 1, blockPos.z)),
                 GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y + 1, blockPos.z)),
                 GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y + 1, blockPos.z + 1)),
-                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y + 1, blockPos.z + 1)));
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y + 1, blockPos.z + 1)),
+                GLMC4Client.getClientWorld().getSunlight(new Vector3i(blockPos.x, blockPos.y + 1, blockPos.z)) / 16.0F);
     }
 
-    public MeshData addYplQuad(Vector3f origin, TextureQuad textureQuad, float ao0, float ao1, float ao2, float ao3) {
+    public MeshData addYplQuad(Vector3f origin, TextureQuad textureQuad, float ao0, float ao1, float ao2, float ao3, float sunlight) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
         addQuad(POS_BUFFER_INDEX, new Vector3f(0, 1, 0).add(origin), new Vector3f(1, 0, 0), new Vector3f(0, 0, 1));
         addQuad(textureQuad.layer1, ao0, ao1, ao2, ao3, FAKE_LIGHT_SIDE_TOP);
+        appendBuffer(SUNLIGHT_BUFFER_INDEX, List.of(sunlight, sunlight, sunlight, sunlight));
         return this;
     }
 
@@ -185,13 +194,15 @@ public class MeshData {
                 GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y + 1, blockPos.z)),
                 GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y + 1, blockPos.z)),
                 GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y, blockPos.z)),
-                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y, blockPos.z)), height);
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y, blockPos.z)), height,
+                GLMC4Client.getClientWorld().getSunlight(new Vector3i(blockPos.x, blockPos.y, blockPos.z - 1)) / 16.0F);
     }
 
-    public MeshData addZmiQuad(Vector3f origin, TextureQuad textureQuad, float ao0, float ao1, float ao2, float ao3, float height) {
+    public MeshData addZmiQuad(Vector3f origin, TextureQuad textureQuad, float ao0, float ao1, float ao2, float ao3, float height, float sunlight) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
         addQuad(POS_BUFFER_INDEX, new Vector3f(1, height, 0).add(origin), new Vector3f(-1, 0, 0), new Vector3f(0, -height, 0));
         addQuad(textureQuad.layer1, ao0, ao1, ao2, ao3, FAKE_LIGHT_SIDE_1);
+        appendBuffer(SUNLIGHT_BUFFER_INDEX, List.of(sunlight, sunlight, sunlight, sunlight));
         return this;
     }
 
@@ -200,13 +211,15 @@ public class MeshData {
                 GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y + 1, blockPos.z + 1)),
                 GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y + 1, blockPos.z + 1)),
                 GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x, blockPos.y, blockPos.z + 1)),
-                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y, blockPos.z + 1)), height);
+                GLMC4Client.getClientWorld().calculateAO(new Vector3i(blockPos.x + 1, blockPos.y, blockPos.z + 1)), height,
+                GLMC4Client.getClientWorld().getSunlight(new Vector3i(blockPos.x, blockPos.y, blockPos.z + 1)) / 16.0F);
     }
 
-    public MeshData addZplQuad(Vector3f origin, TextureQuad textureQuad, float ao0, float ao1, float ao2, float ao3, float height) {
+    public MeshData addZplQuad(Vector3f origin, TextureQuad textureQuad, float ao0, float ao1, float ao2, float ao3, float height, float sunlight) {
         appendTriOffset(List.of(0, 1, 2, 1, 2, 3));
         addQuad(POS_BUFFER_INDEX, new Vector3f(0, height, 1).add(origin), new Vector3f(1, 0, 0), new Vector3f(0, -height, 0));
         addQuad(textureQuad.layer1, ao0, ao1, ao2, ao3, FAKE_LIGHT_SIDE_2);
+        appendBuffer(SUNLIGHT_BUFFER_INDEX, List.of(sunlight, sunlight, sunlight, sunlight));
         return this;
     }
 

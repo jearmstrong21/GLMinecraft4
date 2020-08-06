@@ -11,10 +11,12 @@ import java.util.function.Predicate;
 
 public class Chunk implements PacketByteBuf.Equivalent {
     private final long[][][] data;
+    private final byte[][][] sunlight;
     private final int[][] biomes;
 
     public Chunk() {
         data = new long[16][256][16];
+        sunlight = new byte[16][256][16];
         biomes = new int[16][16];
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
@@ -23,6 +25,16 @@ public class Chunk implements PacketByteBuf.Equivalent {
         }
     }
 
+    public byte[][][] getSunlight() {
+        return sunlight;
+    }
+
+    public byte getSunlight(int x, int y, int z) {
+        if (y < 0 || y >= 256) {
+            return 16;
+        }
+        return sunlight[x][y][z];
+    }
 
     public int getHeight(int x, int z, HeightMapType heightMapType) {
         for (int y = 255; y >= 0; y--) {
@@ -45,6 +57,7 @@ public class Chunk implements PacketByteBuf.Equivalent {
             for (int z = 0; z < 16; z++) {
                 for (int y = 0; y < 256; y++) {
                     data[x][y][z] = buf.readLong();
+                    sunlight[x][y][z] = buf.readByte();
                 }
                 biomes[x][z] = buf.readInt();
             }
@@ -62,6 +75,7 @@ public class Chunk implements PacketByteBuf.Equivalent {
             for (int z = 0; z < 16; z++) {
                 for (int y = 0; y < 256; y++) {
                     buf.writeLong(data[x][y][z]);
+                    buf.writeByte(sunlight[x][y][z]);
                 }
                 buf.writeInt(biomes[x][z]);
             }
