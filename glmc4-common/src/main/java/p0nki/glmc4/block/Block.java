@@ -72,6 +72,10 @@ public class Block extends Registrable<Block> implements AfterRegisterCallback {
         return states;
     }
 
+    public byte getBlockedSunlight() {
+        return 16;
+    }
+
     public float getAOContribution() {
         return 0;
     }

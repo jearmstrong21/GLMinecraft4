@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
+import p0nki.glmc4.block.Block;
 import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.server.ServerWorld;
@@ -254,6 +255,14 @@ public class OverworldChunkGenerator extends ChunkGenerator {
                     }
                 }
             }
+
+//            for (int x = 0; x < 16; x++) {
+//                for (int z = 0; z < 16; z++) {
+//                    for (int y = 64; y < 75; y++) {
+//                        chunk.set(x, y, z, Blocks.AIR.getDefaultState());
+//                    }
+//                }
+//            }
             ServerWorld.ServerChunkEntry entry = new ServerWorld.ServerChunkEntry(chunk);
             runnableQueue.add(() -> chunks.put(v, entry));
         });
@@ -365,23 +374,28 @@ public class OverworldChunkGenerator extends ChunkGenerator {
                     }
                 }
                 while (!list.isEmpty()) {
+//                    System.out.println(list.size());
                     int i = 0;
-//                for (int n = 1; n < list.size(); n++) {
-//                    if (list.get(n).getSecond() > list.get(i).getSecond()) {
-//                        i = n;
+//                    for (int n = 1; n < list.size(); n++) {
+//                        if (list.get(n).getSecond() > list.get(i).getSecond()) {
+//                            i = n;
+//                        }
 //                    }
-//                }
                     Pair<Vector3i, Byte> pair = list.remove(i);
                     byte light = pair.getSecond();
                     Vector2i chunkCoordinate = World.getChunkCoordinate(new Vector2i(pair.getFirst().x, pair.getFirst().z));
                     Vector2i coordinateInChunk = World.getCoordinateInChunk(new Vector2i(pair.getFirst().x, pair.getFirst().z));
-                    if (chunks.get(chunkCoordinate).getValue().get(coordinateInChunk.x, pair.getFirst().y, coordinateInChunk.y).getBlock() != Blocks.AIR)
-                        light -= 16;
+                    Block block = chunks.get(chunkCoordinate).getValue().get(coordinateInChunk.x, pair.getFirst().y, coordinateInChunk.y).getBlock();
+                    light -= block.getBlockedSunlight();
                     if (light <= 0) continue;
-                    int curLight = chunks.get(chunkCoordinate).getValue().getSunlight()[coordinateInChunk.x][pair.getFirst().y][coordinateInChunk.y];
+                    byte curLight = chunks.get(chunkCoordinate).getValue().getSunlight()[coordinateInChunk.x][pair.getFirst().y][coordinateInChunk.y];
                     if (light > curLight) {
                         chunks.get(chunkCoordinate).getValue().getSunlight()[coordinateInChunk.x][pair.getFirst().y][coordinateInChunk.y] = light;
                         list.add(Pair.of(new Vector3i(pair.getFirst()).add(0, -1, 0), light));
+                        list.add(Pair.of(new Vector3i(pair.getFirst()).add(-1, 0, 0), (byte) (light - 1)));
+                        list.add(Pair.of(new Vector3i(pair.getFirst()).add(1, 0, 0), (byte) (light - 1)));
+                        list.add(Pair.of(new Vector3i(pair.getFirst()).add(0, 0, -1), (byte) (light - 1)));
+                        list.add(Pair.of(new Vector3i(pair.getFirst()).add(0, 0, 1), (byte) (light - 1)));
                     }
                 }
                 runnableQueue.add(() -> chunks.get(v).setGenerationStatus(ChunkGenerationStatus.SUNLIGHT));

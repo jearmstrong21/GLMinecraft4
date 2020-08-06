@@ -101,16 +101,20 @@ public class ClientWorld implements World {
     }
 
     public float calculateAO(Vector3i position) {
-        float total = 0;
-        for (int i = -1; i <= 0; i++) {
-            for (int j = -1; j <= 0; j++) {
-                for (int k = -1; k <= 0; k++) {
-                    Vector3i v = new Vector3i(position.x + i, position.y + j, position.z + k);
-                    total += get(v).getBlock().getAOContribution();
+        if (ClientSettings.SMOOTH_LIGHTING) {
+            float total = 0;
+            for (int i = -1; i <= 0; i++) {
+                for (int j = -1; j <= 0; j++) {
+                    for (int k = -1; k <= 0; k++) {
+                        Vector3i v = new Vector3i(position.x + i, position.y + j, position.z + k);
+                        total += get(v).getBlock().getAOContribution();
+                    }
                 }
             }
+            return total / 8.0F;
+        } else {
+            return 1;
         }
-        return total / 8.0F;
     }
 
     public void loadChunk(Vector2i coordinate, Chunk chunk) {

@@ -33,4 +33,9 @@ public class WaterBlock extends Block {
     public VoxelShape getShape(BlockState blockState) {
         return VoxelShape.EMPTY;
     }
+
+    @Override
+    public byte getBlockedSunlight() {
+        return 1;
+    }
 }
