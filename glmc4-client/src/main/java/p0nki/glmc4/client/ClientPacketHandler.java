@@ -68,6 +68,7 @@ public class ClientPacketHandler extends ClientPacketListener {
                 MCWindow.getKey('D'),
                 MCWindow.getKey(' '),
                 MCWindow.getKey((char) GLFW.GLFW_KEY_LEFT_CONTROL),
+                MCWindow.getMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT),
                 GLMC4Client.lookDir));
     }
 

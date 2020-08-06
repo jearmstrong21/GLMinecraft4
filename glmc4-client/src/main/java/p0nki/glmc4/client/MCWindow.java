@@ -135,4 +135,7 @@ public class MCWindow {
         return (float) glfwGetTime();
     }
 
+    public static boolean getMouse(int button) {
+        return glfwGetMouseButton(ptr, button) == GLFW_PRESS;
+    }
 }

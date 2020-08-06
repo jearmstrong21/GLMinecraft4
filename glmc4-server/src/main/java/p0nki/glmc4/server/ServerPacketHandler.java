@@ -2,6 +2,8 @@ package p0nki.glmc4.server;
 
 import org.joml.Vector2i;
 import org.joml.Vector3f;
+import org.joml.Vector3i;
+import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CChunkLoad;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CDisconnectReason;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CPingRequest;
@@ -29,6 +31,7 @@ public class ServerPacketHandler extends ServerPacketListener {
     private boolean right = false;
     private boolean jump = false;
     private boolean sprint = false;
+    private boolean M1 = false;
     private Vector3f lookAt = new Vector3f(0, 0, -1);
 
     @Override
@@ -45,6 +48,7 @@ public class ServerPacketHandler extends ServerPacketListener {
         right = packet.isRight();
         jump = packet.isJump();
         sprint = packet.isSprint();
+        M1 = packet.isM1();
         lookAt = packet.getLookAt();
     }
 
@@ -106,6 +110,15 @@ public class ServerPacketHandler extends ServerPacketListener {
             if (getPlayerEntity().isGrounded())
                 getPlayerEntity().getVelocity().add(0, getPlayerEntity().getJumpPower(), 0);
             jump = false;
+        }
+        if (M1) {
+            for (int x = -5; x <= 5; x++) {
+                for (int y = -5; y <= 5; y++) {
+                    for (int z = -5; z <= 5; z++) {
+                        MinecraftServer.INSTANCE.getServerWorld().update(new Vector3i(x + (int) getPlayerEntity().getEyePosition().x, y + (int) getPlayerEntity().getEyePosition().y, z + (int) getPlayerEntity().getEyePosition().z), Blocks.AIR.getDefaultState());
+                    }
+                }
+            }
         }
         getPlayerEntity().getLookingAt().set(lookAt);
     }

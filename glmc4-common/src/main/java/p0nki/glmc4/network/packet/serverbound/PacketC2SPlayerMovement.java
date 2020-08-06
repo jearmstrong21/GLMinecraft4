@@ -13,13 +13,14 @@ public class PacketC2SPlayerMovement extends Packet<ServerPacketListener> {
     private boolean right;
     private boolean jump;
     private boolean sprint;
+    private boolean M1;
     private Vector3f lookAt;
 
     public PacketC2SPlayerMovement() {
         super(PacketTypes.C2S_PLAYER_MOVEMENT);
     }
 
-    public PacketC2SPlayerMovement(boolean forward, boolean back, boolean left, boolean right, boolean jump, boolean sprint, Vector3f lookAt) {
+    public PacketC2SPlayerMovement(boolean forward, boolean back, boolean left, boolean right, boolean jump, boolean sprint, boolean M1, Vector3f lookAt) {
         super(PacketTypes.C2S_PLAYER_MOVEMENT);
         this.forward = forward;
         this.back = back;
@@ -27,6 +28,7 @@ public class PacketC2SPlayerMovement extends Packet<ServerPacketListener> {
         this.right = right;
         this.jump = jump;
         this.sprint = sprint;
+        this.M1 = M1;
         this.lookAt = lookAt;
     }
 
@@ -54,6 +56,10 @@ public class PacketC2SPlayerMovement extends Packet<ServerPacketListener> {
         return sprint;
     }
 
+    public boolean isM1() {
+        return M1;
+    }
+
     public Vector3f getLookAt() {
         return lookAt;
     }
@@ -66,6 +72,7 @@ public class PacketC2SPlayerMovement extends Packet<ServerPacketListener> {
         right = buf.readBoolean();
         jump = buf.readBoolean();
         sprint = buf.readBoolean();
+        M1 = buf.readBoolean();
         lookAt = buf.read3f();
     }
 
@@ -77,6 +84,7 @@ public class PacketC2SPlayerMovement extends Packet<ServerPacketListener> {
         buf.writeBoolean(right);
         buf.writeBoolean(jump);
         buf.writeBoolean(sprint);
+        buf.writeBoolean(M1);
         buf.write3f(lookAt);
     }
 

@@ -49,11 +49,14 @@ public class DebugChunkGenerator extends ChunkGenerator {
                         if (x < 8) {
                             mid = Blocks.DIRT.getDefaultState();
                             top = Blocks.GRASS.getDefaultState().with(GrassBlock.SNOWED, z < 8);
+                            if (z < 8) h += 1;
+                            if (z < 4) h += 1;
+                            if (z < 2) h += 1;
                         }
-                        for (int y = 85; y <= 90; y++) {
+                        for (int y = 85; y <= h; y++) {
                             chunk.set(x, y, z, mid);
                         }
-                        chunk.set(x, 91, z, top);
+                        chunk.set(x, h + 1, z, top);
 //                        for (int y = 85; y <= (z < 8 ? 89 : 90); y++) {
 //                            chunk.set(x, y, z, (x < 8 ? Blocks.DIRT : Blocks.WATER).getDefaultState());
 //                        }
