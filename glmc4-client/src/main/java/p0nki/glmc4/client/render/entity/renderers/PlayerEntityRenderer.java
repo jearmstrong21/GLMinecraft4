@@ -1,6 +1,7 @@
 package p0nki.glmc4.client.render.entity.renderers;
 
 import org.joml.Matrix4f;
+import p0nki.glmc4.client.ClientSettings;
 import p0nki.glmc4.client.GLMC4Client;
 import p0nki.glmc4.client.gl.Mesh;
 import p0nki.glmc4.client.gl.Shader;
@@ -74,7 +75,8 @@ public class PlayerEntityRenderer extends EntityRenderer<PlayerEntity> {
         stack.push();
         stack.translate(0, 1.75F, 0);
         stack.lookAt(entity.getLookingAt());
-        head.triangles();
+        if (!ClientSettings.FIRST_PERSON && entity.getUuid().equals(GLMC4Client.getThisEntity().getUuid()))
+            head.triangles();
         stack.pop();
     }
 

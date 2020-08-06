@@ -13,6 +13,9 @@ public class ClientSettings {
 
     public static final boolean SMOOTH_LIGHTING = true;
 
+    public static final boolean FIRST_PERSON = true;
+    public static final float CROSSHAIR_SIZE = 0.1F;
+
     private ClientSettings() {
 
     }

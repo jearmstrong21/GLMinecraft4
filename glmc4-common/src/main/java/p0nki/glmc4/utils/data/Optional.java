@@ -1,6 +1,7 @@
 package p0nki.glmc4.utils.data;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -32,6 +33,10 @@ public class Optional<T> {
 
     public boolean isPresent() {
         return value != null;
+    }
+
+    public void ifPresent(Consumer<T> consumer) {
+        if (value != null) consumer.accept(value);
     }
 
     public T get() {

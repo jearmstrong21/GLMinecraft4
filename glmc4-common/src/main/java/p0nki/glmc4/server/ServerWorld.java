@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class ServerWorld implements World {
+public class ServerWorld extends World {
 
     private static final Logger LOGGER = LogManager.getLogger();
 

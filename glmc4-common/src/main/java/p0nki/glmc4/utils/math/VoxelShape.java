@@ -1,6 +1,7 @@
 package p0nki.glmc4.utils.math;
 
 import org.joml.AABBf;
+import org.joml.Rayf;
 
 import java.util.Arrays;
 
@@ -11,7 +12,12 @@ public abstract class VoxelShape {
 
     public static final VoxelShape EMPTY = new VoxelShape() {
         @Override
-        public boolean collidesWith(AABBf box) {
+        public boolean collidesWith(AABBf aabb) {
+            return false;
+        }
+
+        @Override
+        public boolean collidesWith(Rayf ray) {
             return false;
         }
 
@@ -21,15 +27,20 @@ public abstract class VoxelShape {
         }
     };
 
-    public static VoxelShape of(AABBf box) {
-        return of(box, box.toString());
+    public static VoxelShape of(AABBf aabb) {
+        return of(aabb, aabb.toString());
     }
 
-    public static VoxelShape of(AABBf box, String name) {
+    public static VoxelShape of(AABBf aabb, String name) {
         return new VoxelShape() {
             @Override
-            public boolean collidesWith(AABBf box1) {
-                return box.testAABB(box1);
+            public boolean collidesWith(AABBf box) {
+                return aabb.testAABB(box);
+            }
+
+            @Override
+            public boolean collidesWith(Rayf ray) {
+                return aabb.testRay(ray);
             }
 
             @Override
@@ -42,9 +53,17 @@ public abstract class VoxelShape {
     public static VoxelShape union(VoxelShape... boxes) {
         return new VoxelShape() {
             @Override
-            public boolean collidesWith(AABBf box) {
-                for (VoxelShape box1 : boxes) {
-                    if (box1.collidesWith(box)) return true;
+            public boolean collidesWith(AABBf aabb) {
+                for (VoxelShape box : boxes) {
+                    if (box.collidesWith(aabb)) return true;
+                }
+                return false;
+            }
+
+            @Override
+            public boolean collidesWith(Rayf ray) {
+                for (VoxelShape box : boxes) {
+                    if (box.collidesWith(ray)) return true;
                 }
                 return false;
             }
@@ -59,9 +78,17 @@ public abstract class VoxelShape {
     public static VoxelShape intersection(VoxelShape... boxes) {
         return new VoxelShape() {
             @Override
-            public boolean collidesWith(AABBf box) {
-                for (VoxelShape box1 : boxes) {
-                    if (!box1.collidesWith(box)) return false;
+            public boolean collidesWith(AABBf aabb) {
+                for (VoxelShape box : boxes) {
+                    if (!box.collidesWith(aabb)) return false;
+                }
+                return true;
+            }
+
+            @Override
+            public boolean collidesWith(Rayf ray) {
+                for (VoxelShape box : boxes) {
+                    if (!box.collidesWith(ray)) return false;
                 }
                 return true;
             }
@@ -73,6 +100,8 @@ public abstract class VoxelShape {
         };
     }
 
-    public abstract boolean collidesWith(AABBf box);
+    public abstract boolean collidesWith(AABBf aabb);
+
+    public abstract boolean collidesWith(Rayf ray);
 
 }

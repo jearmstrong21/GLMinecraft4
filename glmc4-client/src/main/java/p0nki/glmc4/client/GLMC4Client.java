@@ -152,10 +152,10 @@ public class GLMC4Client {
 
         Matrix4f perspective = new Matrix4f().perspective((float) Math.toRadians(80), 1.0F, 0.001F, 300);
         Entity thisEntity = getThisEntity();
-        Vector3f cameraPosition = new Vector3f(thisEntity.getEyePosition()).sub(new Vector3f(thisEntity.getLookingAt()).mul(3));
+        Vector3f cameraPosition = new Vector3f(thisEntity.getEyePosition()).sub(new Vector3f(thisEntity.getLookingAt()).mul(ClientSettings.FIRST_PERSON ? 0 : 3));
         Matrix4f view = new Matrix4f().lookAt(
                 cameraPosition,
-                new Vector3f(thisEntity.getEyePosition()),
+                new Vector3f(thisEntity.getEyePosition()).add(new Vector3f(thisEntity.getLookingAt()).mul(1)),
                 new Vector3f(0, 1, 0)
         );
 
@@ -200,6 +200,7 @@ public class GLMC4Client {
                 lastMaxMem,
                 clientWorld.getOptionalBiome(new Vector2i((int) thisEntity.getPosition().x, (int) thisEntity.getPosition().z)).map(Biome::getKey).map(Identifier::toString).orElse("not yet loaded")
         ));
+        textRenderer.renderString(-ClientSettings.CROSSHAIR_SIZE / 2, -ClientSettings.CROSSHAIR_SIZE / 2, ClientSettings.CROSSHAIR_SIZE, "+");
 
         packetListener.tick();
 

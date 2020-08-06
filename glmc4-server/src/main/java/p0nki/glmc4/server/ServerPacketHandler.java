@@ -2,7 +2,6 @@ package p0nki.glmc4.server;
 
 import org.joml.Vector2i;
 import org.joml.Vector3f;
-import org.joml.Vector3i;
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CChunkLoad;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CDisconnectReason;
@@ -10,8 +9,10 @@ import p0nki.glmc4.network.packet.clientbound.PacketS2CPingRequest;
 import p0nki.glmc4.network.packet.serverbound.PacketC2SPingResponse;
 import p0nki.glmc4.network.packet.serverbound.PacketC2SPlayerMovement;
 import p0nki.glmc4.network.packet.serverbound.ServerPacketListener;
+import p0nki.glmc4.utils.data.Optional;
 import p0nki.glmc4.utils.math.MathUtils;
 import p0nki.glmc4.world.World;
+import p0nki.glmc4.world.WorldIntersection;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -112,13 +113,10 @@ public class ServerPacketHandler extends ServerPacketListener {
             jump = false;
         }
         if (M1) {
-            for (int x = -5; x <= 5; x++) {
-                for (int y = -5; y <= 5; y++) {
-                    for (int z = -5; z <= 5; z++) {
-                        MinecraftServer.INSTANCE.getServerWorld().update(new Vector3i(x + (int) getPlayerEntity().getEyePosition().x, y + (int) getPlayerEntity().getEyePosition().y, z + (int) getPlayerEntity().getEyePosition().z), Blocks.AIR.getDefaultState());
-                    }
-                }
-            }
+            Optional<WorldIntersection> intersectionOptional = MinecraftServer.INSTANCE.getServerWorld().intersectWorld(getPlayerEntity().getEyePosition(), getPlayerEntity().getLookingAt(), 20);
+            intersectionOptional.ifPresent(worldIntersection -> {
+                MinecraftServer.INSTANCE.getServerWorld().update(worldIntersection.getHit(), Blocks.AIR.getDefaultState());
+            });
         }
         getPlayerEntity().getLookingAt().set(lookAt);
     }
