@@ -38,6 +38,9 @@ public class PlayerEntityRenderer extends EntityRenderer<PlayerEntity> {
 
     @Override
     protected void renderType(WorldRenderContext context, PlayerEntity entity) {
+        if (ClientSettings.FIRST_PERSON || !entity.getUuid().equals(GLMC4Client.getThisEntity().getUuid())) {
+            return;
+        }
         shader.use();
         shader.set(context);
         shader.setTexture("tex", texture, 0);
@@ -75,8 +78,7 @@ public class PlayerEntityRenderer extends EntityRenderer<PlayerEntity> {
         stack.push();
         stack.translate(0, 1.75F, 0);
         stack.lookAt(entity.getLookingAt());
-        if (!ClientSettings.FIRST_PERSON && entity.getUuid().equals(GLMC4Client.getThisEntity().getUuid()))
-            head.triangles();
+        head.triangles();
         stack.pop();
     }
 

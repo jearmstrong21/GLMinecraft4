@@ -63,6 +63,8 @@ public class ServerWorld extends World {
                     list.add(Pair.of(new Vector3i(v.x * 16 + x, 255, v.y * 16 + z), (byte) 15));
                 }
             }
+        });
+        update.getBlocks().keySet().stream().map(MathUtils::getChunkCoordinate).distinct().flatMap(MathUtils::fiveNeighbors).distinct().forEach(v -> {
             Consumer<Vector3i> consumer = p -> {
                 p.add(v.x * 16, 0, v.y * 16);
                 byte sunlight = update.getSunlight(p);
