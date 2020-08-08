@@ -1,6 +1,5 @@
 package p0nki.glmc4.client;
 
-import org.joml.Vector3i;
 import org.lwjgl.glfw.GLFW;
 import p0nki.glmc4.network.packet.clientbound.*;
 import p0nki.glmc4.network.packet.serverbound.PacketC2SPingResponse;
@@ -85,6 +84,7 @@ public class ClientPacketHandler extends ClientPacketListener {
 
     @Override
     public void onChunkUpdate(PacketS2CChunkUpdate packet) {
-        GLMC4Client.onChunkUpdate(new Vector3i(packet.getX(), packet.getY(), packet.getZ()), packet.getBlockState());
+        GLMC4Client.onChunkUpdate(packet);
+//        GLMC4Client.onChunkUpdate(new Vector3i(packet.getX(), packet.getY(), packet.getZ()), packet.getBlockState());
     }
 }

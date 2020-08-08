@@ -1,59 +1,35 @@
 package p0nki.glmc4.network.packet.clientbound;
 
-import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.network.PacketByteBuf;
 import p0nki.glmc4.network.packet.Packet;
 import p0nki.glmc4.network.packet.PacketTypes;
+import p0nki.glmc4.world.gen.BulkUpdate;
 
 public class PacketS2CChunkUpdate extends Packet<ClientPacketListener> {
 
-    private int x;
-    private int y;
-    private int z;
-    private BlockState blockState;
+    private BulkUpdate bulkUpdate;
 
     public PacketS2CChunkUpdate() {
         super(PacketTypes.S2C_CHUNK_UPDATE);
     }
 
-    public PacketS2CChunkUpdate(int x, int y, int z, BlockState blockState) {
+    public PacketS2CChunkUpdate(BulkUpdate bulkUpdate) {
         super(PacketTypes.S2C_CHUNK_UPDATE);
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.blockState = blockState;
+        this.bulkUpdate = bulkUpdate;
     }
 
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public int getZ() {
-        return z;
-    }
-
-    public BlockState getBlockState() {
-        return blockState;
+    public BulkUpdate getBulkUpdate() {
+        return bulkUpdate;
     }
 
     @Override
     public void read(PacketByteBuf buf) {
-        x = buf.readInt();
-        y = buf.readInt();
-        z = buf.readInt();
-        blockState = new BlockState(buf.readLong());
+        bulkUpdate = buf.readEquivalent(new BulkUpdate());
     }
 
     @Override
     public void write(PacketByteBuf buf) {
-        buf.writeInt(x);
-        buf.writeInt(y);
-        buf.writeInt(z);
-        buf.writeLong(blockState.toLong());
+        buf.writeEquivalent(bulkUpdate);
     }
 
     @Override

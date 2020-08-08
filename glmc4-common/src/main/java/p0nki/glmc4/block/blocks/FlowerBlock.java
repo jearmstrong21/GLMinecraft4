@@ -12,7 +12,7 @@ public class FlowerBlock extends Block {
     }
 
     @Override
-    public float getAOContribution() {
+    public float getAOContribution(BlockState blockState) {
         return 1;
     }
 
@@ -22,7 +22,7 @@ public class FlowerBlock extends Block {
     }
 
     @Override
-    public byte getBlockedSunlight() {
+    public byte getBlockedSunlight(BlockState blockState) {
         return 0;
     }
 }

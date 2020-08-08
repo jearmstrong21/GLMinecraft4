@@ -11,8 +11,8 @@ import p0nki.glmc4.network.packet.serverbound.PacketC2SPlayerMovement;
 import p0nki.glmc4.network.packet.serverbound.ServerPacketListener;
 import p0nki.glmc4.utils.data.Optional;
 import p0nki.glmc4.utils.math.MathUtils;
-import p0nki.glmc4.world.World;
 import p0nki.glmc4.world.WorldIntersection;
+import p0nki.glmc4.world.gen.BulkUpdate;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -57,7 +57,7 @@ public class ServerPacketHandler extends ServerPacketListener {
     private final int viewDistance = 3;
 
     private void forViewDistance(Consumer<Vector2i> consumer) {
-        Vector2i startChunkCoordinate = World.getChunkCoordinate(new Vector2i((int) getPlayerEntity().getPosition().x, (int) getPlayerEntity().getPosition().z));
+        Vector2i startChunkCoordinate = MathUtils.getChunkCoordinate(MathUtils.floor(getPlayerEntity().getPosition()));
         for (int x = -viewDistance; x <= viewDistance; x++) {
             for (int z = -viewDistance; z <= viewDistance; z++) {
                 consumer.accept(new Vector2i(x, z).add(startChunkCoordinate));
@@ -114,8 +114,12 @@ public class ServerPacketHandler extends ServerPacketListener {
         }
         if (M1) {
             Optional<WorldIntersection> intersectionOptional = MinecraftServer.INSTANCE.getServerWorld().intersectWorld(getPlayerEntity().getEyePosition(), getPlayerEntity().getLookingAt(), 20);
+//            update.setBlock();
+//            intersectionOptional.ifPresent(worldIntersection -> MinecraftServer.INSTANCE.getServerWorld().update(worldIntersection.getHit(), Blocks.AIR.getDefaultState()));
             intersectionOptional.ifPresent(worldIntersection -> {
-                MinecraftServer.INSTANCE.getServerWorld().update(worldIntersection.getHit(), Blocks.AIR.getDefaultState());
+                BulkUpdate update = new BulkUpdate();
+                update.setBlock(worldIntersection.getHit(), Blocks.AIR.getDefaultState());
+                MinecraftServer.INSTANCE.getServerWorld().update(update);
             });
         }
         getPlayerEntity().getLookingAt().set(lookAt);

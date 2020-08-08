@@ -1,17 +1,14 @@
 package p0nki.glmc4.entity;
 
 import org.joml.AABBf;
-import org.joml.Vector2i;
 import org.joml.Vector3f;
-import org.joml.Vector3i;
 import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.server.MinecraftServer;
 import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.tag.TagEquivalent;
 import p0nki.glmc4.utils.TagUtils;
-import p0nki.glmc4.utils.math.VoxelShape;
-import p0nki.glmc4.world.World;
+import p0nki.glmc4.utils.math.MathUtils;
 
 import java.util.Random;
 import java.util.UUID;
@@ -70,23 +67,23 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
     }
 
     public final BlockState getEyeBlock() {
-        return MinecraftServer.INSTANCE.getServerWorld().get((int) getEyePosition().x, (int) getEyePosition().y, (int) getEyePosition().z);
+        return MinecraftServer.INSTANCE.getServerWorld().getBlock(MathUtils.floor(getEyePosition()));
     }
 
     public final boolean isGrounded() {
-        return getFootBlock().getBlock() == Blocks.WATER || !isValidPosition(new Vector3f(position.x, position.y - 0.1F, position.z));
+        return getFootBlock().getIndex() == Blocks.WATER.getIndex() || !isValidPosition(new Vector3f(position.x, position.y - 0.1F, position.z));
     }
 
     public final float getGravity() {
-        return getFootBlock().getBlock() == Blocks.WATER ? -2 : -40;
+        return getFootBlock().getIndex() == Blocks.WATER.getIndex() ? -2 : -40;
     }
 
     public final float getJumpPower() {
-        return getFootBlock().getBlock() == Blocks.WATER ? 0.1F : 10;
+        return getFootBlock().getIndex() == Blocks.WATER.getIndex() ? 0.1F : 10;
     }
 
     public final BlockState getFootBlock() {
-        return MinecraftServer.INSTANCE.getServerWorld().get((int) getFootPosition().x, (int) getFootPosition().y, (int) getFootPosition().z);
+        return MinecraftServer.INSTANCE.getServerWorld().getBlock(MathUtils.floor(getFootPosition()));
     }
 
     public final Vector3f getFootPosition() {
@@ -94,7 +91,7 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
     }
 
     public boolean canTick() {
-        return MinecraftServer.INSTANCE.getServerWorld().isChunkLoaded(World.getChunkCoordinate(new Vector2i((int) position.x, (int) position.z)));
+        return MinecraftServer.INSTANCE.getServerWorld().isChunkLoaded(MathUtils.getChunkCoordinate(MathUtils.floor(position)));
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
@@ -108,9 +105,7 @@ public abstract class Entity implements TagEquivalent<Entity, CompoundTag> {
         for (int x = x0; x <= x1; x++) {
             for (int y = y0; y <= y1; y++) {
                 for (int z = z0; z <= z1; z++) {
-                    BlockState blockState = MinecraftServer.INSTANCE.getServerWorld().get(new Vector3i(x, y, z));
-                    VoxelShape shape = blockState.getBlock().getShape(blockState);
-                    if (shape.collidesWith(new AABBf(
+                    if (MinecraftServer.INSTANCE.getServerWorld().getBlock(x, y, z).getShape().collidesWith(new AABBf(
                             testPosition.x, testPosition.y, testPosition.z,
                             testPosition.x + getSize().x, testPosition.y + getSize().y, testPosition.z + getSize().z
                     ).translate(-x, -y, -z))) {

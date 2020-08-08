@@ -12,7 +12,6 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import org.joml.*;
-import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.block.Blocks;
 import p0nki.glmc4.client.gl.Framebuffer;
 import p0nki.glmc4.client.gl.Mesh;
@@ -29,6 +28,7 @@ import p0nki.glmc4.entity.EntityTypes;
 import p0nki.glmc4.network.NetworkHandler;
 import p0nki.glmc4.network.PacketCodec;
 import p0nki.glmc4.network.packet.clientbound.ClientPacketListener;
+import p0nki.glmc4.network.packet.clientbound.PacketS2CChunkUpdate;
 import p0nki.glmc4.tag.CompoundTag;
 import p0nki.glmc4.utils.Identifier;
 import p0nki.glmc4.utils.math.MathUtils;
@@ -101,8 +101,8 @@ public class GLMC4Client {
         clientWorld.loadChunk(new Vector2i(x, z), chunk);
     }
 
-    public static void onChunkUpdate(Vector3i blockPos, BlockState newState) {
-        clientWorld.update(blockPos, newState);
+    public static void onChunkUpdate(PacketS2CChunkUpdate packet) {
+        clientWorld.acceptUpdate(packet.getBulkUpdate());
     }
 
     public static void updateEntity(UUID uuid, CompoundTag newData) {
@@ -179,7 +179,7 @@ public class GLMC4Client {
 
         postprocessShader.use();
         postprocessShader.setFramebuffer("tex", gameFramebuffer, 0);
-        postprocessShader.setBoolean("underwater", clientWorld.getOrAir(new Vector3i((int) cameraPosition.x, (int) cameraPosition.y, (int) cameraPosition.z)).getBlock() == Blocks.WATER);
+        postprocessShader.setBoolean("underwater", clientWorld.getOrAir(new Vector3i((int) cameraPosition.x, (int) cameraPosition.y, (int) cameraPosition.z)).getIndex() == Blocks.WATER.getIndex());
         postprocessMesh.triangles();
 
         textRenderer.renderString(-1, 1 - 0.04F, 0.04F, String.format("GLMinecraft4\n" +

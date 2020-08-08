@@ -1,5 +1,6 @@
 package p0nki.glmc4.world;
 
+import org.joml.Vector2i;
 import org.joml.Vector3i;
 import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.block.Blocks;
@@ -34,13 +35,6 @@ public class Chunk implements PacketByteBuf.Equivalent {
             return 16;
         }
         return sunlight[x][y][z];
-    }
-
-    public int getHeight(int x, int z, HeightMapType heightMapType) {
-        for (int y = 255; y >= 0; y--) {
-            if (heightMapType.test(get(x, y, z))) return y;
-        }
-        return 0;
     }
 
     public void setBiome(int x, int z, Biome biome) {
@@ -82,40 +76,36 @@ public class Chunk implements PacketByteBuf.Equivalent {
         }
     }
 
-    private void checkYBounds(int y) {
-        if (y < 0 || y > 255) throw new ArrayIndexOutOfBoundsException("Invalid chunk y coordinate " + y);
+    public BlockState getBlock(Vector3i blockPos) {
+        return getBlock(blockPos.x, blockPos.y, blockPos.z);
     }
 
-    private void checkBounds(int x, int y, int z) {
-        if (x < 0 || y < 0 || z < 0 || x >= 16 || y >= 256 || z >= 16)
-            throw new ArrayIndexOutOfBoundsException(String.format("Invalid chunk coordinates %d, %d, %d", x, y, z));
-    }
-
-    private void checkXZBounds(int x, int z) {
-        if (x < 0 || z < 0 || x >= 16 || z >= 16)
-            throw new ArrayIndexOutOfBoundsException(String.format("Invalid chunk xz coordinates %d, %d", x, z));
-    }
-
-    public BlockState get(Vector3i blockPos) {
-        return get(blockPos.x, blockPos.y, blockPos.z);
-    }
-
-    public BlockState get(int x, int y, int z) {
-        checkXZBounds(x, z);
+    public BlockState getBlock(int x, int y, int z) {
         if (y < 0 || y > 255) return Blocks.AIR.getDefaultState();
         return new BlockState(data[x][y][z]);
     }
 
-    public void set(int x, int y, int z, BlockState state) {
-        checkBounds(x, y, z);
+    public void setBlock(int x, int y, int z, BlockState state) {
         data[x][y][z] = state.toLong();
+    }
+
+    public Biome getBiome(Vector2i position) {
+        return getBiome(position.x, position.y);
+    }
+
+    public void setSunlight(int x, int y, int z, byte sunlight) {
+        this.sunlight[x][y][z] = sunlight;
+    }
+
+    public void setSunlight(Vector3i position, byte sunlight) {
+        setSunlight(position.x, position.y, position.z, sunlight);
     }
 
     public enum HeightMapType implements Predicate<BlockState> {
         FULL_NOT_WATER {
             @Override
             public boolean test(BlockState blockState) {
-                return blockState.getBlock() != Blocks.WATER && blockState.getBlock().isFullBlock(blockState);
+                return blockState.getIndex() != Blocks.WATER.getIndex() && blockState.isFullBlock();
             }
         }
     }

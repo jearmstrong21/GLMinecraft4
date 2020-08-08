@@ -2,11 +2,10 @@ package p0nki.glmc4.world.gen;
 
 import org.joml.Vector2i;
 import org.joml.Vector3i;
-import p0nki.glmc4.block.Block;
 import p0nki.glmc4.server.ServerWorld;
 import p0nki.glmc4.utils.data.Pair;
+import p0nki.glmc4.utils.math.MathUtils;
 import p0nki.glmc4.world.Chunk;
-import p0nki.glmc4.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,11 +89,9 @@ public class SunlightChunkGenerator extends ChunkGenerator {
                 while (!list.isEmpty()) {
                     Pair<Vector3i, Byte> pair = list.remove(0);
                     byte light = pair.getSecond();
-                    Vector2i chunkCoordinate = World.getChunkCoordinate(new Vector2i(pair.getFirst().x, pair.getFirst().z));
-                    Vector2i coordinateInChunk = World.getCoordinateInChunk(new Vector2i(pair.getFirst().x, pair.getFirst().z));
-                    Block block = chunks.get(chunkCoordinate).getFirst().get(coordinateInChunk.x, pair.getFirst().y, coordinateInChunk.y).getBlock();
-                    light -= block.getBlockedSunlight();
-                    if (light <= 0) continue;
+                    Vector2i chunkCoordinate = MathUtils.getChunkCoordinate(new Vector2i(pair.getFirst().x, pair.getFirst().z));
+                    Vector2i coordinateInChunk = MathUtils.getCoordinateInChunk(new Vector2i(pair.getFirst().x, pair.getFirst().z));
+                    light -= chunks.get(chunkCoordinate).getFirst().getBlock(coordinateInChunk.x, pair.getFirst().y, coordinateInChunk.y).getBlockedSunlight();
                     byte curLight = chunks.get(chunkCoordinate).getFirst().getSunlight()[coordinateInChunk.x][pair.getFirst().y][coordinateInChunk.y];
                     if (light > curLight) {
                         chunks.get(chunkCoordinate).getFirst().getSunlight()[coordinateInChunk.x][pair.getFirst().y][coordinateInChunk.y] = light;

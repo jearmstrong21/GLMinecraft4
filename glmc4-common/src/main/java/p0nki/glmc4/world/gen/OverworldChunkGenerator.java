@@ -13,7 +13,6 @@ import p0nki.glmc4.utils.math.SimplexGenerator;
 import p0nki.glmc4.world.Chunk;
 import p0nki.glmc4.world.ChunkGenerationStatus;
 import p0nki.glmc4.world.ChunkNotLoadedException;
-import p0nki.glmc4.world.World;
 import p0nki.glmc4.world.gen.biomes.Biome;
 import p0nki.glmc4.world.gen.biomes.BiomeGenerator;
 import p0nki.glmc4.world.gen.ctx.ReadWriteWorldContext;
@@ -65,52 +64,52 @@ public class OverworldChunkGenerator extends ChunkGenerator {
     }
 
 
-    private ReadWriteWorldContext getContext(Vector2i v, byte readStatus) {
+    private ReadWriteWorldContext getContext(Vector2i v, byte readStatus, byte writeStatus) {
         return new ReadWriteWorldContext() {
 
             @Override
             public boolean canTouch(Vector2i position) {
-                Vector2i chunkCoordinate = World.getChunkCoordinate(position);
+                Vector2i chunkCoordinate = MathUtils.getChunkCoordinate(position);
                 return Math.abs(chunkCoordinate.x - v.x) <= 1 && Math.abs(chunkCoordinate.y - v.y) <= 1;
             }
 
             @Override
             public BlockState get(Vector3i position) {
+                Vector2i chunkCoordinate = MathUtils.getChunkCoordinate(position);
                 if (!canTouch(new Vector2i(position.x, position.z)))
-                    throw new ChunkNotLoadedException(World.getChunkCoordinate(new Vector2i(position.x, position.z)));
-                Vector2i chunkCoordinate = World.getChunkCoordinate(new Vector2i(position.x, position.z));
+                    throw new ChunkNotLoadedException(chunkCoordinate);
                 if (getChunkStatus(chunkCoordinate) < readStatus)
                     throw new ChunkNotLoadedException(chunkCoordinate.x, chunkCoordinate.y);
-                Vector2i coordinateInChunk = World.getCoordinateInChunk(new Vector2i(position.x, position.z));
-                return chunks.get(chunkCoordinate).getValue().get(coordinateInChunk.x, position.y, coordinateInChunk.y);
+                Vector2i coordinateInChunk = MathUtils.getCoordinateInChunk(position);
+                return chunks.get(chunkCoordinate).getValue().getBlock(coordinateInChunk.x, position.y, coordinateInChunk.y);
             }
 
             @Override
             public void set(Vector3i position, BlockState blockState) {
-                Vector2i chunkCoordinate = World.getChunkCoordinate(new Vector2i(position.x, position.z));
+                Vector2i chunkCoordinate = MathUtils.getChunkCoordinate(new Vector2i(position.x, position.z));
                 if (!canTouch(new Vector2i(position.x, position.z)))
                     throw new ChunkNotLoadedException(chunkCoordinate);
-                if (getChunkStatus(chunkCoordinate) < ChunkGenerationStatus.HEIGHTMAP)
+                if (getChunkStatus(chunkCoordinate) < writeStatus)
                     throw new ChunkNotLoadedException(chunkCoordinate.x, chunkCoordinate.y);
-                Vector2i coordinateInChunk = World.getCoordinateInChunk(new Vector2i(position.x, position.z));
-                chunks.get(chunkCoordinate).getValue().set(coordinateInChunk.x, position.y, coordinateInChunk.y, blockState);
+                Vector2i coordinateInChunk = MathUtils.getCoordinateInChunk(position);
+                chunks.get(chunkCoordinate).getValue().setBlock(coordinateInChunk.x, position.y, coordinateInChunk.y, blockState);
             }
 
             @Override
             public int getHeight(Vector2i position) {
+                Vector2i chunkCoordinate = MathUtils.getChunkCoordinate(position);
                 if (!canTouch(new Vector2i(position.x, position.y)))
-                    throw new ChunkNotLoadedException(World.getChunkCoordinate(new Vector2i(position.x, position.y)));
-                Vector2i chunkCoordinate = World.getChunkCoordinate(position);
-                Vector2i coordinateInChunk = World.getCoordinateInChunk(position);
+                    throw new ChunkNotLoadedException(chunkCoordinate);
+                Vector2i coordinateInChunk = MathUtils.getCoordinateInChunk(position);
                 return chunks.get(chunkCoordinate).getWorldGenHeightMap()[coordinateInChunk.x][coordinateInChunk.y];
             }
 
             @Override
             public Biome getBiome(Vector2i position) {
+                Vector2i chunkCoordinate = MathUtils.getChunkCoordinate(position);
                 if (!canTouch(new Vector2i(position.x, position.y)))
-                    throw new ChunkNotLoadedException(World.getChunkCoordinate(new Vector2i(position.x, position.y)));
-                Vector2i chunkCoordinate = World.getChunkCoordinate(position);
-                Vector2i coordinateInChunk = World.getCoordinateInChunk(position);
+                    throw new ChunkNotLoadedException(chunkCoordinate);
+                Vector2i coordinateInChunk = MathUtils.getCoordinateInChunk(position);
                 return chunks.get(chunkCoordinate).getValue().getBiome(coordinateInChunk.x, coordinateInChunk.y);
             }
         };
@@ -227,11 +226,11 @@ public class OverworldChunkGenerator extends ChunkGenerator {
             for (int x = 0; x < 16; x++) {
                 for (int z = 0; z < 16; z++) {
                     for (int y = 0; y <= heightmap[x][z]; y++) {
-                        chunk.set(x, y, z, Blocks.STONE.getDefaultState());
+                        chunk.setBlock(x, y, z, Blocks.STONE.getDefaultState());
                     }
                     if (heightmap[x][z] < 64) {
                         for (int y = heightmap[x][z] + 1; y <= 64; y++) {
-                            chunk.set(x, y, z, Blocks.WATER.getDefaultState());
+                            chunk.setBlock(x, y, z, Blocks.WATER.getDefaultState());
                         }
                     }
                 }
@@ -264,7 +263,7 @@ public class OverworldChunkGenerator extends ChunkGenerator {
         CompletableFuture.runAsync(() -> {
             Random random = new Random(featureSeed + v.hashCode() * 2 + 1);
             random.nextBytes(new byte[10]);
-            ReadWriteWorldContext context = getContext(v, ChunkGenerationStatus.HEIGHTMAP);
+            ReadWriteWorldContext context = getContext(v, ChunkGenerationStatus.HEIGHTMAP, ChunkGenerationStatus.HEIGHTMAP);
             MathUtils.streamCoordinatesInChunk()
                     .map(p -> chunks.get(v).getValue().getBiome(p.x, p.y))
                     .distinct()
@@ -322,7 +321,7 @@ public class OverworldChunkGenerator extends ChunkGenerator {
         CompletableFuture.runAsync(() -> {
             Random random = new Random(featureSeed + v.hashCode() * 2 + 2);
             random.nextBytes(new byte[10]);
-            ReadWriteWorldContext context = getContext(v, ChunkGenerationStatus.DECORATED1);
+            ReadWriteWorldContext context = getContext(v, ChunkGenerationStatus.SURFACE_BUILD, ChunkGenerationStatus.SURFACE_BUILD);
             MathUtils.streamCoordinatesInChunk()
                     .map(p -> chunks.get(v).getValue().getBiome(p.x, p.y))
                     .distinct()

@@ -1,6 +1,7 @@
 package p0nki.glmc4.utils.math;
 
 import org.joml.Vector2i;
+import org.joml.Vector3f;
 import org.joml.Vector3i;
 
 import java.text.DecimalFormat;
@@ -15,6 +16,42 @@ public class MathUtils {
 
     private MathUtils() {
 
+    }
+
+    public static Vector2i getCoordinateInChunk(Vector3i worldPos) {
+        return getCoordinateInChunk(new Vector2i(worldPos.x, worldPos.z));
+    }
+
+    public static Vector2i getCoordinateInChunk(int x, int z) {
+        return new Vector2i(x, z);
+    }
+
+    public static Vector2i getCoordinateInChunk(Vector2i worldPos) {
+        int x = worldPos.x;
+        int z = worldPos.y;
+        while (x < 0) x += 16;
+        while (z < 0) z += 16;
+        while (x >= 16) x -= 16;
+        while (z >= 16) z -= 16;
+        return new Vector2i(x, z);
+    }
+
+    public static Vector2i getChunkCoordinate(Vector3i worldPos) {
+        return getChunkCoordinate(new Vector2i(worldPos.x, worldPos.z));
+    }
+
+    public static Vector2i getChunkCoordinate(int x, int z) {
+        return getChunkCoordinate(new Vector2i(x, z));
+    }
+
+    public static Vector2i getChunkCoordinate(Vector2i worldPos) {
+        int x = worldPos.x;
+        int z = worldPos.y;
+        while (x < 0) x += 16;
+        while (z < 0) z += 16;
+        while (x >= 16) x -= 16;
+        while (z >= 16) z -= 16;
+        return new Vector2i((worldPos.x - x) / 16, (worldPos.y - z) / 16);
     }
 
     public static Stream<Vector2i> streamCoordinatesInChunk() {
@@ -112,4 +149,11 @@ public class MathUtils {
         );
     }
 
+    public static Vector3i floor(Vector3f value) {
+        return new Vector3i(floor(value.x), floor(value.y), floor(value.z));
+    }
+
+    public static Stream<Vector2i> fiveNeighbors(Vector2i v) {
+        return Stream.of(new Vector2i(v.x - 1, v.y), new Vector2i(v.x + 1, v.y), new Vector2i(v.x, v.y - 1), new Vector2i(v.x, v.y + 1), new Vector2i(v));
+    }
 }

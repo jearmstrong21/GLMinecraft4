@@ -28,7 +28,7 @@ public class FlowerFeature extends Feature {
 
     @Override
     public void generate(ReadWriteWorldContext world, Vector3i position, Random random) {
-        if (world.get(position).getBlock() == Blocks.GRASS) {
+        if (world.get(position).getIndex() == Blocks.GRASS.getIndex()) {
             world.set(position.x, position.y + 1, position.z, blockStates[random.nextInt(blockStates.length)]);
         }
     }

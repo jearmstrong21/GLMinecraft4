@@ -19,9 +19,11 @@ import p0nki.glmc4.client.render.block.BlockRenderer;
 import p0nki.glmc4.client.render.block.BlockRenderers;
 import p0nki.glmc4.client.render.block.RenderLayer;
 import p0nki.glmc4.utils.Identifier;
+import p0nki.glmc4.utils.math.MathUtils;
 import p0nki.glmc4.world.Chunk;
 import p0nki.glmc4.world.ChunkNotLoadedException;
 import p0nki.glmc4.world.World;
+import p0nki.glmc4.world.gen.BulkUpdate;
 import p0nki.glmc4.world.gen.biomes.Biome;
 
 import java.nio.file.Path;
@@ -32,6 +34,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ClientWorld extends World {
 
@@ -65,9 +68,9 @@ public class ClientWorld extends World {
     }
 
     public BlockState getOrAir(Vector3i position) {
-        if (!isChunkLoaded(World.getChunkCoordinate(new Vector2i(position.x, position.z))))
+        if (!isChunkLoaded(MathUtils.getChunkCoordinate(position)))
             return Blocks.AIR.getDefaultState();
-        return get(position);
+        return getBlock(position);
     }
 
     public ClientWorld() {
@@ -75,23 +78,31 @@ public class ClientWorld extends World {
         texture = new Texture(Path.of("run", "atlas", "block.png"));
     }
 
+    public void acceptUpdate(BulkUpdate update) {
+        applyUpdate(update);
+        Stream.concat(
+                update.getBlocks().keySet().stream().map(MathUtils::getChunkCoordinate),
+                update.getSunlights().keySet().stream().map(MathUtils::getChunkCoordinate))
+                .flatMap(MathUtils::fiveNeighbors).distinct().forEach(this::remesh);
+    }
+
     private MeshData mesh(int cx, int cz, Chunk chunk, RenderLayer renderLayer) {
         MeshData data = MeshData.chunk();
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 256; y++) {
                 for (int z = 0; z < 16; z++) {
-                    BlockState state = chunk.get(x, y, z);
+                    BlockState state = chunk.getBlock(x, y, z);
                     int rx = x + cx * 16;
                     int rz = z + cz * 16;
-                    BlockState testState = get(rx, y, rz);
+                    BlockState testState = getBlock(rx, y, rz);
                     if (!state.equals(testState)) {
                         LOGGER.error("Expected {} at {},{},{}, got {}", state, x, y, z, testState);
                     }
-                    if (state.getBlock() == Blocks.AIR) continue;
-                    Identifier identifier = Blocks.REGISTRY.get(state.getBlock()).getKey();
+                    if (state.getIndex() == Blocks.AIR.getIndex()) continue;
+                    Identifier identifier = Blocks.REGISTRY.get(state.getIndex()).getKey();
                     BlockRenderer renderer = BlockRenderers.REGISTRY.get(identifier).getValue();
                     if (renderer.getRenderLayer() != renderLayer) continue;
-                    BlockRenderContext context = new BlockRenderContext(renderLayer, new Vector3i(x + cx * 16, y, z + cz * 16), get(rx - 1, y, rz), get(rx + 1, y, rz), get(rx, y - 1, rz), get(rx, y + 1, rz), get(rx, y, rz - 1), get(rx, y, rz + 1), state);
+                    BlockRenderContext context = new BlockRenderContext(renderLayer, new Vector3i(x + cx * 16, y, z + cz * 16), getBlock(rx - 1, y, rz), getBlock(rx + 1, y, rz), getBlock(rx, y - 1, rz), getBlock(rx, y + 1, rz), getBlock(rx, y, rz - 1), getBlock(rx, y, rz + 1), state);
                     MeshData rendered = renderer.render(context);
                     rendered.multiply4f(0, new Matrix4f().translate(x, y, z));
                     data.append(rendered);
@@ -108,7 +119,7 @@ public class ClientWorld extends World {
                 for (int j = -1; j <= 0; j++) {
                     for (int k = -1; k <= 0; k++) {
                         Vector3i v = new Vector3i(position.x + i, position.y + j, position.z + k);
-                        total += get(v).getBlock().getAOContribution();
+                        total += getBlock(v).getAOContribution();
                     }
                 }
             }
@@ -137,68 +148,9 @@ public class ClientWorld extends World {
     }
 
     @Override
-    public boolean isClient() {
-        return true;
-    }
-
-    @Override
-    public BlockState get(Vector3i blockPos) {
-        Vector2i chunkCoordinate = World.getChunkCoordinate(new Vector2i(blockPos.x, blockPos.z));
-        if (!isChunkLoaded(chunkCoordinate)) throw new ChunkNotLoadedException(chunkCoordinate);
-        Vector2i coordinateInChunk = World.getCoordinateInChunk(new Vector2i(blockPos.x, blockPos.z));
-        return chunks.get(chunkCoordinate).get(coordinateInChunk.x, blockPos.y, coordinateInChunk.y);
-    }
-
-    @Override
-    public byte getSunlight(Vector3i blockPos) {
-        Vector2i chunkCoordinate = World.getChunkCoordinate(new Vector2i(blockPos.x, blockPos.z));
-        if (!isChunkLoaded(chunkCoordinate)) throw new ChunkNotLoadedException(chunkCoordinate);
-        Vector2i coordinateInChunk = World.getCoordinateInChunk(new Vector2i(blockPos.x, blockPos.z));
-        return chunks.get(chunkCoordinate).getSunlight(coordinateInChunk.x, blockPos.y, coordinateInChunk.y);
-    }
-
-    @Override
     public Chunk getChunk(Vector2i chunkCoordinate) {
         if (!isChunkLoaded(chunkCoordinate)) throw new ChunkNotLoadedException(chunkCoordinate);
         return chunks.get(chunkCoordinate);
-    }
-
-    @Override
-    public void update(Vector3i blockPos, BlockState blockState) {
-        runnableQueue.add(() -> {
-            if (get(blockPos).toLong() == blockState.toLong()) return;
-            Vector2i chunkCoordinate = World.getChunkCoordinate(new Vector2i(blockPos.x, blockPos.z));
-            if (!isChunkLoaded(chunkCoordinate))
-                throw new ChunkNotLoadedException(chunkCoordinate.x, chunkCoordinate.y);
-            Vector2i coordinateInChunk = World.getCoordinateInChunk(new Vector2i(blockPos.x, blockPos.z));
-            getChunk(chunkCoordinate).set(coordinateInChunk.x, blockPos.y, coordinateInChunk.y, blockState);
-            if (coordinateInChunk.x == 0 && coordinateInChunk.y == 0)
-                remesh(new Vector2i(chunkCoordinate.x - 1, chunkCoordinate.y - 1));
-            if (coordinateInChunk.x == 0 && coordinateInChunk.y == 15)
-                remesh(new Vector2i(chunkCoordinate.x - 1, chunkCoordinate.y + 1));
-            if (coordinateInChunk.x == 15 && coordinateInChunk.y == 0)
-                remesh(new Vector2i(chunkCoordinate.x + 1, chunkCoordinate.y - 1));
-            if (coordinateInChunk.x == 15 && coordinateInChunk.y == 15)
-                remesh(new Vector2i(chunkCoordinate.x + 1, chunkCoordinate.y + 1));
-            if (coordinateInChunk.x == 0) remesh(new Vector2i(chunkCoordinate.x - 1, chunkCoordinate.y));
-            if (coordinateInChunk.x == 15) remesh(new Vector2i(chunkCoordinate.x + 1, chunkCoordinate.y));
-            if (coordinateInChunk.y == 0) remesh(new Vector2i(chunkCoordinate.x, chunkCoordinate.y - 1));
-            if (coordinateInChunk.y == 15) remesh(new Vector2i(chunkCoordinate.x, chunkCoordinate.y + 1));
-            remesh(chunkCoordinate);
-        });
-    }
-
-    @Override
-    public List<Vector2i> getLoadedChunks() {
-        return List.copyOf(chunks.keySet());
-    }
-
-    @Override
-    public Biome getBiome(Vector2i position) {
-        Vector2i chunkCoordinate = World.getChunkCoordinate(position);
-        if (!isChunkLoaded(chunkCoordinate)) throw new ChunkNotLoadedException(chunkCoordinate);
-        Vector2i coordinateInChunk = World.getCoordinateInChunk(position);
-        return chunks.get(chunkCoordinate).getBiome(coordinateInChunk.x, coordinateInChunk.y);
     }
 
     public void render(WorldRenderContext worldRenderContext) {
@@ -220,15 +172,10 @@ public class ClientWorld extends World {
         if (ClientSettings.CHUNK_BORDERS) {
             chunks.keySet().forEach(key -> GLMC4Client.debugRenderer3D.renderCube(worldRenderContext, ClientSettings.CHUNK_COLOR, new Vector3f(key.x * 16, 0, key.y * 16), new Vector3f(16, 256, 16)));
             for (int y = 0; y < 256; y++) {
-                Vector2i chunk = World.getChunkCoordinate(new Vector2i((int) GLMC4Client.getThisEntity().getPosition().x, (int) GLMC4Client.getThisEntity().getPosition().z));
+                Vector2i chunk = MathUtils.getChunkCoordinate(MathUtils.floor(GLMC4Client.getThisEntity().getPosition()));
                 GLMC4Client.debugRenderer3D.renderCube(worldRenderContext, ClientSettings.CURRENT_CHUNK_COLOR, new Vector3f(chunk.x * 16, y, chunk.y * 16), new Vector3f(16, 1, 16));
             }
         }
-//        for (Vector2i v : chunks.keySet()) {
-//            if (!meshes.containsKey(v)) {
-//                remesh(v);
-//            }
-//        }
 
         if (!inMeshQueue.isEmpty()) {
             Vector2i v = inMeshQueue.remove();
@@ -277,4 +224,5 @@ public class ClientWorld extends World {
             return Optional.empty();
         }
     }
+
 }

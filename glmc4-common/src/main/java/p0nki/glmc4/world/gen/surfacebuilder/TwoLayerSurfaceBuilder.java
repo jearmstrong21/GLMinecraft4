@@ -23,14 +23,14 @@ public class TwoLayerSurfaceBuilder extends SurfaceBuilder {
         BlockState realTop = top;
         BlockState realMiddle = middle;
         for (int y = 255; y >= 0; y--) {
-            BlockState b = chunk.get(x, y, z);
-            if (b.getBlock() != Blocks.AIR) {
-                if (b.getBlock() == Blocks.WATER) {
+            BlockState b = chunk.getBlock(x, y, z);
+            if (b.getIndex() != Blocks.AIR.getIndex()) {
+                if (b.getIndex() == Blocks.WATER.getIndex()) {
                     realTop = realMiddle = Blocks.SAND.getDefaultState();
                 } else {
-                    chunk.set(x, y, z, realTop);
+                    chunk.setBlock(x, y, z, realTop);
                     for (int i = 0; i < surfaceDepth; i++) {
-                        chunk.set(x, y - i - 1, z, realMiddle);
+                        chunk.setBlock(x, y - i - 1, z, realMiddle);
                     }
                     return;
                 }

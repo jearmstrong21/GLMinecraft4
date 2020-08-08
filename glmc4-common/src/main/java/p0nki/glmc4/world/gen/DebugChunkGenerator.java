@@ -41,7 +41,7 @@ public class DebugChunkGenerator extends ChunkGenerator {
                 for (int x = 0; x < 16; x++) {
                     for (int z = 0; z < 16; z++) {
                         for (int y = 0; y <= 84; y++) {
-                            chunk.set(x, y, z, Blocks.STONE.getDefaultState());
+                            chunk.setBlock(x, y, z, Blocks.STONE.getDefaultState());
                         }
                         int h = 90;
                         BlockState mid = Blocks.WATER.getDefaultState();
@@ -54,9 +54,9 @@ public class DebugChunkGenerator extends ChunkGenerator {
                             if (z < 2) h += 1;
                         }
                         for (int y = 85; y <= h; y++) {
-                            chunk.set(x, y, z, mid);
+                            chunk.setBlock(x, y, z, mid);
                         }
-                        chunk.set(x, h + 1, z, top);
+                        chunk.setBlock(x, h + 1, z, top);
 //                        for (int y = 85; y <= (z < 8 ? 89 : 90); y++) {
 //                            chunk.set(x, y, z, (x < 8 ? Blocks.DIRT : Blocks.WATER).getDefaultState());
 //                        }

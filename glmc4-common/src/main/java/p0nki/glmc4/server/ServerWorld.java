@@ -1,29 +1,26 @@
 package p0nki.glmc4.server;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
-import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.network.packet.clientbound.PacketS2CChunkUpdate;
 import p0nki.glmc4.utils.data.Pair;
+import p0nki.glmc4.utils.math.MathUtils;
 import p0nki.glmc4.world.Chunk;
 import p0nki.glmc4.world.ChunkGenerationStatus;
 import p0nki.glmc4.world.ChunkNotLoadedException;
 import p0nki.glmc4.world.World;
+import p0nki.glmc4.world.gen.BulkUpdate;
 import p0nki.glmc4.world.gen.ChunkGenerator;
 import p0nki.glmc4.world.gen.DebugChunkGenerator;
 import p0nki.glmc4.world.gen.SunlightChunkGenerator;
-import p0nki.glmc4.world.gen.biomes.Biome;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
 public class ServerWorld extends World {
-
-    private static final Logger LOGGER = LogManager.getLogger();
 
     private final Map<Vector2i, Chunk> chunks = new HashMap<>();
 
@@ -48,25 +45,52 @@ public class ServerWorld extends World {
         return chunks.containsKey(chunkCoordinate);
     }
 
-    @Override
-    public BlockState get(Vector3i blockPos) {
-        Vector2i chunkCoordinate = World.getChunkCoordinate(new Vector2i(blockPos.x, blockPos.z));
-        if (!isChunkLoaded(chunkCoordinate)) throw new ChunkNotLoadedException(chunkCoordinate);
-        Vector2i coordinateInChunk = World.getCoordinateInChunk(new Vector2i(blockPos.x, blockPos.z));
-        return chunks.get(chunkCoordinate).get(coordinateInChunk.x, blockPos.y, coordinateInChunk.y);
-    }
-
-    @Override
-    public byte getSunlight(Vector3i blockPos) {
-        Vector2i chunkCoordinate = World.getChunkCoordinate(new Vector2i(blockPos.x, blockPos.z));
-        if (!isChunkLoaded(chunkCoordinate)) throw new ChunkNotLoadedException(chunkCoordinate);
-        Vector2i coordinateInChunk = World.getCoordinateInChunk(new Vector2i(blockPos.x, blockPos.z));
-        return chunks.get(chunkCoordinate).getSunlight(coordinateInChunk.x, blockPos.y, coordinateInChunk.y);
-    }
-
-    @Override
-    public boolean isClient() {
-        return false;
+    public void update(BulkUpdate update) {
+        if (update.getSunlights().size() > 0) {
+            throw new IllegalStateException("BulkUpdate should not have manually modified sunlight");
+        }
+        List<Pair<Vector3i, Byte>> list = new ArrayList<>();
+        update.getBlocks().keySet().stream().map(MathUtils::getChunkCoordinate).distinct().forEach(v -> {
+            for (int x = 0; x < 16; x++) {
+                for (int y = 0; y < 256; y++) {
+                    for (int z = 0; z < 16; z++) {
+                        update.setSunlight(v.x * 16 + x, y, v.y * 16 + z, (byte) 0);
+                    }
+                }
+            }
+            for (int x = 0; x < 16; x++) {
+                for (int z = 0; z < 16; z++) {
+                    list.add(Pair.of(new Vector3i(v.x * 16 + x, 255, v.y * 16 + z), (byte) 15));
+                }
+            }
+            Consumer<Vector3i> consumer = p -> {
+                p.add(v.x * 16, 0, v.y * 16);
+                byte sunlight = update.getSunlight(p);
+                if (sunlight > 0) list.add(Pair.of(p, sunlight));
+            };
+            for (int y = 0; y < 256; y++) {
+                consumer.accept(new Vector3i(-1, y, 0));
+                consumer.accept(new Vector3i(16, y, 0));
+                consumer.accept(new Vector3i(0, y, -1));
+                consumer.accept(new Vector3i(0, y, 16));
+            }
+        });
+        while (!list.isEmpty()) {
+            Pair<Vector3i, Byte> pair = list.remove(0);
+            byte light = pair.getSecond();
+            light -= update.getBlock(pair.getFirst()).getBlockedSunlight();
+            byte curLight = update.getSunlight(pair.getFirst());
+            if (light > curLight) {
+                update.setSunlight(pair.getFirst(), light);
+                list.add(Pair.of(new Vector3i(pair.getFirst()).add(0, -1, 0), light));
+                list.add(Pair.of(new Vector3i(pair.getFirst()).add(-1, 0, 0), (byte) (light - 1)));
+                list.add(Pair.of(new Vector3i(pair.getFirst()).add(1, 0, 0), (byte) (light - 1)));
+                list.add(Pair.of(new Vector3i(pair.getFirst()).add(0, 0, -1), (byte) (light - 1)));
+                list.add(Pair.of(new Vector3i(pair.getFirst()).add(0, 0, 1), (byte) (light - 1)));
+            }
+        }
+        applyUpdate(update);
+        MinecraftServer.INSTANCE.writeAll(new PacketS2CChunkUpdate(update));
     }
 
     @Override
@@ -77,29 +101,6 @@ public class ServerWorld extends World {
 
     public void queueLoad(Vector2i v) {
         chunkGenerator.requestLoadChunk(v);
-    }
-
-    @Override
-    public void update(Vector3i blockPos, BlockState blockState) {
-        if (get(blockPos).toLong() == blockState.toLong()) return;
-        Vector2i chunkCoordinate = World.getChunkCoordinate(new Vector2i(blockPos.x, blockPos.z));
-        if (!isChunkLoaded(chunkCoordinate)) throw new ChunkNotLoadedException(chunkCoordinate.x, chunkCoordinate.y);
-        Vector2i coordinateInChunk = World.getCoordinateInChunk(new Vector2i(blockPos.x, blockPos.z));
-        getChunk(chunkCoordinate).set(coordinateInChunk.x, blockPos.y, coordinateInChunk.y, blockState);
-        MinecraftServer.INSTANCE.writeAll(new PacketS2CChunkUpdate(blockPos.x, blockPos.y, blockPos.z, blockState));
-    }
-
-    @Override
-    public Biome getBiome(Vector2i position) {
-        Vector2i chunkCoordinate = World.getChunkCoordinate(position);
-        if (!isChunkLoaded(chunkCoordinate)) throw new ChunkNotLoadedException(chunkCoordinate);
-        Vector2i coordinateInChunk = World.getCoordinateInChunk(position);
-        return chunks.get(chunkCoordinate).getBiome(coordinateInChunk.x, coordinateInChunk.y);
-    }
-
-    @Override
-    public List<Vector2i> getLoadedChunks() {
-        return List.copyOf(chunks.keySet());
     }
 
     public static class ServerChunkEntry {
@@ -119,7 +120,7 @@ public class ServerWorld extends World {
             for (int x = 0; x < 16; x++) {
                 for (int z = 0; z < 16; z++) {
                     for (int y = 255; y >= 0; y--) {
-                        if (Chunk.HeightMapType.FULL_NOT_WATER.test(value.get(x, y, z))) {
+                        if (Chunk.HeightMapType.FULL_NOT_WATER.test(value.getBlock(x, y, z))) {
                             worldGenHeightMap[x][z] = y;
                             break;
                         }

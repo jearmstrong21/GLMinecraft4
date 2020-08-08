@@ -1,12 +1,14 @@
 package p0nki.glmc4.block;
 
+import p0nki.glmc4.network.PacketByteBuf;
 import p0nki.glmc4.state.Property;
+import p0nki.glmc4.utils.math.VoxelShape;
 
 import javax.annotation.CheckReturnValue;
 
-public final class BlockState {
+public final class BlockState implements PacketByteBuf.Equivalent {
 
-    private final long value;
+    private long value;
 
     public BlockState(long value) {
         this.value = value;
@@ -32,7 +34,7 @@ public final class BlockState {
     }
 
     @CheckReturnValue
-    public int getId() {
+    public int getIndex() {
         return (int) (value >> 32);
     }
 
@@ -48,7 +50,7 @@ public final class BlockState {
 
     @CheckReturnValue
     public <T> BlockState with(Property<T> property, T value) {
-        return new BlockState(getId(), getBlock().getSchema().set(getMeta(), property, value));
+        return new BlockState(getIndex(), getBlock().getSchema().set(getMeta(), property, value));
     }
 
     @CheckReturnValue
@@ -59,22 +61,48 @@ public final class BlockState {
     @SuppressWarnings("unchecked")
     @CheckReturnValue
     public BlockState withUnsafe(@SuppressWarnings("rawtypes") Property property, Object value) {
-        return new BlockState(getId(), getBlock().getSchema().set(getMeta(), property, value));
+        return new BlockState(getIndex(), getBlock().getSchema().set(getMeta(), property, value));
     }
 
     @Override
     public String toString() {
-        return Blocks.REGISTRY.get(getId()).getKey() + Blocks.REGISTRY.get(getId()).getValue().getSchema().toString(getMeta());
+        return Blocks.REGISTRY.get(getIndex()).getKey() + Blocks.REGISTRY.get(getIndex()).getValue().getSchema().toString(getMeta());
     }
 
-    @CheckReturnValue
-    public Block getBlock() {
-        return Blocks.REGISTRY.get(getId()).getValue();
+    //    @CheckReturnValue
+    private Block getBlock() {
+        return Blocks.REGISTRY.get(getIndex()).getValue();
     }
 
     @CheckReturnValue
     public long toLong() {
         return value;
+    }
+
+    public float getAOContribution() {
+        return getBlock().getAOContribution(this);
+    }
+
+    public boolean isFullBlock() {
+        return getBlock().isFullBlock(this);
+    }
+
+    @Override
+    public void write(PacketByteBuf buf) {
+        buf.writeLong(value);
+    }
+
+    @Override
+    public void read(PacketByteBuf buf) {
+        value = buf.readLong();
+    }
+
+    public VoxelShape getShape() {
+        return getBlock().getShape(this);
+    }
+
+    public byte getBlockedSunlight() {
+        return getBlock().getBlockedSunlight(this);
     }
 
 }

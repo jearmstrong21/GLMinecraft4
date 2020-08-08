@@ -71,7 +71,7 @@ public class BlockRenderContext {
     }
 
     private boolean show(BlockState blockState) {
-        return !blockState.getBlock().isFullBlock(blockState) || BlockRenderers.REGISTRY.get(blockState.getBlock().getKey()).getValue().getRenderLayer().showsTo(renderLayer);
+        return !blockState.isFullBlock() || BlockRenderers.REGISTRY.get(blockState.getIndex()).getValue().getRenderLayer().showsTo(renderLayer);
     }
 
     public boolean showXmi() {

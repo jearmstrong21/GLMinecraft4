@@ -7,53 +7,74 @@ import org.joml.Vector3i;
 import p0nki.glmc4.block.BlockState;
 import p0nki.glmc4.utils.data.Optional;
 import p0nki.glmc4.utils.math.MathUtils;
-import p0nki.glmc4.utils.math.VoxelShape;
+import p0nki.glmc4.world.gen.BulkUpdate;
 import p0nki.glmc4.world.gen.biomes.Biome;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class World {
 
-    public static Vector2i getCoordinateInChunk(Vector2i worldPos) {
-        int x = worldPos.x;
-        int z = worldPos.y;
-        while (x < 0) x += 16;
-        while (z < 0) z += 16;
-        while (x >= 16) x -= 16;
-        while (z >= 16) z -= 16;
-        return new Vector2i(x, z);
-    }
+    protected final Map<Vector2i, Chunk> chunks;
 
-    public static Vector2i getChunkCoordinate(Vector2i worldPos) {
-        int x = worldPos.x;
-        int z = worldPos.y;
-        while (x < 0) x += 16;
-        while (z < 0) z += 16;
-        while (x >= 16) x -= 16;
-        while (z >= 16) z -= 16;
-        return new Vector2i((worldPos.x - x) / 16, (worldPos.y - z) / 16);
+    protected World() {
+        chunks = new ConcurrentHashMap<>();
     }
 
     public abstract boolean isChunkLoaded(Vector2i chunkCoordinate);
 
-    public abstract boolean isClient();
-
-    public abstract BlockState get(Vector3i blockPos);
-
-    public BlockState get(int x, int y, int z) {
-        return get(new Vector3i(x, y, z));
-    }
-
-    public abstract byte getSunlight(Vector3i blockPos);
-
     public abstract Chunk getChunk(Vector2i chunkCoordinate);
 
-    public abstract void update(Vector3i blockPos, BlockState blockState);
+    public final BlockState getBlock(int x, int y, int z) {
+        return getBlock(new Vector3i(x, y, z));
+    }
 
-    public abstract List<Vector2i> getLoadedChunks();
+    protected void applyUpdate(BulkUpdate update) {
+        update.getBlocks().forEach((position, state) -> {
+            Vector2i chunkCoordinate = MathUtils.getChunkCoordinate(position);
+            Vector2i coordinateInChunk = MathUtils.getCoordinateInChunk(position);
+            getChunk(chunkCoordinate).setBlock(coordinateInChunk.x, position.y, coordinateInChunk.y, state);
+        });
+        update.getSunlights().forEach((position, sunlight) -> {
+            Vector2i chunkCoordinate = MathUtils.getChunkCoordinate(position);
+            Vector2i coordinateInChunk = MathUtils.getCoordinateInChunk(position);
+            getChunk(chunkCoordinate).setSunlight(coordinateInChunk.x, position.y, coordinateInChunk.y, sunlight);
+        });
+    }
 
-    public abstract Biome getBiome(Vector2i position);
+    public final BlockState getBlock(Vector3i position) {
+        Vector2i chunkCoordinate = MathUtils.getChunkCoordinate(position);
+        if (!isChunkLoaded(chunkCoordinate)) throw new ChunkNotLoadedException(chunkCoordinate);
+        Vector2i coordinateInChunk = MathUtils.getCoordinateInChunk(position);
+        return getChunk(chunkCoordinate).getBlock(coordinateInChunk.x, position.y, coordinateInChunk.y);
+    }
+
+    public final Biome getBiome(Vector3i position) {
+        return getBiome(new Vector2i(position.x, position.z));
+    }
+
+    public final Biome getBiome(int x, int z) {
+        return getBiome(new Vector2i(x, z));
+    }
+
+    public final Biome getBiome(Vector2i position) {
+        Vector2i chunkCoordinate = MathUtils.getChunkCoordinate(position);
+        if (!isChunkLoaded(chunkCoordinate)) throw new ChunkNotLoadedException(chunkCoordinate);
+        Vector2i coordinateInChunk = MathUtils.getCoordinateInChunk(position);
+        return getChunk(chunkCoordinate).getBiome(coordinateInChunk);
+    }
+
+    public final byte getSunlight(int x, int y, int z) {
+        return getSunlight(new Vector3i(x, y, z));
+    }
+
+    public final byte getSunlight(Vector3i position) {
+        Vector2i chunkCoordinate = MathUtils.getChunkCoordinate(position);
+        if (!isChunkLoaded(chunkCoordinate)) throw new ChunkNotLoadedException(chunkCoordinate);
+        Vector2i coordinateInChunk = MathUtils.getCoordinateInChunk(position);
+        return getChunk(chunkCoordinate).getSunlight(coordinateInChunk.x, position.y, coordinateInChunk.y);
+    }
 
     public final Optional<WorldIntersection> intersectWorld(Vector3f start, Vector3f dir, int range) {
         Vector3f end = new Vector3f(start.x + dir.x * range, start.y + dir.y * range, start.z + dir.z * range);
@@ -90,13 +111,10 @@ public abstract class World {
         Rayf ray = new Rayf(start, dir);
 
         for (int num = 0; num < range; num++) {
-            BlockState blockState = get(new Vector3i(i, j, k));
-            VoxelShape shape = blockState.getBlock().getShape(blockState);
             ray.oX -= i;
             ray.oY -= j;
             ray.oZ -= k;
-            if (shape.collidesWith(ray)) {
-//            if (blockState.getBlock() != Blocks.AIR) {
+            if (getBlock(new Vector3i(i, j, k)).getShape().collidesWith(ray)) {
                 Vector3i prev = list.get(list.size() - 1);
                 return Optional.of(new WorldIntersection(new Vector3i(i, j, k), new Vector3i(i - prev.x, j - prev.y, k - prev.z)));
             }
